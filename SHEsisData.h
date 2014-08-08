@@ -41,9 +41,14 @@ public:
 	std::vector<SampleStatus> vPermutateLabel;
 	void statCount(std::vector< SampleStatus > & label);
 	void printLocusInfo();
+	int getCaseNum();
+	int getControlNum();
 private:
 	boost::unordered_map<short, std::string> code2allele;
 	std::vector<LocusInfo> vLocusInfo;
+	void getCaseAndControlNum();
+	int CaseNum;
+	int ControlNum;
 	const int SampleNum;
 	const int SnpNum;
 	const int NumOfChrSet;
