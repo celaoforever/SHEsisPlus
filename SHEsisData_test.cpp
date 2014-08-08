@@ -1,9 +1,10 @@
 /*
- * main.cpp
+ * SHEsisData_test.cpp
  *
- *  Created on: Aug 3, 2014
- *      Author: ionadmin
+ *  Created on: Aug 8, 2014
+ *      Author: ada
  */
+
 #include "SHEsisData.h"
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/discrete_distribution.hpp>
@@ -61,3 +62,7 @@ SHEsis::SHEsisData GenerateRandomData(int sampleNum, int snpNum, int chrSetNum){
 	BOOST_CHECK(chrSetNum==data.mGenotype.shape()[2]);
 	return data;
 }
+
+
+
+

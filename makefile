@@ -1,15 +1,16 @@
-CXXFLAGS =	-O2 -g -Wall -fmessage-length=0  -L/results/software/boost_1_55_0/stage/lib -I/results/software/boost_1_55_0/ 
- 
-OBJS = GenotypeMatrix.o /SHEsisData.o main.o
+CXXFLAGS =	-O2 -g -Wall -fmessage-length=0  -L/home/ada/git/SHEsis/boost/boost_1_55_0/stage/lib -I/home/ada/git/SHEsis/boost/boost_1_55_0 
+
 LIBS =
 
-TARGET =	SHEsis
 
-$(TARGET):	$(OBJS)
-	$(CXX) -o $(TARGET) $(OBJS) $(LIBS)
+SHEsis:	SHEsisData.o main.o
+	$(CXX) -o SHEsis SHEsisData.o main.o $(LIBS)
 
+ 
+all:	SHEsis SHEsisData_test
 
-all:	$(TARGET)
+SHEsisData_test: SHEsisData.o SHEsisData_test.o
+	$(CXX) -o  SHEsisData_test SHEsisData.o SHEsisData_test.o $(LIBS)
 
 clean:
 	rm -f $(OBJS) $(TARGET)
