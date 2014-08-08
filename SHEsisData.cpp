@@ -109,6 +109,8 @@ void SHEsisData::statCount(std::vector< SampleStatus > & label){
 						this->vLocusInfo[iSnp].CaseAlleleCount[Cur]=1;
 					else
 						(this->vLocusInfo[iSnp].CaseAlleleCount[Cur])++;
+					if(this->vLocusInfo[iSnp].ControlAlleleCount.end() == this->vLocusInfo[iSnp].ControlAlleleCount.find(Cur))
+						this->vLocusInfo[iSnp].ControlAlleleCount[Cur]=0;
 					if(iChrset == (this->NumOfChrSet-1)){
 						geno.push_back(Cur);
 						if(this->NumOfChrSet > geno.size())
@@ -132,6 +134,8 @@ void SHEsisData::statCount(std::vector< SampleStatus > & label){
 						this->vLocusInfo[iSnp].ControlAlleleCount[Cur]=1;
 					else
 						(this->vLocusInfo[iSnp].ControlAlleleCount[Cur])++;
+					if(this->vLocusInfo[iSnp].CaseAlleleCount.end() == this->vLocusInfo[iSnp].CaseAlleleCount.find(Cur))
+						this->vLocusInfo[iSnp].CaseAlleleCount[Cur]=0;
 					if(iChrset == (this->NumOfChrSet-1)){
 						geno.push_back(Cur);
 						if(this->NumOfChrSet > geno.size())

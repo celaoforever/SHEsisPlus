@@ -11,7 +11,6 @@
 #include <boost/test/minimal.hpp>
 #include <boost/assert.hpp>
 #include <iostream>
-#include "utility.h"
 boost::mt19937 rng;
 SHEsis::SHEsisData GenerateRandomData(int sampleNum, int snpNum, int chrSetNum);
 
