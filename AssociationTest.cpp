@@ -17,12 +17,9 @@ AssociationTest::AssociationTest(SHEsisData& mdata):data(mdata),
 		vAssocationTestResult(mdata.getSnpNum()),
 		NumOfPermutation(0)
 {
-	// TODO Auto-generated constructor stub
-
 }
 
 AssociationTest::~AssociationTest() {
-	// TODO Auto-generated destructor stub
 	vAssocationTestResult.clear();
 }
 
@@ -73,10 +70,8 @@ void AssociationTest::SingleSnpTestAllele(int iSnp, double& FisherP, double& Pea
 	BOOST_ASSERT(this->data.vLocusInfo[iSnp].CaseAlleleCount.size()
 			== this->data.vLocusInfo[iSnp].ControlAlleleCount.size());
 
-	//boost::multi_array<double,2> contigency;
 	int NumOfAlleleType=this->data.vLocusInfo[iSnp].ControlAlleleCount.size();
 	int NumOfPhenotype=2;
-	//contigency(boost::extents[2][degreeOfFreedom+1]);
 	double* contigency=new double[NumOfPhenotype*NumOfAlleleType];
 
 	boost::unordered_map<short, double> ::iterator map_it;
@@ -88,8 +83,6 @@ void AssociationTest::SingleSnpTestAllele(int iSnp, double& FisherP, double& Pea
 				this->data.vLocusInfo[iSnp].ControlAlleleCount.find(map_it->first));
 		contigency[idx++]=this->data.vLocusInfo[iSnp].ControlAlleleCount[map_it->first];
 		contigency[idx++]=map_it->second;
-		//contigency[0][colIdx]=this->data.vLocusInfo[iSnp].ControlAlleleCount[map_it->first];
-		//contigency[1][colIdx]=map_it->second;
 	};
 
 	//Fisher's exact test:

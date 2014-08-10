@@ -20,12 +20,10 @@ SHEsisData::SHEsisData(int SampleNum, int SnpNum, int NumOfChrSet)
  vLocusInfo(SnpNum),CaseNum(-1),ControlNum(-1),
  vLabel(SampleNum),vPermutateLabel(SampleNum)
 {
-
 };
 
 
 SHEsisData::~SHEsisData() {
-	// TODO Auto-generated destructor stub
 	this->vLabel.clear();
 	this->vPermutateLabel.clear();
 	this->vLocusInfo.clear();
