@@ -80,6 +80,8 @@ double GetExpectedGenotypeFreq(std::string& genotype,
 	for(iter=AlleleType.begin();iter != AlleleType.end();iter++){
 		short CurAllele=iter->first;
 		size_t CurCount=iter->second;
+		if( 0 == CurCount)
+			continue;
 		res*=pow(AlleleCount[CurAllele]/((double)SampleNum*NumOfChrSet),CurCount);
 	}
 
