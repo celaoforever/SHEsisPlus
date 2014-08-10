@@ -9,34 +9,34 @@
 #define ASSOCIATIONTEST_H_
 #include "SHEsisData.h"
 namespace SHEsis {
-typedef enum{
-	PERSON,
-	FISHER
-} TestType;
 
 struct LocusAssiciationTestResult{
-	double GenoTypePersonP;
+	double GenoTypePearsonP;
 	double GenotypeFisherP;
 	double GenotypeChiSquare;
 
-	double AllelePersonP;
+	double AllelePearsonP;
 	double AlleleFisherP;
-	double AleleChiSquare;
+	double AlleleChiSquare;
 	double AlleleOddsRatio;
+	double AlleleOddsRatioLowLimit;
+	double AlleleOddsRatioUpLimit;
 };
 
 class AssociationTest {
 public:
 	SHEsisData&  data;
 	std::vector<LocusAssiciationTestResult> vAssocationTestResult;
-	AssociationTest();
-	void SingleSnpTest(int iSnp, TestType method, double &p, int &ndf);
-	void
+	AssociationTest(SHEsisData& data);
+	void AssociationTestForAllSnpsAllele();
+	void AssociationTestForAllSnpsGenotype();
 	virtual ~AssociationTest();
+	void printAssociationTestResults();
 private:
 	int NumOfPermutation;
-	TestType method;
-
+	void SingleSnpTestAllele(int iSnp, double& FisherP, double& PearsonP,
+			double& ChiSquare,double& oddsRatio,double& ORLowLimit, double& ORUpLimit);
+	void SingleSnpTestGenotype(int iSnp, double &FisherP, double& PearsonP, double & ChiSquare);
 };
 
 } /* namespace SHEsis */

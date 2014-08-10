@@ -97,10 +97,9 @@ void SHEsisData::statCount(std::vector< SampleStatus > & label){
 		for(int iSnp=0;iSnp<this->SnpNum;iSnp++){
 			geno.clear();
 			for(int iChrset=0;iChrset<this->NumOfChrSet;iChrset++){
-				BOOST_ASSERT_MSG(iSample<this->mGenotype.shape()[0] &&
+				BOOST_ASSERT(iSample<this->mGenotype.shape()[0] &&
 						iSnp<this->mGenotype.shape()[1] &&
-						iChrset<this->mGenotype.shape()[2],
-						"mGenotype out of range");
+						iChrset<this->mGenotype.shape()[2]);
 				short Cur=this->mGenotype[iSample][iSnp][iChrset];
 				if(GENOTYPE_MISSING ==Cur)
 					continue;

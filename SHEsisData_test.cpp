@@ -6,13 +6,33 @@
  */
 
 #include "SHEsisData.h"
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/discrete_distribution.hpp>
-#include <boost/test/minimal.hpp>
-#include <boost/assert.hpp>
+#include "utility.h"
 #include <iostream>
-boost::mt19937 rng;
-SHEsis::SHEsisData GenerateRandomData(int sampleNum, int snpNum, int chrSetNum);
+#include <boost/test/minimal.hpp>
+#include <boost/random/discrete_distribution.hpp>
+#include <boost/assert.hpp>
+#include <boost/random/mersenne_twister.hpp>
+boost::mt19937 boost_rng;
+SHEsis::SHEsisData GenerateRandomData(int sampleNum, int snpNum, int chrSetNum){
+	double probabilities[]={0.04,0.48,0.48};//0.04 missing phenotype for individuals
+	double probabilities2[]={0.01,0.33,0.33,0.33};//0.01 is missing genotype for individuals
+	boost::random::discrete_distribution<> dist(probabilities);
+	boost::random::discrete_distribution<> dist2(probabilities2);
+	SHEsis::SHEsisData data(sampleNum,snpNum,chrSetNum);
+	for(int iSample=0;iSample<sampleNum;iSample++){
+		BOOST_ASSERT(iSample<data.vLabel.size());
+		data.vLabel[iSample]=((SHEsis::SampleStatus)dist(boost_rng));
+		for(int iSnp=0;iSnp<snpNum;iSnp++){
+			for(int iChrset=0;iChrset<chrSetNum;iChrset++){
+				data.mGenotype[iSample][iSnp][iChrset]=dist2(boost_rng);
+			}
+		}
+	}
+	BOOST_CHECK(sampleNum==data.mGenotype.shape()[0]);
+	BOOST_CHECK(snpNum==data.mGenotype.shape()[1]);
+	BOOST_CHECK(chrSetNum==data.mGenotype.shape()[2]);
+	return data;
+}
 
 int
 test_main(int,char*[])
@@ -41,26 +61,6 @@ test_main(int,char*[])
 }
 
 
-SHEsis::SHEsisData GenerateRandomData(int sampleNum, int snpNum, int chrSetNum){
-	double probabilities[]={0.04,0.48,0.48};//0.04 missing phenotype for individuals
-	double probabilities2[]={0.01,0.33,0.33,0.33};//0.01 is missing genotype for individuals
-	boost::random::discrete_distribution<> dist(probabilities);
-	boost::random::discrete_distribution<> dist2(probabilities2);
-	SHEsis::SHEsisData data(sampleNum,snpNum,chrSetNum);
-	for(int iSample=0;iSample<sampleNum;iSample++){
-		BOOST_ASSERT_MSG(iSample<data.vLabel.size(),"vLabel idx out of range");
-		data.vLabel[iSample]=((SHEsis::SampleStatus)dist(rng));
-		for(int iSnp=0;iSnp<snpNum;iSnp++){
-			for(int iChrset=0;iChrset<chrSetNum;iChrset++){
-				data.mGenotype[iSample][iSnp][iChrset]=dist2(rng);
-			}
-		}
-	}
-	BOOST_CHECK(sampleNum==data.mGenotype.shape()[0]);
-	BOOST_CHECK(snpNum==data.mGenotype.shape()[1]);
-	BOOST_CHECK(chrSetNum==data.mGenotype.shape()[2]);
-	return data;
-}
 
 
 

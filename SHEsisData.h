@@ -39,13 +39,13 @@ public:
 	boost::multi_array< short, 3> mGenotype;
 	std::vector< SampleStatus > vLabel;
 	std::vector<SampleStatus> vPermutateLabel;
+	std::vector<LocusInfo> vLocusInfo;
 	void statCount(std::vector< SampleStatus > & label);
 	void printLocusInfo();
 	int getCaseNum();
 	int getControlNum();
-private:
+protected:
 	boost::unordered_map<short, std::string> code2allele;
-	std::vector<LocusInfo> vLocusInfo;
 	void getCaseAndControlNum();
 	int CaseNum;
 	int ControlNum;
