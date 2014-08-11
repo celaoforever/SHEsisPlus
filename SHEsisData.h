@@ -21,6 +21,9 @@ struct LocusInfo{
 	boost::unordered_map<short, double> ControlAlleleCount;
 	boost::unordered_map<std::string, double> CaseGenotypeCount;
 	boost::unordered_map<std::string, double> ControlGenotypeCount;
+
+	boost::unordered_map<short, double> BothAlleleCount;
+	boost::unordered_map<std::string, double> BothGenotypeCount;
 };
 
 typedef enum{

@@ -53,6 +53,10 @@ void SHEsisData::printLocusInfo()
 		for(map_it=this->vLocusInfo[i].ControlAlleleCount.begin();map_it!=this->vLocusInfo[i].ControlAlleleCount.end();map_it++){
 			std::cout<<map_it->first<<":"<<map_it->second<<", ";
 		}
+		std::cout<<"\nBothAlleleCount:\n";
+		for(map_it=this->vLocusInfo[i].BothAlleleCount.begin();map_it!=this->vLocusInfo[i].BothAlleleCount.end();map_it++){
+			std::cout<<map_it->first<<":"<<map_it->second<<", ";
+		}
 		boost::unordered_map<std::string, double> ::iterator map_it2;
 		std::cout<<"\nCaseGenotypeCount:\n";
 		for(map_it2=this->vLocusInfo[i].CaseGenotypeCount.begin();map_it2!=this->vLocusInfo[i].CaseGenotypeCount.end();map_it2++){
@@ -60,6 +64,10 @@ void SHEsisData::printLocusInfo()
 		}
 		std::cout<<"\nControlGenotypeCount:\n";
 		for(map_it2=this->vLocusInfo[i].ControlGenotypeCount.begin();map_it2!=this->vLocusInfo[i].ControlGenotypeCount.end();map_it2++){
+			std::cout<<map_it2->first<<":"<<map_it2->second<<", ";
+		}
+		std::cout<<"\nBothGenotypeCount:\n";
+		for(map_it2=this->vLocusInfo[i].BothGenotypeCount.begin();map_it2!=this->vLocusInfo[i].BothGenotypeCount.end();map_it2++){
 			std::cout<<map_it2->first<<":"<<map_it2->second<<", ";
 		}
 	}
@@ -153,6 +161,29 @@ void SHEsisData::statCount(std::vector< SampleStatus > & label){
 
 		}
 	}
+	for(int iSnp=0;iSnp<this->SnpNum;iSnp++){
+		BOOST_ASSERT(this->vLocusInfo[iSnp].CaseGenotypeCount.size()
+				== this->vLocusInfo[iSnp].ControlGenotypeCount.size());
+		boost::unordered_map<std::string, double>::iterator iter;
+		for(iter=this->vLocusInfo[iSnp].CaseGenotypeCount.begin();
+				iter!=this->vLocusInfo[iSnp].CaseGenotypeCount.end();iter++){
+			this->vLocusInfo[iSnp].BothGenotypeCount[iter->first]=
+					this->vLocusInfo[iSnp].CaseGenotypeCount[iter->first]+
+					this->vLocusInfo[iSnp].ControlGenotypeCount[iter->first];
+		}
+
+		BOOST_ASSERT(this->vLocusInfo[iSnp].CaseAlleleCount.size()
+				== this->vLocusInfo[iSnp].ControlAlleleCount.size());
+		boost::unordered_map<short,double>::iterator iter2;
+		for(iter2=this->vLocusInfo[iSnp].CaseAlleleCount.begin();
+				iter2!=this->vLocusInfo[iSnp].CaseAlleleCount.end();iter2++){
+			this->vLocusInfo[iSnp].BothAlleleCount[iter2->first]=
+					this->vLocusInfo[iSnp].CaseAlleleCount[iter2->first]+
+					this->vLocusInfo[iSnp].ControlAlleleCount[iter2->first];
+		}
+	}
+
+
 }
 
 }
