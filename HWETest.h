@@ -10,10 +10,23 @@
 #include "SHEsisData.h"
 namespace SHEsis {
 struct HWETestResult{
-	double PearsonP;
-	double FisherP;
-	double ChiSquare;
+	double CasePearsonP;
+	double CaseFisherP;
+	double CaseChiSquare;
+
+	double ControlPearsonP;
+	double ControlFisherP;
+	double ControlChiSquare;
+
+	double BothPearsonP;
+	double BothFisherP;
+	double BothChiSquare;
 };
+typedef enum{
+	CASE_,
+	CONTROL_,
+	BOTH_
+} category;
 
 class HWETest {
 public:
@@ -22,8 +35,12 @@ public:
 	HWETest(SHEsisData& data);
 	virtual ~HWETest();
 	void AllSnpHWETest();
+	void printHWETestResults();
 private:
-	void SingleSnpHWETest(int iSnp, double& chi, double& PearsonP, double& FisherP);
+	void SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP, double& CaseFisherP,
+			double& ControlChi,double& ControlPearsonP, double& ControlFisherP,
+			double& BothChi, double& BothPearsonP, double& BothFisherP);
+	boost::unordered_map<std::string,size_t> vCoefficient;
 };
 
 } /* namespace SHEsis */
