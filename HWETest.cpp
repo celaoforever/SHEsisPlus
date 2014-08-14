@@ -143,7 +143,7 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
 		  CaseChi+=(contigency[i+1]-contigency[i])
 				  *(contigency[i+1]-contigency[i])/contigency[i+1];
 	  }
-	  boost::math::chi_squared dist(1);
+	  boost::math::chi_squared dist(NumOfCol-1);
 	  CasePearsonP= boost::math::cdf(boost::math::complement(dist,CaseChi));
 	  //fexact(&NumOfRow, &NumOfCol, contigency, &NumOfRow, &expect, &percnt, &emin, &prt, &pre, &ws);
 	//  CaseFisherP=pre;
