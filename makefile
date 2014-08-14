@@ -1,4 +1,4 @@
-CXXFLAGS =	-O2 -g -Wall -fmessage-length=0  -L/home/ada/git/SHEsis/boost/boost_1_55_0/stage/lib -I/home/ada/git/SHEsis/boost/boost_1_55_0
+CXXFLAGS =	 -O0  -g -Wall -fmessage-length=0  -L/home/ada/git/SHEsis/boost/boost_1_55_0/stage/lib -I/home/ada/git/SHEsis/boost/boost_1_55_0
 
 LIBS =
 TARGET = SHEsis SHEsisData_test AssociationTest_test HWETest_test 
