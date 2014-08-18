@@ -12,11 +12,12 @@
 #include <boost/assert.hpp>
 #include <boost/multi_array.hpp>
 #include <boost/math/distributions/chi_squared.hpp>
-
+#define SHEsisABS(x) x<0?(-1)*x: x
 
 std::string int2str(int n);
 void error(std::string msg);
-
+int GeneralIndexingGetIndex(boost::multi_array<int,1> sizes,boost::multi_array<int,1> indices );
+int GeneralIndexingGetSize(boost::multi_array<int,1>  sizes);
 
 template<typename T>
 //tab is stored in column-major format

@@ -19,6 +19,33 @@ void error(std::string msg){
 	std::cout<<msg<<"\n";
 	BOOST_ASSERT(1 == 0);
 }
+/* translated from clase GenralIndexing*/
+int GeneralIndexingGetIndex(boost::multi_array<int,1> sizes,boost::multi_array<int,1> indices ){
+    int index = 0;
+    for(int i = 0; i < indices.shape()[0]; i++)
+    {
+        int p = 1;
+        for(int j = i + 1; j < sizes.shape()[0]; j++)
+            p *= sizes[j];
+
+        p *= indices[i];
+        index += p;
+    }
+    return index;
+};
+
+int GeneralIndexingGetSize(boost::multi_array<int,1>  sizes)
+{
+     int p = 1;
+     for(int i = 0; i < sizes.shape()[0]; i++)
+         p *= sizes[i];
+     return p;
+};
+
+
+
+
+
 
 
 //template<typename T>
