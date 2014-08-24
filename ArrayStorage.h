@@ -11,48 +11,31 @@
 #include "Cloneable.h"
 #include "utility.h"
 namespace SHEsis {
-template <class T>
 class ArrayStorage: public Cloneable {
 public:
-	ArrayStorage(boost::multi_array<int,1>& sizes):sizes(sizes),dimension(sizes.shape()[0]),
-		size(GeneralIndexingGetSize(sizes)),one_dimensional_array(boost::extents[size])
+	//ArrayStorage(){};
+	ArrayStorage(boost::shared_ptr<int[]> sizes):sizes(sizes),dimension(sizes[0]),
+		size(GeneralIndexingGetSize(sizes)),
+		one_dimensional_array(new int[size+1])
 	{};
-	ArrayStorage(boost::multi_array<int,1> sizes, boost::multi_array<T,1> one_dimensional_array):
-		sizes(sizes),dimension(sizes.shape()[0]),
-			size(GeneralIndexingGetSize(sizes)),one_dimensional_array(one_dimensional_array)
+	ArrayStorage(boost::shared_ptr<int[]> sizes, boost::shared_ptr<int[]> one_dimensional_array):
+		sizes(sizes),dimension(sizes[0]),
+			size(GeneralIndexingGetSize(sizes)),
+			one_dimensional_array(one_dimensional_array)
 	{};
-
-	void set(boost::multi_array<int,1>& indices, int value){
-        int index = GeneralIndexingGetIndex(sizes, indices);
-        BOOST_ASSERT(index < size);
-        one_dimensional_array[index] = value;
-	};
-
-	void set(int index, int value){
-		one_dimensional_array[index] = value;
-	};
-
-	T get(boost::multi_array<int,1>& indices){
-        int index = GeneralIndexingGetIndex(sizes, indices);
-        BOOST_ASSERT(index < size);
-        return one_dimensional_array[index];
-	};
-	boost::multi_array<T,1>& getArray(){
-		return this->one_dimensional_array;
-	}
-	boost::multi_array<int,1>& getSizes(){
-		return this->sizes;
-	}
-	int getDimension(){
-		return this->dimension;
-	};
-	virtual ~ArrayStorage();
+	void set(boost::shared_ptr<int[]> indices, int value);
+	void set(int index, int value);
+	int get(boost::shared_ptr<int[]> indices);
+	boost::shared_ptr<int[]> getArray();
+	boost::shared_ptr<int[]> getSizes();
+	int getDimension();
+	virtual ~ArrayStorage(){};
 	CLONE(ArrayStorage);
+	boost::shared_ptr<int[]> sizes;
 private:
 	int dimension;
-	boost::multi_array<T,1> one_dimensional_array;
-    boost::multi_array<int,1> sizes;
     int size;
+	boost::shared_ptr<int[]> one_dimensional_array;
 };
 
 } /* namespace SHEsis */

@@ -9,6 +9,7 @@
 #define SHESISDATA_H_
 #include <boost/multi_array.hpp>
 #include <boost/unordered_map.hpp>
+#include <boost/assert.hpp>
 #include <vector>
 #include <string>
 
@@ -24,6 +25,17 @@ struct LocusInfo{
 
 	boost::unordered_map<short, double> BothAlleleCount;
 	boost::unordered_map<std::string, double> BothGenotypeCount;
+	int getAlleleIndex(short a){
+		BOOST_ASSERT(BothAlleleCount.end() != BothAlleleCount.find(a));
+		boost::unordered_map<short,double>::iterator iter;
+		int idx=0;
+		for(iter=BothAlleleCount.begin();iter!=BothAlleleCount.end();iter++){
+			if(a == iter->first)
+				return idx;
+			idx++;
+		}
+		return -1;
+	}
 };
 
 typedef enum{

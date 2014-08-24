@@ -14,10 +14,43 @@
 #include <boost/math/distributions/chi_squared.hpp>
 #define SHEsisABS(x) x<0?(-1)*x: x
 
+template  <class T>
+class array1D {
+public:
+	array1D(){};
+	array1D(int msize):isStatic(false),msize(msize){
+		this->a=new T[msize];
+		std::memset(a,0,msize*sizeof(T));
+	}
+	array1D(T* a,int msize):a(a),msize(msize),isStatic(true){
+		this->a=new T[msize];
+		//for(int )
+	};
+	~array1D(){
+			delete[] a;
+			a=0;
+	}
+	int size(){return msize;};
+	T& operator [] (const int idx){
+		BOOST_ASSERT(idx<msize);
+		return a[idx];
+	}
+private:
+	T* a;
+	int msize;
+	bool isStatic;
+};
+
+std::string ToBinaryString(int i);
+boost::shared_ptr<int[]> SetSharedPtr( int Num,...);
 std::string int2str(int n);
 void error(std::string msg);
-int GeneralIndexingGetIndex(boost::multi_array<int,1> sizes,boost::multi_array<int,1> indices );
-int GeneralIndexingGetSize(boost::multi_array<int,1>  sizes);
+int GeneralIndexingGetIndex(boost::shared_ptr<int[]> sizes,boost::shared_ptr<int[]> indices );
+int GeneralIndexingGetSize(boost::shared_ptr<int[]>  sizes);
+boost::shared_ptr<int[]> toBooleanInt(int n , int i);
+
+
+
 
 template<typename T>
 //tab is stored in column-major format

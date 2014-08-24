@@ -5,9 +5,61 @@
  *      Author: ionadmin
  */
 #include "utility.h"
+#include <boost/array.hpp>
+#include <stdarg.h>
+boost::shared_ptr<int[]> SetSharedPtr( int Num,...){
+	boost::shared_ptr<int[]> sp(new int[Num+1]);
+	sp[0]=Num;
+	va_list args;
+	va_start(args,Num);
+	int idx=1;
+	while(Num>0){
+		sp[idx++]=va_arg(args,int);
+		Num--;
+	}
+	return sp;
+}
 
+char digits[]=
+{
+'0', '1', '2', '3', '4', '5',
+'6', '7', '8', '9', 'a', 'b',
+'c', 'd', 'e', 'f', 'g', 'h',
+'i', 'j', 'k', 'l', 'm', 'n',
+'o', 'p', 'q', 'r', 's', 't',
+'u', 'v', 'w', 'x', 'y', 'z'
+};
 
+std::string ToUnsignedString(int i, int shift)
+{
+    char  buf[32];
+    char * pBuf = buf;
+    int charPos = 32;
+    int radix = 1<<shift;
+    int mask = radix - 1;
+    do
+    {
+        pBuf[--charPos] = digits[i&mask];
+        i = i>>shift;
+    }while(i != 0);
 
+    std::string str;
+    int strLen = 32 - charPos;
+    pBuf = pBuf+charPos;
+    while(strLen)
+    {
+        str.push_back(*pBuf);
+        pBuf++;
+        strLen--;
+    }
+
+    return str;
+}
+
+std::string ToBinaryString(int i)
+{
+    return  ToUnsignedString(i, 1);
+}
 std::string int2str(int n)
 {
   std::ostringstream s2( std::stringstream::out );
@@ -15,29 +67,54 @@ std::string int2str(int n)
   return s2.str();
 }
 
+boost::shared_ptr<int[]> toBooleanInt(int n , int i){
+
+	//boost::shared_ptr<int[]> spb(new int[n+1]);
+	boost::shared_ptr<int[]> spb(new int[n]);
+	for(int i=0;i<n;i++){
+		spb[i]=0;
+	}
+	boost::shared_ptr<int[] > spb_(new int[n]);
+	for(int i=0;i<n;i++){
+		spb_[i]=0;
+	}
+	std::string s = ToBinaryString(i);
+	for(int j=n-s.length();j<n;j++){
+		char c= s[j-n+s.length()];
+		if(c=='1')
+			spb_[j]=1;
+	}
+	int counter = n-1;
+	for(int j=0;j<n;j++){
+		spb[j]=spb_[counter];
+		counter--;
+	}
+	return spb;
+}
+
 void error(std::string msg){
 	std::cout<<msg<<"\n";
 	BOOST_ASSERT(1 == 0);
 }
 /* translated from clase GenralIndexing*/
-int GeneralIndexingGetIndex(boost::multi_array<int,1> sizes,boost::multi_array<int,1> indices ){
+int GeneralIndexingGetIndex(boost::shared_ptr<int[]> sizes,boost::shared_ptr<int[]> indices ){
     int index = 0;
-    for(int i = 0; i < indices.shape()[0]; i++)
+    for(int i = 1; i <=indices[0]; i++)
     {
         int p = 1;
-        for(int j = i + 1; j < sizes.shape()[0]; j++)
+        for(int j = i + 1; j <= sizes[0]; j++)
             p *= sizes[j];
 
         p *= indices[i];
         index += p;
     }
-    return index;
+    return ++index;
 };
 
-int GeneralIndexingGetSize(boost::multi_array<int,1>  sizes)
+int GeneralIndexingGetSize(boost::shared_ptr<int[]>  sizes)
 {
      int p = 1;
-     for(int i = 0; i < sizes.shape()[0]; i++)
+     for(int i = 1; i <=sizes[0]; i++)
          p *= sizes[i];
      return p;
 };
