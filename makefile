@@ -1,5 +1,5 @@
-#CXXFLAGS =	 -O0  -g -Wall -fmessage-length=0  -L/home/ada/git/SHEsis/boost/boost_1_55_0/stage/lib -I/home/ada/git/SHEsis/boost/boost_1_55_0
-CXXFLAGS =	-O0 -g -Wall -fmessage-length=0  -L/results/software/boost_1_55_0/stage/lib -I/results/software/boost_1_55_0/ 
+CXXFLAGS =	 -O0  -g -Wall -std=c++11 -fmessage-length=0  -L/home/ada/git/SHEsis/boost/boost_1_55_0/stage/lib -I/home/ada/git/SHEsis/boost/boost_1_55_0
+#CXXFLAGS =	-O0 -g -Wall -fmessage-length=0  -L/results/software/boost_1_55_0/stage/lib -I/results/software/boost_1_55_0/ 
  
 LIBS =
 TARGET = SHEsis SHEsisData_test AssociationTest_test HWETest_test 
@@ -23,9 +23,7 @@ AssociationTest_test: SHEsisData.o utility.o fisher.o AssociationTest.o Associat
 
 Haplotype_test: SHEsisData.o    Haplotype_test.o  utility.o Haplotype.o IndexingVariables.o ArrayStorage.o
 	$(CXX) -o Haplotype_test SHEsisData.o    Haplotype_test.o  utility.o Haplotype.o IndexingVariables.o ArrayStorage.o
-#Haplotype.o: Haplotype.cpp Haplotype.h utility.h 
-#	$(CXX) -o Haplotype.o Haplotype.cpp Haplotype.h utility.h
-#	
+
 
 
 
