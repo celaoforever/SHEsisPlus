@@ -23,6 +23,18 @@ public:
 			size(GeneralIndexingGetSize(sizes)),
 			one_dimensional_array(one_dimensional_array)
 	{};
+	void printSizeAndVar(){
+		std::cout<<"sizes:";
+		for(int i=1;i<=sizes[0];i++){
+			std::cout<<sizes[i]<<",";
+		}
+		std::cout<<"\n";
+		std::cout<<"var:";
+		for(int i=1;i<=one_dimensional_array[0];i++){
+			std::cout<<one_dimensional_array[i]<<",";
+		}
+		std::cout<<"\n";
+	}
 	void set(boost::shared_ptr<int[]> indices, int value);
 	void set(int index, int value);
 	int get(boost::shared_ptr<int[]> indices);

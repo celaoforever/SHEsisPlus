@@ -24,6 +24,7 @@ namespace SHEsis {
 
 	int ArrayStorage::get(boost::shared_ptr<int[]> indices){
         int index = GeneralIndexingGetIndex(sizes, indices);
+       // std::cout<<"index="<<index<<",size="<<one_dimensional_array[0]<<"\n";
         BOOST_ASSERT(index <= one_dimensional_array[0]);
         return one_dimensional_array[index];
 	};

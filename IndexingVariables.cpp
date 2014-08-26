@@ -16,9 +16,13 @@ namespace SHEsis{
 		if(enumeration.size()>0)
 			this->enumeration.clear();
 	}
+
+
 	void IndexingVariables::add(std::string key, boost::shared_ptr<int[]> sizes)
 	{
 	    int size = GeneralIndexingGetSize(sizes);
+	    //std::cout<<key<<"\n";
+	    //BOOST_ASSERT(size);
 	    boost::shared_ptr<int[]> variables(new int[size+1]);
 	    variables[0]=size;
 	    for(int i = 1; i <= size; i++)

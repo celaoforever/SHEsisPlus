@@ -28,6 +28,8 @@ public:
 	void statOccurence();
 	std::string getBiallelicCoding(int ploidy,int which_genotype, int which_index, int which_allele, IndexingVariables& variables);
 	std::string getGeneralCoding(int ploidy, int which_genotype, int which_index,IndexingVariables& variables);
+	std::string getGeneralCodingMissing(int ploidy, int which_genotype, int which_index, IndexingVariables& variables);
+	std::string getGeneralCodingTotalyMissing(int ploidy, int which_genotype, int which_index, IndexingVariables& variables);
 	void BuildModel();
 	IndexingVariables BuildModel(/*IndexingVariables variables_old,*/ int number_of_explaining_haplotypes);
 	IndexingVariables createVariables(int);

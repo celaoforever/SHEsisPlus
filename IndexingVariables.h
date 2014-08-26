@@ -25,6 +25,14 @@ public:
 		this->id.clear();
 		this->enumeration.clear();
 	}
+	void printVar(){
+		boost::unordered_map<std::string,boost::shared_ptr<ArrayStorage> > ::iterator iter;
+		for(iter=this->hm.begin();iter!=this->hm.end();iter++){
+			std::cout<<iter->first<<"\n";
+			iter->second->printSizeAndVar();
+			std::cout<<"\n";
+		}
+	}
 	boost::unordered_map<int,int> id;
 	boost::unordered_map<int,int> enumeration;
 	void reset();

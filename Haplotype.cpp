@@ -81,9 +81,9 @@ IndexingVariables Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int
 					res<<getGeneralCoding(ploidy,which_genotype,which_index,variables);
 				}
 			}else if(this->statMissing(which_genotype,which_index)<ploidy){
-
+					res<<getGeneralCodingMissing(ploidy,which_genotype,which_index,variables);
 			}else{
-
+					res<<getGeneralCodingTotalyMissing(ploidy,which_genotype,which_index,variables);
 			}
 			//above ok
 			for(int which_explaining_genotype=0;which_explaining_genotype<number_of_explaining_haplotypes;which_explaining_genotype++){
@@ -159,11 +159,94 @@ IndexingVariables Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int
 			for(int k=0;k<width;k++){
 				tmpss.str("");
 				tmpss<<which_index<<"_"<<k<<"e";
-				int f1=variables.getEnumeration(tmpss.str(),SetSharedPtr(1,which_explaining_haplotype);)
+				int f1=variables.getEnumeration(tmpss.str(),SetSharedPtr(1,which_explaining_haplotype));
+				tmpss.str("");
+				tmpss<<which_index<<"_"<<k<<"haplotypes";
+				int f2=variables.getEnumeration(tmpss.str(),SetSharedPtr(1,which_explaining_haplotype));
+				tmpss.str("");
+				tmpss<<which_index<<"_"<<k<<"haplotypes";
+				int f3=variables.getEnumeration(tmpss.str(),SetSharedPtr(1,which_explaining_haplotype+1));
+				res<<f1<<" "<<(-1*f2)<<" "<<f3<<EOL;
+				if(0 == which_index && 0 == k){
+					tmpss.str("");
+					tmpss<<which_index<<"_"<<k<<"e";
+					int f1=variables.getEnumeration(tmpss.str(),SetSharedPtr(1,which_explaining_haplotype));
+					tmpss.str("");
+					tmpss<<which_index<<"_"<<k<<"haplotypes";
+					int f2=variables.getEnumeration(tmpss.str(),SetSharedPtr(1,which_explaining_haplotype));
+					res<<(-1*f1)<<" "<<(-1*f2)<<EOL;
+					int f3=variables.getEnumeration(tmpss.str(),SetSharedPtr(1,which_explaining_haplotype+1));
+					res<<(-1*f1)<<" "<<f3<<EOL;
+					res<<f1<<" "<<f2<<" "<<(-1*f3)<<EOL;
+				}
+				if(which_index>0 || (0 == which_index && k>0)){//ln461
+					tmpss.str("");
+					tmpss<<which_index<<"_"<<k<<"e";
+					int f1=variables.getEnumeration(tmpss.str(),SetSharedPtr(1,which_explaining_haplotype));
+					tmpss.str("");
+					tmpss<<which_index<<"_"<<k<<"haplotypes";
+					int f2=variables.getEnumeration(tmpss.str(),SetSharedPtr(1,which_explaining_haplotype));
+					res<<(-1*f1)<<" "<<_index_e<<" "<<(-1*f2)<<EOL;
+					int f3=variables.getEnumeration(tmpss.str(),SetSharedPtr(1,which_explaining_haplotype+1));
+					res<<(-1*f1)<<" "<<_index_e<<" "<<f3<<EOL;
+					res<<f1<<" "<<f2<<" "<<(-1*f3)<<EOL;
+					res<<f1<<" "<<(-1*_index_e)<<EOL;
+				}
+				if(which_index == length_of_genotypes-1 && width-1 == k){
+					tmpss.str("");
+					tmpss<<which_index<<"_"<<k<<"e";
+					int f1=variables.getEnumeration(tmpss.str(),SetSharedPtr(1,which_explaining_haplotype));
+					res<<f1<<EOL;
+					_index_e=f1;
+				}
+
 			}
 
 		}
 	}
+
+	//ln497
+	for(int which_genotype=0; which_genotype<number_of_genotypes;which_genotype++){
+		for(int which_chromosome=0;which_chromosome<ploidy-1;which_chromosome++){
+			int _index_s=0;
+			for(int which_explaining_haplotype=0;which_explaining_haplotype<number_of_explaining_haplotypes;which_explaining_haplotype++){
+				int f1=variables.getEnumeration("s",SetSharedPtr(3,which_chromosome,which_explaining_haplotype,which_genotype));
+				int f2=variables.getEnumeration("selections",SetSharedPtr(3,which_chromosome,which_explaining_haplotype,which_genotype));
+				int f3=variables.getEnumeration("selections",SetSharedPtr(3,which_chromosome+1,which_explaining_haplotype,which_genotype));
+				res<<f1<<" "<<(-1*f2)<<" "<<f3<<EOL;
+				if(0 == which_explaining_haplotype){
+					int f1=variables.getEnumeration("s",SetSharedPtr(3,which_chromosome,which_explaining_haplotype,which_genotype));
+					int f2=variables.getEnumeration("selections",SetSharedPtr(3,which_chromosome,which_explaining_haplotype,which_genotype));
+					res<<(-1*f1)<<" "<<(-1*f2)<<EOL;
+					int f3=variables.getEnumeration("selections",SetSharedPtr(3,which_chromosome+1,which_explaining_haplotype,which_genotype));
+					res<<(-1*f1)<<" "<<f3<<EOL;
+					res<<f1<<" "<<f2<<" "<<(-1*f3)<<EOL;
+				};
+				if(which_explaining_haplotype>0){
+					int f1=variables.getEnumeration("s",SetSharedPtr(3,which_chromosome,which_explaining_haplotype,which_genotype));
+					int f2=variables.getEnumeration("selections",SetSharedPtr(3,which_chromosome,which_explaining_haplotype,which_genotype));
+					res<<(-1*f1)<<" "<<_index_s<<" "<<(-1*f2)<<EOL;
+					int f3=variables.getEnumeration("selections",SetSharedPtr(3,which_chromosome+1,which_explaining_haplotype,which_genotype));
+					res<<(-1*f1)<<""<<_index_s<<" "<<f3<<EOL;
+					res<<f1<<" "<<f2<<" "<<(-1*f3)<<EOL;
+					res<<f1<<" "<<(-1*_index_s)<<EOL;
+				}
+				_index_s=variables.getEnumeration("s",SetSharedPtr(3,which_chromosome,which_explaining_haplotype,which_genotype));
+			}
+			//ln559
+			for(int which_explaining_haplotype=0;which_explaining_haplotype<number_of_explaining_haplotypes;which_explaining_haplotype++){
+				int f1=variables.getEnumeration("selections",SetSharedPtr(3,which_chromosome,which_explaining_haplotype,which_genotype));
+				int f2=variables.getEnumeration("selections",SetSharedPtr(3,which_chromosome+1,which_explaining_haplotype,which_genotype));
+				res<<_index_s<<" "<<(-1*f1)<<" "<<f2<<EOL;
+				res<<_index_s<<" "<<f1<<" "<<(-1*f2)<<EOL;
+			}
+		}
+	}
+
+	//if(M>-1) omitted
+
+	//ln907
+
 
 
 
@@ -382,8 +465,131 @@ std::string Haplotype::getGeneralCoding(int ploidy, int which_genotype, int whic
 			literal<<this->getBiallelicCoding(ploidy,which_genotype,which_index,which_allele,variables);
 		}
 
-//CodingBiallelicSequence
 		return "";
+}
+
+
+std::string Haplotype::getGeneralCodingMissing(int ploidy, int which_genotype, int which_index, IndexingVariables& variables){
+	//std::stringstream literal;
+#define literal std::cout
+	std::stringstream tmpss;
+	int number_of_different_alleles=this->occurence[which_genotype][which_index].size();
+	int width=CEIL(log2(this->occurence[which_genotype][which_index].size()));
+	std::vector< boost::shared_ptr< int[]> > mbool(number_of_different_alleles);
+	for(int which_allele=0;which_allele<number_of_different_alleles;which_allele++){
+		mbool[which_allele]=toBooleanInt(width,which_allele);
+	}
+
+	for(int which_allele=0;which_allele<number_of_different_alleles;which_allele++){
+		for(int which_chromosome=0;which_chromosome<ploidy;which_chromosome++){
+			for(int k=0;k<width;k++){
+				int f1=pow(-1,mbool[which_allele][k]);
+				tmpss.str("");
+				tmpss<<which_index<<"_"<<k<<"combinations";
+				int f2=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,which_genotype));
+				literal<<f1*f2<<" ";
+			}
+			tmpss.str("");
+			tmpss<<which_genotype<<"_"<<which_index<<"_"<<which_allele<<"parity";
+			int f1=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,0));
+			res<<f1<<EOL;
+			for(int k=0;k<width;k++){
+				int f1=pow(-1,1-mbool[which_allele][k]);
+				tmpss.str("");
+				tmpss<<which_index<<"_"<<k<<"combinations";
+				int f2=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,which_genotype));
+				tmpss.str("");
+				tmpss<<which_genotype<<"_"<<which_index<<"_"<<which_allele<<"parity";
+				int f3=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,0));
+				literal<<f1*f2<<" "<<(-1*f3)<<EOL;
+			}
+		}
+	}
+//ln206
+	for(int which_allele=0;which_allele<number_of_different_alleles;which_allele++){
+		if(this->occurence[which_genotype][which_index][which_allele]>0){
+			for(int which_chromosome=0;which_chromosome<ploidy;which_chromosome++){
+				tmpss.str("");
+				tmpss<<which_genotype<<"_"<<which_index<<"_"<<which_allele<<"parity";
+				int f1=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,0));
+				literal<<f1<<" ";
+			}
+			literal<<0<<"\n";
+		}else{
+			for(int which_chromosome=0;which_chromosome<ploidy;which_chromosome++){
+				tmpss.str("");
+				tmpss<<which_genotype<<"_"<<which_index<<"_"<<which_allele<<"parity";
+				int f1=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,0));
+				literal<<(-1*f1)<<EOL;
+			}
+		}
+	}
+
+	//ln233
+	for(int which_chromosome=0;which_chromosome<ploidy;which_chromosome){
+		for(int which_allele=0;which_allele<number_of_different_alleles;which_allele++){
+			tmpss.str("");
+			tmpss<<which_genotype<<"_"<<which_index<<"_"<<which_allele<<"parity";
+			int f1=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,0));
+			literal<<f1<<" ";
+		}
+		literal<<0<<"\n";
+	}
+	return "";
+}
+
+
+
+std::string Haplotype::getGeneralCodingTotalyMissing(int ploidy, int which_genotype, int which_index, IndexingVariables& variables){
+	//std::stringstream literal;
+#define literal std::cout
+	std::stringstream tmpss;
+	int number_of_different_alleles=this->occurence[which_genotype][which_index].size();
+	int width=CEIL(log2(this->occurence[which_genotype][which_index].size()));
+	std::vector< boost::shared_ptr< int[]> > mbool(number_of_different_alleles);
+	for(int which_allele=0;which_allele<number_of_different_alleles;which_allele++){
+		mbool[which_allele]=toBooleanInt(width,which_allele);
+	}
+
+	//262
+	for(int which_allele=0;which_allele<number_of_different_alleles;which_allele++){
+		for(int which_chromosome=0;which_chromosome<ploidy;which_chromosome++){
+			for(int k=0;k<width;k++){
+				int f1=pow(-1,mbool[which_allele][k]);
+				tmpss.str("");
+				tmpss<<which_index<<"_"<<k<<"combinations";
+				int f2=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,which_genotype));
+				literal<<f1*f2<<" ";
+			}
+			tmpss.str("");
+			tmpss<<which_genotype<<"_"<<which_index<<"_"<<which_allele<<"parity";
+			int f1=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,0));
+			literal<<f1<<EOL;
+			for(int k=0;k<width;k++){
+				int f1=pow(-1,mbool[which_allele][k]);
+				tmpss.str("");
+				tmpss<<which_index<<"_"<<k<<"combinations";
+				int f2=variables.getEnumeration(tmpss.str(),SetSharedPtr(which_chromosome,which_genotype));
+				tmpss.str("");
+				tmpss<<which_genotype<<"_"<<which_index<<"_"<<which_allele<<"parity";
+				int f3=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,0));
+				literal<<f1*f2<<" "<<(-1*f3)<<EOL;
+			}
+		}
+	}
+
+	//ln290
+	for(int which_chromosome=0;which_chromosome<ploidy;which_chromosome++){
+		for(int which_allele=0;which_allele<number_of_different_alleles;which_allele++){
+			tmpss.str("");
+			tmpss<<which_genotype<<"_"<<which_index<<"_"<<which_allele<<"parity";
+			int f1=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,0));
+			literal<<f1<<" ";
+		}
+		literal<<0<<"\n";
+	};
+	return "";
+
 }
 
 std::vector<int> Haplotype::createAntiHaplotypes(int number_of_explaining_haplotypes,IndexingVariables variables,
@@ -496,7 +702,7 @@ IndexingVariables Haplotype::createVariables(int number_of_explaining_haplotypes
 						q_=1;
 					tmpss.str("");;
 					tmpss<<which_genotype<<"_"<<which_index<<"_"<<k<<"sum";
-					variables.add(tmpss.str(),SetSharedPtr(2,ploidy+1,q));
+					variables.add(tmpss.str(),SetSharedPtr(2,ploidy+1,q_));
 					tmpss.str("");
 					tmpss<<which_genotype<<"_"<<which_index<<"_"<<k<<"parity";
 					variables.add(tmpss.str(),SetSharedPtr(2,ploidy,q_+2));
@@ -510,11 +716,8 @@ IndexingVariables Haplotype::createVariables(int number_of_explaining_haplotypes
 			}
 		}
 	}
+	//variables.printVar();
 	return variables;
-
-
-
-
 }
 
 } /* namespace SHEsis */
