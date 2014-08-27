@@ -56,6 +56,7 @@ IndexingVariables Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int
 	for(int which_genotype=0;which_genotype<number_of_genotypes;which_genotype++){
 		for(int which_index=0;which_index<length_of_genotypes;which_index++){
 			int width=CEIL(log2(this->occurence[which_genotype][which_index].size()));
+
 			if(0 == this->statMissing(which_genotype,which_index)){
 				bool b=true;
 				for(int i=0;i<this->occurence[which_genotype][which_index].size();i++){
@@ -72,10 +73,9 @@ IndexingVariables Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int
 							int f2=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,which_genotype));
 							res<<(f1*f2)<<EOL;
 						}
-						b=false;
-						break;
 					}
-
+					b=false;
+					break;
 				}
 				if(b){
 					res<<getGeneralCoding(ploidy,which_genotype,which_index,variables);
@@ -86,9 +86,11 @@ IndexingVariables Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int
 					res<<getGeneralCodingTotalyMissing(ploidy,which_genotype,which_index,variables);
 			}
 			//above ok
+			//std::cout<<"above ok\n";
 			for(int which_explaining_genotype=0;which_explaining_genotype<number_of_explaining_haplotypes;which_explaining_genotype++){
 				for(int which_chromosome=0;which_chromosome<ploidy;which_chromosome++){
 					for(int k=0;k<width;k++){
+						//std::cout<<"index:"<<which_explaining_genotype<<","<<which_chromosome<<","<<k<<"\n";
 						tmpss.str("");
 						tmpss<<which_index<<"_"<<k<<"haplotypes";
 						int f1=variables.getEnumeration(tmpss.str(),SetSharedPtr(1,which_explaining_genotype));
@@ -105,6 +107,7 @@ IndexingVariables Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int
 						int f5=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,which_genotype));
 						int f6=variables.getEnumeration("selections",SetSharedPtr(3,which_chromosome,which_explaining_genotype,which_genotype));
 						res<<(-1*f4)<<" "<<f5<<" "<<(-1*f6)<<EOL;
+
 					}
 				}
 			}
@@ -276,7 +279,7 @@ std::string Haplotype::getBiallelicCoding(int ploidy,int which_genotype, int whi
 		int c=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,l,q_));
 		res<<(-1*c)<<EOL;
 	}
-	std::cout<<"*****3******\n";
+	//std::cout<<"*****3******\n";
 	std::string s=ToBinaryString(q);
 	boost::shared_ptr<bool[]> b(new bool[q_]);
 	for(int i=0;i<q_;i++){
@@ -298,7 +301,7 @@ std::string Haplotype::getBiallelicCoding(int ploidy,int which_genotype, int whi
 		else
 			res<<(-1)*a<<EOL;
 	}
-	std::cout<<"*****4******\n";
+	//std::cout<<"*****4******\n";
 	for(int l=0;l<ploidy;l++){
 		for(int t=0;t<q_;t++){
 			tmpss.str("");
@@ -319,7 +322,7 @@ std::string Haplotype::getBiallelicCoding(int ploidy,int which_genotype, int whi
 			res<<(-1*c_)<<" "<<c<<EOL;
 		}
 	}
-	std::cout<<"*****5******\n";
+	//std::cout<<"*****5******\n";
 	return "";//res.str();
 
 }
@@ -420,7 +423,9 @@ std::string Haplotype::getGeneralCoding(int ploidy, int which_genotype, int whic
 
 		for(int which_chromosome=0;which_chromosome<ploidy;which_chromosome++){
 			for(int which_allele=0;which_allele<number_of_different_alleles-1;which_allele++){
-				if(MIN(this->occurence[which_genotype][which_index][which_allele],ploidy-this->occurence[which_genotype][which_index][which_allele])==this->occurence[which_genotype][which_index][which_allele]){
+				//std::cout<<"allele:"<<this->occurence[which_genotype][which_index][which_allele]<<"\n";
+				int min=MIN(this->occurence[which_genotype][which_index][which_allele],ploidy-this->occurence[which_genotype][which_index][which_allele]);
+				if(min==this->occurence[which_genotype][which_index][which_allele]){
 					tmpss.str("");;
 					tmpss<<which_genotype<<"_"<<which_index<<"_"<<which_allele<<"parity";
 					int f=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,0));
@@ -460,7 +465,7 @@ std::string Haplotype::getGeneralCoding(int ploidy, int which_genotype, int whic
 			}
 		}
 
-		std::cout<<"****2*****\n";
+		//std::cout<<"****2*****\n";
 		for(int which_allele=0;which_allele<number_of_different_alleles-1;which_allele++){
 			literal<<this->getBiallelicCoding(ploidy,which_genotype,which_index,which_allele,variables);
 		}
