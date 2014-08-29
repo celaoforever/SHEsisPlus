@@ -531,7 +531,7 @@ std::string Haplotype::getGeneralCodingMissing(int ploidy, int which_genotype, i
 	}
 
 	//ln233
-	for(int which_chromosome=0;which_chromosome<ploidy;which_chromosome){
+	for(int which_chromosome=0;which_chromosome<ploidy;which_chromosome++){
 		for(int which_allele=0;which_allele<number_of_different_alleles;which_allele++){
 			tmpss.str("");
 			tmpss<<which_genotype<<"_"<<which_index<<"_"<<which_allele<<"parity";
@@ -571,10 +571,10 @@ std::string Haplotype::getGeneralCodingTotalyMissing(int ploidy, int which_genot
 			int f1=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,0));
 			literal<<f1<<EOL;
 			for(int k=0;k<width;k++){
-				int f1=pow(-1,mbool[which_allele][k]);
+				int f1=pow(-1,1-mbool[which_allele][k]);
 				tmpss.str("");
 				tmpss<<which_index<<"_"<<k<<"combinations";
-				int f2=variables.getEnumeration(tmpss.str(),SetSharedPtr(which_chromosome,which_genotype));
+				int f2=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,which_genotype));
 				tmpss.str("");
 				tmpss<<which_genotype<<"_"<<which_index<<"_"<<which_allele<<"parity";
 				int f3=variables.getEnumeration(tmpss.str(),SetSharedPtr(2,which_chromosome,0));
