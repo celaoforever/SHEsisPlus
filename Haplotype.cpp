@@ -32,16 +32,16 @@ void Haplotype::statOccurence(){
 			}
 		}
 	}
-	std::cout<<"\n";
-	for(int iSample=0;iSample<data.getSampleNum();iSample++){
-	for(int iSnp=0;iSnp<this->occurence.shape()[1];iSnp++){
-	for(int k=00;k<this->occurence[iSample][iSnp].size();k++){
-	std::cout<<this->occurence[iSample][iSnp][k]<<"/";
-	}
-	std::cout<<" ";
-	}
-	std::cout<<"\n";
-	};
+//	std::cout<<"\n";
+//	for(int iSample=0;iSample<data.getSampleNum();iSample++){
+//	for(int iSnp=0;iSnp<this->occurence.shape()[1];iSnp++){
+//	for(int k=00;k<this->occurence[iSample][iSnp].size();k++){
+//	std::cout<<this->occurence[iSample][iSnp][k]<<"/";
+//	}
+//	std::cout<<" ";
+//	}
+//	std::cout<<"\n";
+//	};
 }
 
 
@@ -71,16 +71,16 @@ void Haplotype::statOccurenceMask(){
 			}
 		}
 	}
-	std::cout<<"\n";
-	for(int iSample=0;iSample<data.getSampleNum();iSample++){
-	for(int iSnp=0;iSnp<this->occurence.shape()[1];iSnp++){
-	for(int k=00;k<this->occurence[iSample][iSnp].size();k++){
-	std::cout<<this->occurence[iSample][iSnp][k]<<"/";
-	}
-	std::cout<<" ";
-	}
-	std::cout<<"\n";
-	};
+//	std::cout<<"\n";
+//	for(int iSample=0;iSample<data.getSampleNum();iSample++){
+//	for(int iSnp=0;iSnp<this->occurence.shape()[1];iSnp++){
+//	for(int k=00;k<this->occurence[iSample][iSnp].size();k++){
+//	std::cout<<this->occurence[iSample][iSnp][k]<<"/";
+//	}
+//	std::cout<<" ";
+//	}
+//	std::cout<<"\n";
+//	};
 
 
 }
@@ -176,7 +176,7 @@ void Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int number_of_ex
 					res<<(-1*f6)<<" "<<f7<<EOL;
 				}
 			}
-			if(which_explaining_genotype>0 && which_explaining_genotype<number_of_explaining_haplotypes-1){
+			if(which_explaining_genotype>0 && (which_explaining_genotype<number_of_explaining_haplotypes-1)){
 				for(int which_chromosome=0;which_chromosome<ploidy;which_chromosome++){
 					int f1=variables.getEnumeration("v",SetSharedPtr(3,which_chromosome,which_explaining_genotype,which_genotype));
 					int f2=variables.getEnumeration("selections",SetSharedPtr(3,which_chromosome,which_explaining_genotype+1,which_genotype));
@@ -232,13 +232,14 @@ void Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int number_of_ex
 					res<<f1<<" "<<f2<<" "<<(-1*f3)<<EOL;
 					res<<f1<<" "<<(-1*_index_e)<<EOL;
 				}
-				if(which_index == length_of_genotypes-1 && width-1 == k){
-					tmpss.str("");
-					tmpss<<which_index<<"_"<<k<<"e";
-					int f1=variables.getEnumeration(tmpss.str(),SetSharedPtr(1,which_explaining_haplotype));
-					res<<f1<<EOL;
-					_index_e=f1;
+				tmpss.str("");
+				tmpss<<which_index<<"_"<<k<<"e";
+				int f=variables.getEnumeration(tmpss.str(),SetSharedPtr(1,which_explaining_haplotype));
+				if((which_index == length_of_genotypes-1) && (width-1 == k)){
+					res<<f<<EOL;
 				}
+					_index_e=f;
+
 
 			}
 
@@ -267,7 +268,7 @@ void Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int number_of_ex
 					int f2=variables.getEnumeration("selections",SetSharedPtr(3,which_chromosome,which_explaining_haplotype,which_genotype));
 					res<<(-1*f1)<<" "<<_index_s<<" "<<(-1*f2)<<EOL;
 					int f3=variables.getEnumeration("selections",SetSharedPtr(3,which_chromosome+1,which_explaining_haplotype,which_genotype));
-					res<<(-1*f1)<<""<<_index_s<<" "<<f3<<EOL;
+					res<<(-1*f1)<<" "<<_index_s<<" "<<f3<<EOL;
 					res<<f1<<" "<<f2<<" "<<(-1*f3)<<EOL;
 					res<<f1<<" "<<(-1*_index_s)<<EOL;
 				}
@@ -283,8 +284,8 @@ void Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int number_of_ex
 		}
 	}
 	this->VarNum=variables.getVarnum();
-	std::cout<<"\n"<<res.str();
-	std::cout<<"\n"<<this->ClauseNum<<","<<this->VarNum<<"\n";
+//	std::cout<<"\n"<<res.str();
+//	std::cout<<"\n"<<this->ClauseNum<<","<<this->VarNum<<"\n";
 
 };
 
