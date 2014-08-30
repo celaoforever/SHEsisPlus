@@ -18,6 +18,7 @@ public:
 	IndexingVariables(){
 		this->reset();
 		this->offset=1;
+		this->varnum=0;
 	}
 	~IndexingVariables(){
 		this->hm.clear();
@@ -47,8 +48,6 @@ public:
 	void set(boost::unordered_map<std::string,boost::shared_ptr<ArrayStorage> > as, int offset);
 	boost::shared_ptr<int[]> getObjectSizes(std::string key);
 	int size();
-
-	int numberOfVariables();
 	void setParities(boost::multi_array<int,1> parities, boost::multi_array<int, 1> outsider);
 	void setValueILP(std::string key, double value);
 	void show();
@@ -57,10 +56,12 @@ public:
 	bool containsKey(std::string key);
 	int getIdSize();
 	void printHmKey();
+	int getVarnum(){return this->varnum;};
 private:
 	boost::unordered_map<std::string,boost::shared_ptr<ArrayStorage> > hm;
 	boost::unordered_map<std::string,double> ILPsolution;
 	int offset;
+	int varnum;
 
 };
 

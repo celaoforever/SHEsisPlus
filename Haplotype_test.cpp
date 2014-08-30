@@ -53,8 +53,8 @@ void testHp(){
 	data.statCount(data.vLabel);
 	data.printLocusInfo();
 	SHEsis::Haplotype hp(data);
-	hp.statOccurence();
-	SHEsis::IndexingVariables var;
+	//hp.statOccurence();
+	//SHEsis::IndexingVariables var;
 	//SHEsis::IndexingVariables var2=
 	hp.BuildModel(1);
 

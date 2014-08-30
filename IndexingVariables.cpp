@@ -55,6 +55,7 @@ namespace SHEsis{
 		if(id.end() == id.find(ident)){
 			size = id.size()+1;
 			id[ident]=size;
+			this->varnum=size;
 			enumeration[size]=ident;
 			return size;
 		}else{
@@ -123,11 +124,6 @@ namespace SHEsis{
 	{
 		return hm.size();
 	};
-
-	int IndexingVariables::numberOfVariables()
-	{
-		return this->offset-1;
-	}
 
 	void IndexingVariables::setParities(boost::multi_array<int,1> parities, boost::multi_array<int, 1> outsider){
 		//TO-DO
