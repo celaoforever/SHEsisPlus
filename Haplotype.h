@@ -32,8 +32,8 @@ public:
 	};
 
 	virtual ~Haplotype(){
-		for(int i=0;i<data.getSampleNum();i++){
-			for(int j=0;j<data.getSnpNum();j++){
+		for(int i=0;i<occurence.shape()[0];i++){
+			for(int j=0;j<occurence.shape()[1];j++){
 				this->occurence[i][j].clear();
 			}
 		}
@@ -46,10 +46,8 @@ public:
 	void getGeneralCoding(int ploidy, int which_genotype, int which_index,IndexingVariables& variables);
 	void getGeneralCodingMissing(int ploidy, int which_genotype, int which_index, IndexingVariables& variables);
 	void getGeneralCodingTotalyMissing(int ploidy, int which_genotype, int which_index, IndexingVariables& variables);
-	void BuildModel();
 	void BuildModel(/*IndexingVariables variables_old,*/ int number_of_explaining_haplotypes);
 	void createVariables(int number_of_explaining_haplotypes,IndexingVariables& variables);
-	int statMissing(int iSample,int iSnp);
 	boost::multi_array< std::vector<int>, 2> occurence;
 	boost::multi_array<int, 2> missing;
 private:

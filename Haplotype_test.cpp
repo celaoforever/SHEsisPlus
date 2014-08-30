@@ -50,9 +50,14 @@ void testHp(){
 			}
 		}
 	}
+	std::vector<short> mask(3);
+	mask[0]=0;
+	mask[1]=1;
+	mask[2]=1;
 	data.statCount(data.vLabel);
 	data.printLocusInfo();
-	SHEsis::Haplotype hp(data);
+	SHEsis::Haplotype hp(data,2,mask);
+	//SHEsis::Haplotype hp(data);
 	//hp.statOccurence();
 	//SHEsis::IndexingVariables var;
 	//SHEsis::IndexingVariables var2=

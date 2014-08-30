@@ -32,38 +32,65 @@ void Haplotype::statOccurence(){
 			}
 		}
 	}
+	std::cout<<"\n";
+	for(int iSample=0;iSample<data.getSampleNum();iSample++){
+	for(int iSnp=0;iSnp<this->occurence.shape()[1];iSnp++){
+	for(int k=00;k<this->occurence[iSample][iSnp].size();k++){
+	std::cout<<this->occurence[iSample][iSnp][k]<<"/";
+	}
+	std::cout<<" ";
+	}
+	std::cout<<"\n";
+	};
 }
 
+
 void Haplotype::statOccurenceMask(){
-	int subiSample=0;
-	int subiSnp=0;
+	std::cout<<"mask:";
+	for(int i=0;i<mask.size();i++){
+		std::cout<<mask[i]<<",";;
+	}
+	std::cout<<"\n";
+	int subiSnp;
 	for(int iSample=0;iSample<data.getSampleNum();iSample++){
+		subiSnp=0;
 		for(int iSnp=0;iSnp<data.getSnpNum();iSnp++){
 			if(mask[iSnp]){
-				this->occurence[subiSample][subiSnp].resize(data.vLocusInfo[iSnp].BothAlleleCount.size(),0);
-				this->missing[subiSample][subiSnp]=0;
+				this->occurence[iSample][subiSnp].resize(data.vLocusInfo[iSnp].BothAlleleCount.size(),0);
+				this->missing[iSample][subiSnp]=0;
 				for(int p=0;p<data.getNumOfChrSet();p++){
 					if(GENOTYPE_MISSING != data.mGenotype[iSample][iSnp][p]){
 						int idx=data.vLocusInfo[iSnp].getAlleleIndex(data.mGenotype[iSample][iSnp][p]);
 						BOOST_ASSERT(-1 != idx);
-						this->occurence[subiSample][subiSnp][idx]++;
+						this->occurence[iSample][subiSnp][idx]++;
 					}else{
-						this->missing[subiSample][subiSnp]++;
+						this->missing[iSample][subiSnp]++;
 					}
 				}
-				subiSample++;
 				subiSnp++;
 			}
 		}
 	}
+	std::cout<<"\n";
+	for(int iSample=0;iSample<data.getSampleNum();iSample++){
+	for(int iSnp=0;iSnp<this->occurence.shape()[1];iSnp++){
+	for(int k=00;k<this->occurence[iSample][iSnp].size();k++){
+	std::cout<<this->occurence[iSample][iSnp][k]<<"/";
+	}
+	std::cout<<" ";
+	}
+	std::cout<<"\n";
+	};
+
+
 }
 
 void Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int number_of_explaining_haplotypes){
 //#define res std::cout
 	std::stringstream tmpss;
 	boost::multi_array<int,1> anti_haplotypes;
-	int number_of_genotypes=this->data.mGenotype.shape()[0];
-	int length_of_genotypes=this->data.mGenotype.shape()[1];
+	int number_of_genotypes=this->occurence.shape()[0];
+	int length_of_genotypes=this->occurence.shape()[1];
 	int ploidy=this->data.getNumOfChrSet();
 	int number_of_known_haplotypes=0;
 	IndexingVariables variables;
@@ -72,7 +99,7 @@ void Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int number_of_ex
 		for(int which_index=0;which_index<length_of_genotypes;which_index++){
 			int width=CEIL(log2(this->occurence[which_genotype][which_index].size()));
 
-			if(0 == this->statMissing(which_genotype,which_index)){
+			if(0 == this->missing[which_genotype][which_index]){
 				bool b=true;
 				for(int i=0;i<this->occurence[which_genotype][which_index].size();i++){
 					if(ploidy != this->occurence[which_genotype][which_index][i])
@@ -93,7 +120,7 @@ void Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int number_of_ex
 				if(b){
 					getGeneralCoding(ploidy,which_genotype,which_index,variables);
 				}
-			}else if(this->statMissing(which_genotype,which_index)<ploidy){
+			}else if(this->missing[which_genotype][which_index]<ploidy){
 					getGeneralCodingMissing(ploidy,which_genotype,which_index,variables);
 			}else{
 					getGeneralCodingTotalyMissing(ploidy,which_genotype,which_index,variables);
@@ -255,9 +282,9 @@ void Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int number_of_ex
 			}
 		}
 	}
-//	this->VarNum=variables.getVarnum();
-//	std::cout<<"\n"<<res.str();
-//	std::cout<<"\n"<<this->ClauseNum<<","<<this->VarNum<<"\n";
+	this->VarNum=variables.getVarnum();
+	std::cout<<"\n"<<res.str();
+	std::cout<<"\n"<<this->ClauseNum<<","<<this->VarNum<<"\n";
 
 };
 
@@ -575,19 +602,9 @@ void Haplotype::getGeneralCodingTotalyMissing(int ploidy, int which_genotype, in
 }
 
 
-int Haplotype::statMissing(int iSample,int iSnp){
-	int missing=0;
-	for(int i=0;i<this->data.getNumOfChrSet();i++){
-		if(0 == this->data.mGenotype[iSample][iSnp][i])
-			missing++;
-	}
-	return missing;
-}
-
-
 void Haplotype::createVariables(int number_of_explaining_haplotypes,IndexingVariables& variables){
-	int number_of_genotypes=this->data.mGenotype.shape()[0];
-	int length_of_genotypes=this->data.mGenotype.shape()[1];
+	int number_of_genotypes=this->occurence.shape()[0];
+	int length_of_genotypes=this->occurence.shape()[1];
 	int ploidy=this->data.getNumOfChrSet();
 	boost::shared_ptr<int[]> sp;
 	sp=SetSharedPtr(3,ploidy,number_of_explaining_haplotypes,number_of_genotypes);
@@ -596,7 +613,7 @@ void Haplotype::createVariables(int number_of_explaining_haplotypes,IndexingVari
 	variables.add("v",sp);
 	std::stringstream tmpss;
 	for(int which_index=0;which_index<length_of_genotypes;which_index++){
-		int width=CEIL(log2(this->data.vLocusInfo[which_index].BothAlleleCount.size()));
+		int width=CEIL(log2(this->occurence[0][which_index].size()));
 		for(int k=0;k<width;k++){
 			tmpss.str("");
 			tmpss<<which_index<<"_"<<k<<"haplotypes";
@@ -642,7 +659,7 @@ void Haplotype::createVariables(int number_of_explaining_haplotypes,IndexingVari
 	for(int which_genotype=0;which_genotype<number_of_genotypes;which_genotype++){
 		for(int which_index=0;which_index<length_of_genotypes;which_index++){
 			for(int k=0;k<this->occurence[which_genotype][which_index].size();k++){
-				if(0 == statMissing(which_genotype,which_index)){
+				if(0 == missing[which_genotype][which_index]){
 					int allele=this->occurence[which_genotype][which_index][k];
 					int q = MIN(allele,ploidy-allele);
 					int q_=CEIL(log2(q+1));
