@@ -45,7 +45,7 @@ void testHp(){
 	//34,32,24,22
 	for(int iSample=0;iSample<sampleNum;iSample++){
 		BOOST_ASSERT(iSample<data.vLabel.size());
-		data.vLabel[iSample]=SHEsis::CASE;
+		data.vLabel[iSample]=iSample%2==0?SHEsis::CASE:SHEsis::CONTROL;
 		for(int iSnp=0;iSnp<snpNum;iSnp++){
 			for(int iChrset=0;iChrset<chrSetNum;iChrset++){
 				data.mGenotype[iSample][iSnp][iChrset]=a[iSample][iSnp][iChrset];
@@ -66,6 +66,7 @@ void testHp(){
 	hp.BuildModel(var,4);
 	hp.solve();
 	hp.parseSolution(var,4);
+	hp.associationTest();
 
 }
 

@@ -21,8 +21,8 @@ AssociationTest_test: SHEsisData.o utility.o fisher.o AssociationTest.o Associat
 HWETest_test: SHEsisData.o utility.o fisher.o HWETest.o HWETest_test.o 
 	$(CXX) -o HWETest_test SHEsisData.o utility.o fisher.o HWETest.o HWETest_test.o $(LIBS)
 
-Haplotype_test: SHEsisData.o    Haplotype_test.o  utility.o Haplotype.o IndexingVariables.o ArrayStorage.o System.o Solver.o Options.o
-	$(CXX) -o Haplotype_test SHEsisData.o    Haplotype_test.o  utility.o Haplotype.o IndexingVariables.o ArrayStorage.o System.o Solver.o Options.o
+Haplotype_test: SHEsisData.o    Haplotype_test.o  fisher.o utility.o Haplotype.o IndexingVariables.o ArrayStorage.o System.o Solver.o Options.o
+	$(CXX) -o Haplotype_test SHEsisData.o    Haplotype_test.o  fisher.o utility.o Haplotype.o IndexingVariables.o ArrayStorage.o System.o Solver.o Options.o
 
 
 

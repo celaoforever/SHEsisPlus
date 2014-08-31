@@ -4,7 +4,8 @@
  *  Created on: Aug 19, 2014
  *      Author: ada
  */
-
+#include "fisher.h"
+#include "utility.h"
 #include "Haplotype.h"
 #include <math.h>
 #include <sstream>
@@ -14,6 +15,7 @@
 #include "Dimacs.h"
 #include "Solver.h"
 #include <boost/lexical_cast.hpp>
+
 
 namespace SHEsis {
 #define CEIL(x) (x-(int)x)>0?((int)x+1):(x)
@@ -150,8 +152,10 @@ void Haplotype::parseSolution(IndexingVariables& variables,int assumed_haplotype
     	boost::shared_ptr<short[]> haplo(new short[this->SnpIdx.size()]);
     	for(int j=0;j<this->SnpIdx.size();j++){
     		int width=CEIL(log2(this->occurence[0][j].size()));
-    		char* chr_=new char[width];
-    		char* chr =new char[width];
+    		char* chr_=new char[width+1];
+    		char* chr =new char[width+1];
+    		chr_[width]='\0';
+    		chr[width]='\0';
     		for(int k=0;k<width;k++){
     			tmpss.str("");
     			tmpss<<j<<"_"<<k<<"haplotypes";
@@ -166,38 +170,86 @@ void Haplotype::parseSolution(IndexingVariables& variables,int assumed_haplotype
     		for(int k=0;k<width;k++){
     			chr[counter--]=chr_[k];
     		}
-    		int index=std::atoi(std::string(chr).c_str());
+    		std::string str_chr(chr);
+    		int index=std::atoi(str_chr.c_str());
     		haplo[j]=this->data.vLocusInfo[this->SnpIdx[j]].getAlleleType(index);
     		delete[] chr;
     		delete[] chr_;
     	}
-    	this->haplotypes.push_back(haplo);
-//    	for(int i=0;i<this->SnpIdx.size();i++){
-//        	std::cout<<haplo[i];
-//    	};
-//    	std::cout<<"\n";
+    	this->Results.haplotypes.push_back(haplo);
+    	for(int i=0;i<this->SnpIdx.size();i++){
+        	std::cout<<haplo[i];
+    	};
+    	std::cout<<"\n";
 
     }
 
     for(int i=0;i<this->data.getSampleNum();i++){
     	for(int k=0;k<this->data.getNumOfChrSet();k++){
-    		this->genotypes[i][k]=-1;
+    		this->Results.genotypes[i][k]=-1;
     		for(int j=0;j<assumed_haplotypes;j++){
     			int f=variables.getEvalutatedId("selections",SetSharedPtr(3,k,j,i));
     			if(f>0){
-    				this->genotypes[i][k]=j;
+    				this->Results.genotypes[i][k]=j;
     				break;
     			}
     		}
     	}
     }
 
-//    for(int i=0;i<this->data.getSampleNum();i++){
-//    	for(int k=0;k<this->data.getNumOfChrSet();k++){
-//    		std::cout<<genotypes[i][k]<<",";
-//    	}
-//    	std::cout<<"\n";
-//    };
+    for(int i=0;i<this->data.getSampleNum();i++){
+    	for(int k=0;k<this->data.getNumOfChrSet();k++){
+    		std::cout<<Results.genotypes[i][k]<<",";
+    	}
+    	std::cout<<"\n";
+    };
+
+
+}
+
+void Haplotype::associationTest(){
+	int haploNum=this->Results.haplotypes.size();
+	this->Results.CaseCount.reset(new int[haploNum]);
+	this->Results.ControlCount.reset(new int[haploNum]);
+	for(int i=0;i<this->Results.haplotypes.size();i++){
+		this->Results.CaseCount[i]=0;
+		this->Results.ControlCount[i]=0;
+	}
+    for(int i=0;i<this->data.getSampleNum();i++){
+    	for(int k=0;k<this->data.getNumOfChrSet();k++){
+			int idx=Results.genotypes[i][k];
+    		if(CASE == this->data.vLabel[i]){
+    			this->Results.CaseCount[idx]++;
+    		}else if(CONTROL == this->data.vLabel[i]){
+    			this->Results.ControlCount[idx]++;
+    		}
+    	}
+    }
+    std::cout<<"contigency:\n";
+    double* contigency= new double[2*haploNum];
+    int idx=0;
+    for(int i=0;i<haploNum;i++){
+    	contigency[idx++]=this->Results.ControlCount[i];
+    	contigency[idx++]=this->Results.CaseCount[i];
+    	std::cout<<this->Results.ControlCount[i]<<","<<this->Results.CaseCount[i]<<"\n";
+    };
+
+
+	  double expect = -1.0;
+	  double percnt = 100.0;
+	  double emin = 0;
+	  double pre = 0, prt = 0;
+	  int ws = 300000;
+	  int nrow=2;
+	  fexact(&nrow, &haploNum, contigency, &nrow, &expect, &percnt, &emin, &prt, &pre, &ws);
+	  this->Results.FisherP=pre;
+
+	  //Pearson's ChiSquare test
+	  PearsonChiSquareTest(contigency,nrow,haploNum,this->Results.ChiSquare,this->Results.PearsonP);
+	  std::cout<<"fisherp:"<<this->Results.FisherP;
+	  std::cout<<"\npearsonp:"<<this->Results.PearsonP;
+
+
 
 
 }
