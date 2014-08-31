@@ -41,6 +41,8 @@ void testHp(){
 	{{1,1,3,3},{3,3,3,3},{4,4,2,2}},
 	{{1,1,3,3},{3,3,2,2},{4,4,2,2}},
 	{{1,1,3,3},{0,0,0,0},{2,2,2,2}}};
+
+	//34,32,24,22
 	for(int iSample=0;iSample<sampleNum;iSample++){
 		BOOST_ASSERT(iSample<data.vLabel.size());
 		data.vLabel[iSample]=SHEsis::CASE;
@@ -59,10 +61,11 @@ void testHp(){
 	SHEsis::Haplotype hp(data,2,mask);
 //	SHEsis::Haplotype hp(data);
 //	hp.statOccurence();
-//	SHEsis::IndexingVariables var;
+	SHEsis::IndexingVariables var;
 //	SHEsis::IndexingVariables var2=
-	hp.BuildModel(4);
+	hp.BuildModel(var,4);
 	hp.solve();
+	hp.parseSolution(var,4);
 
 }
 

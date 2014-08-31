@@ -12,25 +12,35 @@
 #include "ArrayStorage.h"
 #include "IndexingVariables.h"
 namespace SHEsis {
+
+
 class Haplotype {
 public:
 	Haplotype(SHEsisData& data):data(data),VarNum(0),ClauseNum(0),
 	occurence(boost::extents[data.getSampleNum()][data.getSnpNum()]),
-	missing(boost::extents[data.getSampleNum()][data.getSnpNum()])
+	missing(boost::extents[data.getSampleNum()][data.getSnpNum()]),
+	genotypes(boost::extents[data.getSampleNum()][data.getNumOfChrSet()])
+	//variables()
 	{
 		res.str("");
-		sat.str("");
+		sat="";
 		this->statOccurence();
+		for(int i=0;i<this->data.getSnpNum();i++){
+				this->SnpIdx[i]=i;
+		}
 	};
 
 	Haplotype(SHEsisData& data, int Snp, std::vector<short> mask):data(data),VarNum(0),ClauseNum(0),
 			occurence(boost::extents[data.getSampleNum()][Snp]),
-			missing(boost::extents[data.getSampleNum()][Snp])
+			missing(boost::extents[data.getSampleNum()][Snp]),
+			genotypes(boost::extents[data.getSampleNum()][data.getNumOfChrSet()])
+//			SnpIdx(Snp,0)
 	{
 		res.str("");
-		sat.str("");
+		sat="";
 		this->mask=mask;
 		this->statOccurenceMask();
+
 	};
 
 	virtual ~Haplotype(){
@@ -40,6 +50,8 @@ public:
 			}
 		}
 		this->mask.clear();
+		this->SnpIdx.clear();
+		this->haplotypes.clear();
 	};
 	SHEsisData& data;
 	void statOccurence();
@@ -48,18 +60,23 @@ public:
 	void getGeneralCoding(int ploidy, int which_genotype, int which_index,IndexingVariables& variables);
 	void getGeneralCodingMissing(int ploidy, int which_genotype, int which_index, IndexingVariables& variables);
 	void getGeneralCodingTotalyMissing(int ploidy, int which_genotype, int which_index, IndexingVariables& variables);
-	void BuildModel(/*IndexingVariables variables_old,*/ int number_of_explaining_haplotypes);
+	void BuildModel(IndexingVariables& variables, int number_of_explaining_haplotypes);
 	void createVariables(int number_of_explaining_haplotypes,IndexingVariables& variables);
 	int solve();
-	boost::multi_array< std::vector<int>, 2> occurence;
-	boost::multi_array<int, 2> missing;
+	void parseSolution(IndexingVariables& variables,int assumed_haplotypes);
+
 private:
 	std::stringstream res;
-	std::stringstream sat;
+	std::string sat;
 	int VarNum;
 	int ClauseNum;
 	std::vector<short> mask;
-
+	std::vector<int> SnpIdx;
+	std::vector<boost::shared_ptr<short[]> > haplotypes;
+	boost::multi_array<short,2> genotypes;
+	boost::multi_array< std::vector<int>, 2> occurence;
+	boost::multi_array<int, 2> missing;
+//	IndexingVariables variables;
 
 };
 

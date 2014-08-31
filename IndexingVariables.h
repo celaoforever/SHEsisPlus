@@ -16,9 +16,8 @@ public:
 
 	CLONE(IndexingVariables);
 	IndexingVariables(){
+//		std::cout<<"constructor, id.size()="<<id.size()<<"\n";
 		this->reset();
-		this->offset=1;
-		this->varnum=0;
 	}
 	~IndexingVariables(){
 		this->hm.clear();
@@ -48,7 +47,8 @@ public:
 	void set(boost::unordered_map<std::string,boost::shared_ptr<ArrayStorage> > as, int offset);
 	boost::shared_ptr<int[]> getObjectSizes(std::string key);
 	int size();
-	void setParities(boost::multi_array<int,1> parities, boost::multi_array<int, 1> outsider);
+	//void setParities(boost::multi_array<int,1> parities, boost::multi_array<int, 1> outsider);
+	void setParities(boost::shared_ptr<int[]> parities);
 	void setValueILP(std::string key, double value);
 	void show();
 	int test();
@@ -57,6 +57,7 @@ public:
 	int getIdSize();
 	void printHmKey();
 	int getVarnum(){return this->varnum;};
+	int numberOfVariables(){return offset-1;};
 private:
 	boost::unordered_map<std::string,boost::shared_ptr<ArrayStorage> > hm;
 	boost::unordered_map<std::string,double> ILPsolution;

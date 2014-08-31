@@ -29,4 +29,4 @@ Haplotype_test: SHEsisData.o    Haplotype_test.o  utility.o Haplotype.o Indexing
 
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f *.o $(TARGET)

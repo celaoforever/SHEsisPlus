@@ -35,6 +35,17 @@ struct LocusInfo{
 			idx++;
 		}
 		return -1;
+	};
+	short getAlleleType(int idx){
+		BOOST_ASSERT(idx<BothAlleleCount.size());
+		boost::unordered_map<short,double>::iterator iter;
+		int i=0;
+		for(iter=BothAlleleCount.begin();iter!=BothAlleleCount.end();iter++){
+			if(i==idx)
+				return iter->first;
+			i++;
+		}
+		return -1;
 	}
 };
 

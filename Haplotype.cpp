@@ -13,7 +13,7 @@
 #include "Options.h"
 #include "Dimacs.h"
 #include "Solver.h"
-
+#include <boost/lexical_cast.hpp>
 
 namespace SHEsis {
 #define CEIL(x) (x-(int)x)>0?((int)x+1):(x)
@@ -63,6 +63,8 @@ void Haplotype::statOccurenceMask(){
 		subiSnp=0;
 		for(int iSnp=0;iSnp<data.getSnpNum();iSnp++){
 			if(mask[iSnp]){
+				if(this->SnpIdx.size()==0 || iSnp>this->SnpIdx[SnpIdx.size()-1])
+					this->SnpIdx.push_back(iSnp);
 				this->occurence[iSample][subiSnp].resize(data.vLocusInfo[iSnp].BothAlleleCount.size(),0);
 				this->missing[iSample][subiSnp]=0;
 				for(int p=0;p<data.getNumOfChrSet();p++){
@@ -79,6 +81,10 @@ void Haplotype::statOccurenceMask(){
 		}
 	}
 //	std::cout<<"\n";
+//	for(int i=0;i<this->SnpIdx.size();i++){
+//		std::cout<<SnpIdx[i]<<",";
+//	}
+//	std::cout<<"\n";
 //	for(int iSample=0;iSample<data.getSampleNum();iSample++){
 //	for(int iSnp=0;iSnp<this->occurence.shape()[1];iSnp++){
 //	for(int k=00;k<this->occurence[iSample][iSnp].size();k++){
@@ -93,6 +99,7 @@ void Haplotype::statOccurenceMask(){
 }
 int Haplotype::solve(){
 	//std::stringstream sat;
+
 	Minisat::Solver S;
 	parse_DIMACS(this->res, S);
     if (!S.simplify()){
@@ -101,19 +108,101 @@ int Haplotype::solve(){
     Minisat::vec<Minisat::Lit> dummy;
     Minisat::lbool ret = S.solveLimited(dummy);
     if (ret == l_True){
-            sat<<"SAT\n";
+//            sat<<"SAT\n";
             for (int i = 0; i < S.nVars(); i++)
                 if (S.model[i] != l_Undef){
-                	sat<<((i==0)?"":" ")<<((S.model[i]==l_True)?"":"-")<<(i+1);
+                	sat=sat+((i==0)?"":" ")+((S.model[i]==l_True)?"":"-")+boost::lexical_cast<std::string>(i+1);
 //                    printf("%s%s%d", (i==0)?"":" ", (S.model[i]==l_True)?"":"-", i+1);}
                 };
-           sat<<" 0\n";
-        }
-//    std::cout<<sat.str();
-    return 1;
+//           sat<<" 0\n";
+//           std::cout<<sat;
+           return 1;
+        };
+    return 0;
 
 }
-void Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int number_of_explaining_haplotypes){
+
+void Haplotype::parseSolution(IndexingVariables& variables,int assumed_haplotypes){
+    std::vector<std::string> strs;
+    std::stringstream tmpss;
+    boost::split(strs,this->sat,boost::is_any_of("\t "));
+    boost::shared_ptr<int[]> parities(new int[variables.numberOfVariables()+1]);
+    parities[0]=variables.numberOfVariables();
+    for(int i=1;i<=parities[0];i++){
+    	parities[i]=0;
+    };
+//    std::cout<<"\n\n\nstrs:\n";
+//    for(int i=0;i<strs.size();i++){
+//    	std::cout<<strs[i].c_str()<<" ";
+//    }
+//	std::cout<<"\n\n\n";
+    for(int i=0;i<strs.size();i++){
+    	int var=boost::lexical_cast<int>(strs[i].c_str());
+    	BOOST_ASSERT(0!=var);
+    	int index=variables.enumeration[ABS(var)];
+//    	std::cout<<index<<"\n";
+    	BOOST_ASSERT(index<=parities[0]);
+    	parities[index-1]=var;
+    }
+    variables.setParities(parities);
+//
+    for(int i=0;i<assumed_haplotypes;i++){
+    	boost::shared_ptr<short[]> haplo(new short[this->SnpIdx.size()]);
+    	for(int j=0;j<this->SnpIdx.size();j++){
+    		int width=CEIL(log2(this->occurence[0][j].size()));
+    		char* chr_=new char[width];
+    		char* chr =new char[width];
+    		for(int k=0;k<width;k++){
+    			tmpss.str("");
+    			tmpss<<j<<"_"<<k<<"haplotypes";
+    			int f=variables.getEvalutatedId(tmpss.str(),SetSharedPtr(1,i));
+    			BOOST_ASSERT(0 != f);
+    			if(f<0)
+    				chr_[k]='0';
+    			else
+    				chr_[k]='1';
+    		};
+    		int counter=width-1;
+    		for(int k=0;k<width;k++){
+    			chr[counter--]=chr_[k];
+    		}
+    		int index=std::atoi(std::string(chr).c_str());
+    		haplo[j]=this->data.vLocusInfo[this->SnpIdx[j]].getAlleleType(index);
+    		delete[] chr;
+    		delete[] chr_;
+    	}
+    	this->haplotypes.push_back(haplo);
+//    	for(int i=0;i<this->SnpIdx.size();i++){
+//        	std::cout<<haplo[i];
+//    	};
+//    	std::cout<<"\n";
+
+    }
+
+    for(int i=0;i<this->data.getSampleNum();i++){
+    	for(int k=0;k<this->data.getNumOfChrSet();k++){
+    		this->genotypes[i][k]=-1;
+    		for(int j=0;j<assumed_haplotypes;j++){
+    			int f=variables.getEvalutatedId("selections",SetSharedPtr(3,k,j,i));
+    			if(f>0){
+    				this->genotypes[i][k]=j;
+    				break;
+    			}
+    		}
+    	}
+    }
+
+//    for(int i=0;i<this->data.getSampleNum();i++){
+//    	for(int k=0;k<this->data.getNumOfChrSet();k++){
+//    		std::cout<<genotypes[i][k]<<",";
+//    	}
+//    	std::cout<<"\n";
+//    };
+
+
+}
+
+void Haplotype::BuildModel(IndexingVariables& variables, int number_of_explaining_haplotypes){
 //#define res std::cout
 	std::stringstream tmpss;
 	boost::multi_array<int,1> anti_haplotypes;
@@ -121,7 +210,8 @@ void Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int number_of_ex
 	int length_of_genotypes=this->occurence.shape()[1];
 	int ploidy=this->data.getNumOfChrSet();
 	int number_of_known_haplotypes=0;
-	IndexingVariables variables;
+
+	//IndexingVariables variables;
 	createVariables(number_of_explaining_haplotypes,variables);
 	for(int which_genotype=0;which_genotype<number_of_genotypes;which_genotype++){
 		for(int which_index=0;which_index<length_of_genotypes;which_index++){
@@ -311,7 +401,7 @@ void Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int number_of_ex
 			}
 		}
 	}
-	this->VarNum=variables.getVarnum();
+//	this->VarNum=variables.getVarnum();
 //	std::cout<<"\n"<<res.str();
 //	std::cout<<"\n"<<this->ClauseNum<<","<<this->VarNum<<"\n";
 

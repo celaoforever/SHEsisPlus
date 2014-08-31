@@ -11,10 +11,13 @@
 
 namespace SHEsis{
 	void IndexingVariables::reset(){
+//		std::cout<<"id.size()="<<id.size()<<"\n";
 		if(id.size()>0)
 			this->id.clear();
 		if(enumeration.size()>0)
 			this->enumeration.clear();
+		this->offset=1;
+		this->varnum=0;
 	}
 
 
@@ -125,8 +128,17 @@ namespace SHEsis{
 		return hm.size();
 	};
 
-	void IndexingVariables::setParities(boost::multi_array<int,1> parities, boost::multi_array<int, 1> outsider){
+	void IndexingVariables::setParities(boost::shared_ptr<int[]> parities){
 		//TO-DO
+		boost::unordered_map<std::string,boost::shared_ptr<ArrayStorage> >::iterator iter;
+		for(iter=this->hm.begin();iter!=this->hm.end();iter++){
+			boost::shared_ptr<int[]> arr=iter->second->getArray();
+			for(int i=1;i<=arr[0];i++){
+				BOOST_ASSERT(i<=parities[0]);
+				if(parities[arr[i]-1]<0)
+					iter->second->set(i,-1*arr[i]);
+			}
+		}
 	}
 
 	void IndexingVariables::setValueILP(std::string key, double value){
