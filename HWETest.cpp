@@ -14,8 +14,8 @@
 #include <iostream>
 namespace SHEsis {
 
-HWETest::HWETest(SHEsisData& data): data(data),
-		vHWETestResult(data.getSnpNum()){
+HWETest::HWETest(boost::shared_ptr<SHEsisData> data): data(data),
+		vHWETestResult(data->getSnpNum()){
 }
 
 HWETest::~HWETest() {
@@ -94,13 +94,13 @@ double GetExpectedGenotypeFreq(std::string genotype,
 void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
 		double& ControlChi,double& ControlPearsonP,
 		double& BothChi, double& BothPearsonP){
-	BOOST_ASSERT(this->data.vLocusInfo[iSnp].CaseAlleleCount.size()
-			== this->data.vLocusInfo[iSnp].ControlAlleleCount.size());
+	BOOST_ASSERT(this->data->vLocusInfo[iSnp].CaseAlleleCount.size()
+			== this->data->vLocusInfo[iSnp].ControlAlleleCount.size());
 
 	boost::unordered_map<short, size_t> AlleleType;
 	boost::unordered_map<short, double> ::iterator map_it;
-	for(map_it=this->data.vLocusInfo[iSnp].CaseAlleleCount.begin();
-			map_it != this->data.vLocusInfo[iSnp].CaseAlleleCount.end();
+	for(map_it=this->data->vLocusInfo[iSnp].CaseAlleleCount.begin();
+			map_it != this->data->vLocusInfo[iSnp].CaseAlleleCount.end();
 			map_it++){
 		AlleleType[map_it->first]=0;
 	};
@@ -108,21 +108,21 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
 	//calculate HWE for cases
 	boost::unordered_map<std::string,double>::iterator genotype_iter;
 	int NumOfRow=2;//1st row is for observed freq, 2nd row is for expected frequency
-	int NumOfCol=this->data.vLocusInfo[iSnp].CaseGenotypeCount.size();
+	int NumOfCol=this->data->vLocusInfo[iSnp].CaseGenotypeCount.size();
 	int totalGenotype=0;
 	double* contigency=new double[NumOfRow*NumOfCol];
 	int idx=0;
-	for(genotype_iter=this->data.vLocusInfo[iSnp].CaseGenotypeCount.begin();
-			genotype_iter != this->data.vLocusInfo[iSnp].CaseGenotypeCount.end();
+	for(genotype_iter=this->data->vLocusInfo[iSnp].CaseGenotypeCount.begin();
+			genotype_iter != this->data->vLocusInfo[iSnp].CaseGenotypeCount.end();
 			genotype_iter++){
 			double expectedFreq=GetExpectedGenotypeFreq(genotype_iter->first,
-					this->data.vLocusInfo[iSnp].CaseAlleleCount,
+					this->data->vLocusInfo[iSnp].CaseAlleleCount,
 					AlleleType,
 					this->vCoefficient,
-					this->data.getCaseNum(),
-					this->data.getNumOfChrSet());
+					this->data->getCaseNum(),
+					this->data->getNumOfChrSet());
 			BOOST_ASSERT(idx<NumOfRow*NumOfCol);
-			contigency[idx++]=genotype_iter->second;//(this->data.getCaseNum()*this->data.getNumOfChrSet());
+			contigency[idx++]=genotype_iter->second;//(this->data->getCaseNum()*this->data->getNumOfChrSet());
 			BOOST_ASSERT(idx<NumOfRow*NumOfCol);
 			contigency[idx++]=expectedFreq;
 			totalGenotype+=genotype_iter->second;
@@ -155,20 +155,20 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
 	//calculate HWE for control
 	totalGenotype=0;
 	NumOfRow=2;//1st row is for observed freq, 2nd row is for expected frequency
-	NumOfCol=this->data.vLocusInfo[iSnp].ControlGenotypeCount.size();
+	NumOfCol=this->data->vLocusInfo[iSnp].ControlGenotypeCount.size();
 	contigency=new double[NumOfRow*NumOfCol];
 	idx=0;
-	for(genotype_iter=this->data.vLocusInfo[iSnp].ControlGenotypeCount.begin();
-			genotype_iter != this->data.vLocusInfo[iSnp].ControlGenotypeCount.end();
+	for(genotype_iter=this->data->vLocusInfo[iSnp].ControlGenotypeCount.begin();
+			genotype_iter != this->data->vLocusInfo[iSnp].ControlGenotypeCount.end();
 			genotype_iter++){
 			double expectedFreq=GetExpectedGenotypeFreq(genotype_iter->first,
-					this->data.vLocusInfo[iSnp].ControlAlleleCount,
+					this->data->vLocusInfo[iSnp].ControlAlleleCount,
 					AlleleType,
 					this->vCoefficient,
-					this->data.getControlNum(),
-					this->data.getNumOfChrSet());
+					this->data->getControlNum(),
+					this->data->getNumOfChrSet());
 			BOOST_ASSERT(idx<NumOfRow*NumOfCol);
-			contigency[idx++]=genotype_iter->second;//(this->data.getControlNum()*this->data.getNumOfChrSet());
+			contigency[idx++]=genotype_iter->second;//(this->data->getControlNum()*this->data->getNumOfChrSet());
 			BOOST_ASSERT(idx<NumOfRow*NumOfCol);
 			contigency[idx++]=expectedFreq;
 			totalGenotype+=genotype_iter->second;
@@ -197,20 +197,20 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
 	//calculate HWE for case and control
 	totalGenotype=0;
 	NumOfRow=2;//1st row is for observed freq, 2nd row is for expected frequency
-	NumOfCol=this->data.vLocusInfo[iSnp].BothGenotypeCount.size();
+	NumOfCol=this->data->vLocusInfo[iSnp].BothGenotypeCount.size();
 	contigency=new double[NumOfRow*NumOfCol];
 	idx=0;
-	for(genotype_iter=this->data.vLocusInfo[iSnp].BothGenotypeCount.begin();
-			genotype_iter != this->data.vLocusInfo[iSnp].BothGenotypeCount.end();
+	for(genotype_iter=this->data->vLocusInfo[iSnp].BothGenotypeCount.begin();
+			genotype_iter != this->data->vLocusInfo[iSnp].BothGenotypeCount.end();
 			genotype_iter++){
 			double expectedFreq=GetExpectedGenotypeFreq(genotype_iter->first,
-					this->data.vLocusInfo[iSnp].BothAlleleCount,
+					this->data->vLocusInfo[iSnp].BothAlleleCount,
 					AlleleType,
 					this->vCoefficient,
-					this->data.getSampleNum(),
-					this->data.getNumOfChrSet());
+					this->data->getSampleNum(),
+					this->data->getNumOfChrSet());
 			BOOST_ASSERT(idx<NumOfRow*NumOfCol);
-			contigency[idx++]=genotype_iter->second;//(this->data.getSampleNum()*this->data.getNumOfChrSet());
+			contigency[idx++]=genotype_iter->second;//(this->data->getSampleNum()*this->data->getNumOfChrSet());
 			BOOST_ASSERT(idx<NumOfRow*NumOfCol);
 			contigency[idx++]=expectedFreq;
 			totalGenotype+=genotype_iter->second;
@@ -236,7 +236,7 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
 }
 
 void HWETest::AllSnpHWETest(){
-	for(int i=0;i<this->data.getSnpNum();i++){
+	for(int i=0;i<this->data->getSnpNum();i++){
 		this->SingleSnpHWETest(i,this->vHWETestResult[i].CaseChiSquare,this->vHWETestResult[i].CasePearsonP,
 				this->vHWETestResult[i].ControlChiSquare,this->vHWETestResult[i].ControlPearsonP,
 				this->vHWETestResult[i].BothChiSquare,this->vHWETestResult[i].BothPearsonP);

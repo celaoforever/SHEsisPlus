@@ -8,6 +8,7 @@
 #ifndef HWETEST_H_
 #define HWETEST_H_
 #include "SHEsisData.h"
+#include <boost/shared_ptr.hpp>
 namespace SHEsis {
 struct HWETestResult{
 	double CasePearsonP;
@@ -27,9 +28,9 @@ typedef enum{
 
 class HWETest {
 public:
-	SHEsisData& data;
+	boost::shared_ptr<SHEsisData> data;
 	std::vector<HWETestResult> vHWETestResult;
-	HWETest(SHEsisData& data);
+	HWETest(boost::shared_ptr<SHEsisData>  data);
 	virtual ~HWETest();
 	void AllSnpHWETest();
 	void printHWETestResults();

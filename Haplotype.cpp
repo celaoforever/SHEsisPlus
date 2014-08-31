@@ -25,13 +25,13 @@ namespace SHEsis {
 #define EOL2 "0\n";this->ClauseNum++;
 
 void Haplotype::statOccurence(){
-	for(int iSample=0;iSample<data.getSampleNum();iSample++){
-		for(int iSnp=0;iSnp<data.getSnpNum();iSnp++){
-			this->occurence[iSample][iSnp].resize(data.vLocusInfo[iSnp].BothAlleleCount.size(),0);
+	for(int iSample=0;iSample<data->getSampleNum();iSample++){
+		for(int iSnp=0;iSnp<data->getSnpNum();iSnp++){
+			this->occurence[iSample][iSnp].resize(data->vLocusInfo[iSnp].BothAlleleCount.size(),0);
 			this->missing[iSample][iSnp]=0;
-			for(int p=0;p<data.getNumOfChrSet();p++){
-				if(GENOTYPE_MISSING != data.mGenotype[iSample][iSnp][p]){
-					int idx=data.vLocusInfo[iSnp].getAlleleIndex(data.mGenotype[iSample][iSnp][p]);
+			for(int p=0;p<data->getNumOfChrSet();p++){
+				if(GENOTYPE_MISSING != data->mGenotype[iSample][iSnp][p]){
+					int idx=data->vLocusInfo[iSnp].getAlleleIndex(data->mGenotype[iSample][iSnp][p]);
 					BOOST_ASSERT(-1 != idx);
 					this->occurence[iSample][iSnp][idx]++;
 				}else
@@ -42,7 +42,7 @@ void Haplotype::statOccurence(){
 		}
 	}
 //	std::cout<<"\n";
-//	for(int iSample=0;iSample<data.getSampleNum();iSample++){
+//	for(int iSample=0;iSample<data->getSampleNum();iSample++){
 //	for(int iSnp=0;iSnp<this->occurence.shape()[1];iSnp++){
 //	for(int k=00;k<this->occurence[iSample][iSnp].size();k++){
 //	std::cout<<this->occurence[iSample][iSnp][k]<<"/";
@@ -61,17 +61,17 @@ void Haplotype::statOccurenceMask(){
 //	}
 	std::cout<<"\n";
 	int subiSnp;
-	for(int iSample=0;iSample<data.getSampleNum();iSample++){
+	for(int iSample=0;iSample<data->getSampleNum();iSample++){
 		subiSnp=0;
-		for(int iSnp=0;iSnp<data.getSnpNum();iSnp++){
+		for(int iSnp=0;iSnp<data->getSnpNum();iSnp++){
 			if(mask[iSnp]){
 				if(this->SnpIdx.size()==0 || iSnp>this->SnpIdx[SnpIdx.size()-1])
 					this->SnpIdx.push_back(iSnp);
-				this->occurence[iSample][subiSnp].resize(data.vLocusInfo[iSnp].BothAlleleCount.size(),0);
+				this->occurence[iSample][subiSnp].resize(data->vLocusInfo[iSnp].BothAlleleCount.size(),0);
 				this->missing[iSample][subiSnp]=0;
-				for(int p=0;p<data.getNumOfChrSet();p++){
-					if(GENOTYPE_MISSING != data.mGenotype[iSample][iSnp][p]){
-						int idx=data.vLocusInfo[iSnp].getAlleleIndex(data.mGenotype[iSample][iSnp][p]);
+				for(int p=0;p<data->getNumOfChrSet();p++){
+					if(GENOTYPE_MISSING != data->mGenotype[iSample][iSnp][p]){
+						int idx=data->vLocusInfo[iSnp].getAlleleIndex(data->mGenotype[iSample][iSnp][p]);
 						BOOST_ASSERT(-1 != idx);
 						this->occurence[iSample][subiSnp][idx]++;
 					}else{
@@ -87,7 +87,7 @@ void Haplotype::statOccurenceMask(){
 //		std::cout<<SnpIdx[i]<<",";
 //	}
 //	std::cout<<"\n";
-//	for(int iSample=0;iSample<data.getSampleNum();iSample++){
+//	for(int iSample=0;iSample<data->getSampleNum();iSample++){
 //	for(int iSnp=0;iSnp<this->occurence.shape()[1];iSnp++){
 //	for(int k=00;k<this->occurence[iSample][iSnp].size();k++){
 //	std::cout<<this->occurence[iSample][iSnp][k]<<"/";
@@ -172,7 +172,7 @@ void Haplotype::parseSolution(IndexingVariables& variables,int assumed_haplotype
     		}
     		std::string str_chr(chr);
     		int index=std::atoi(str_chr.c_str());
-    		haplo[j]=this->data.vLocusInfo[this->SnpIdx[j]].getAlleleType(index);
+    		haplo[j]=this->data->vLocusInfo[this->SnpIdx[j]].getAlleleType(index);
     		delete[] chr;
     		delete[] chr_;
     	}
@@ -184,8 +184,8 @@ void Haplotype::parseSolution(IndexingVariables& variables,int assumed_haplotype
 
     }
 
-    for(int i=0;i<this->data.getSampleNum();i++){
-    	for(int k=0;k<this->data.getNumOfChrSet();k++){
+    for(int i=0;i<this->data->getSampleNum();i++){
+    	for(int k=0;k<this->data->getNumOfChrSet();k++){
     		this->Results.genotypes[i][k]=-1;
     		for(int j=0;j<assumed_haplotypes;j++){
     			int f=variables.getEvalutatedId("selections",SetSharedPtr(3,k,j,i));
@@ -197,8 +197,8 @@ void Haplotype::parseSolution(IndexingVariables& variables,int assumed_haplotype
     	}
     }
 
-    for(int i=0;i<this->data.getSampleNum();i++){
-    	for(int k=0;k<this->data.getNumOfChrSet();k++){
+    for(int i=0;i<this->data->getSampleNum();i++){
+    	for(int k=0;k<this->data->getNumOfChrSet();k++){
     		std::cout<<Results.genotypes[i][k]<<",";
     	}
     	std::cout<<"\n";
@@ -215,12 +215,12 @@ void Haplotype::associationTest(){
 		this->Results.CaseCount[i]=0;
 		this->Results.ControlCount[i]=0;
 	}
-    for(int i=0;i<this->data.getSampleNum();i++){
-    	for(int k=0;k<this->data.getNumOfChrSet();k++){
+    for(int i=0;i<this->data->getSampleNum();i++){
+    	for(int k=0;k<this->data->getNumOfChrSet();k++){
 			int idx=Results.genotypes[i][k];
-    		if(CASE == this->data.vLabel[i]){
+    		if(CASE == this->data->vLabel[i]){
     			this->Results.CaseCount[idx]++;
-    		}else if(CONTROL == this->data.vLabel[i]){
+    		}else if(CONTROL == this->data->vLabel[i]){
     			this->Results.ControlCount[idx]++;
     		}
     	}
@@ -260,7 +260,7 @@ void Haplotype::BuildModel(IndexingVariables& variables, int number_of_explainin
 	boost::multi_array<int,1> anti_haplotypes;
 	int number_of_genotypes=this->occurence.shape()[0];
 	int length_of_genotypes=this->occurence.shape()[1];
-	int ploidy=this->data.getNumOfChrSet();
+	int ploidy=this->data->getNumOfChrSet();
 	int number_of_known_haplotypes=0;
 
 	//IndexingVariables variables;
@@ -776,7 +776,7 @@ void Haplotype::getGeneralCodingTotalyMissing(int ploidy, int which_genotype, in
 void Haplotype::createVariables(int number_of_explaining_haplotypes,IndexingVariables& variables){
 	int number_of_genotypes=this->occurence.shape()[0];
 	int length_of_genotypes=this->occurence.shape()[1];
-	int ploidy=this->data.getNumOfChrSet();
+	int ploidy=this->data->getNumOfChrSet();
 	boost::shared_ptr<int[]> sp;
 	sp=SetSharedPtr(3,ploidy,number_of_explaining_haplotypes,number_of_genotypes);
 	variables.add("selections",sp);

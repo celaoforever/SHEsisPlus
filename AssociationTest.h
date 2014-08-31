@@ -8,6 +8,7 @@
 #ifndef ASSOCIATIONTEST_H_
 #define ASSOCIATIONTEST_H_
 #include "SHEsisData.h"
+#include <boost/shared_ptr.hpp>
 namespace SHEsis {
 
 struct LocusAssiciationTestResult{
@@ -25,9 +26,9 @@ struct LocusAssiciationTestResult{
 
 class AssociationTest {
 public:
-	SHEsisData&  data;
+	boost::shared_ptr<SHEsisData>   data;
 	std::vector<LocusAssiciationTestResult> vAssocationTestResult;
-	AssociationTest(SHEsisData& data);
+	AssociationTest(boost::shared_ptr<SHEsisData>  data);
 	void AssociationTestForAllSnpsAllele();
 	void AssociationTestForAllSnpsGenotype();
 	virtual ~AssociationTest();

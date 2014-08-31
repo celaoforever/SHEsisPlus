@@ -15,12 +15,12 @@ void testHp(){
 	int sampleNum=5;
 	int snpNum=3;
 	int chrSetNum=4;
-	SHEsis::SHEsisData data(sampleNum,snpNum,chrSetNum);
+	boost::shared_ptr<SHEsis::SHEsisData> data(new SHEsis::SHEsisData(sampleNum,snpNum,chrSetNum));
 	for(int iSample=0;iSample<sampleNum;iSample++){
-		data.vLabel[iSample]=SHEsis::CASE;
+		data->vLabel[iSample]=SHEsis::CASE;
 	}
 
-	//data.mGenotype=
+	//data->mGenotype=
 //	int a[5][3][4]=
 //	{{{1,1,4,4},{3,3,2,2},{4,4,2,2}},
 //	{{1,1,3,3},{3,3,2,2},{4,4,2,2}},
@@ -44,11 +44,11 @@ void testHp(){
 
 	//34,32,24,22
 	for(int iSample=0;iSample<sampleNum;iSample++){
-		BOOST_ASSERT(iSample<data.vLabel.size());
-		data.vLabel[iSample]=iSample%2==0?SHEsis::CASE:SHEsis::CONTROL;
+		BOOST_ASSERT(iSample<data->vLabel.size());
+		data->vLabel[iSample]=iSample%2==0?SHEsis::CASE:SHEsis::CONTROL;
 		for(int iSnp=0;iSnp<snpNum;iSnp++){
 			for(int iChrset=0;iChrset<chrSetNum;iChrset++){
-				data.mGenotype[iSample][iSnp][iChrset]=a[iSample][iSnp][iChrset];
+				data->mGenotype[iSample][iSnp][iChrset]=a[iSample][iSnp][iChrset];
 			}
 		}
 	}
@@ -56,8 +56,8 @@ void testHp(){
 	mask[0]=0;
 	mask[1]=1;
 	mask[2]=1;
-	data.statCount(data.vLabel);
-	data.printLocusInfo();
+	data->statCount(data->vLabel);
+	data->printLocusInfo();
 	SHEsis::Haplotype hp(data,2,mask);
 //	SHEsis::Haplotype hp(data);
 //	hp.statOccurence();

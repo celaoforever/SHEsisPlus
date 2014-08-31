@@ -13,8 +13,8 @@
 #include <math.h>
 namespace SHEsis {
 
-AssociationTest::AssociationTest(SHEsisData& mdata):data(mdata),
-		vAssocationTestResult(mdata.getSnpNum()),
+AssociationTest::AssociationTest(boost::shared_ptr<SHEsisData>  mdata):data(mdata),
+		vAssocationTestResult(mdata->getSnpNum()),
 		NumOfPermutation(0)
 {
 }
@@ -67,21 +67,21 @@ void AssociationTest::printAssociationTestResults()
 void AssociationTest::SingleSnpTestAllele(int iSnp, double& FisherP, double& PearsonP,
 		double& ChiSquare,double& oddsRatio,double& ORLowLimit, double& ORUpLimit){
 
-	BOOST_ASSERT(this->data.vLocusInfo[iSnp].CaseAlleleCount.size()
-			== this->data.vLocusInfo[iSnp].ControlAlleleCount.size());
+	BOOST_ASSERT(this->data->vLocusInfo[iSnp].CaseAlleleCount.size()
+			== this->data->vLocusInfo[iSnp].ControlAlleleCount.size());
 
-	int NumOfAlleleType=this->data.vLocusInfo[iSnp].ControlAlleleCount.size();
+	int NumOfAlleleType=this->data->vLocusInfo[iSnp].ControlAlleleCount.size();
 	int NumOfPhenotype=2;
 	double* contigency=new double[NumOfPhenotype*NumOfAlleleType];
 
 	boost::unordered_map<short, double> ::iterator map_it;
 	int idx=0;
-	for(map_it=this->data.vLocusInfo[iSnp].CaseAlleleCount.begin();
-			map_it != this->data.vLocusInfo[iSnp].CaseAlleleCount.end();
+	for(map_it=this->data->vLocusInfo[iSnp].CaseAlleleCount.begin();
+			map_it != this->data->vLocusInfo[iSnp].CaseAlleleCount.end();
 			map_it++){
-		BOOST_ASSERT(this->data.vLocusInfo[iSnp].ControlAlleleCount.end()!=
-				this->data.vLocusInfo[iSnp].ControlAlleleCount.find(map_it->first));
-		contigency[idx++]=this->data.vLocusInfo[iSnp].ControlAlleleCount[map_it->first];
+		BOOST_ASSERT(this->data->vLocusInfo[iSnp].ControlAlleleCount.end()!=
+				this->data->vLocusInfo[iSnp].ControlAlleleCount.find(map_it->first));
+		contigency[idx++]=this->data->vLocusInfo[iSnp].ControlAlleleCount[map_it->first];
 		contigency[idx++]=map_it->second;
 	};
 
@@ -117,21 +117,21 @@ void AssociationTest::SingleSnpTestAllele(int iSnp, double& FisherP, double& Pea
 
 void AssociationTest::SingleSnpTestGenotype(int iSnp, double& FisherP, double& PearsonP, double& ChiSquare){
 
-	BOOST_ASSERT(this->data.vLocusInfo[iSnp].CaseGenotypeCount.size()
-			== this->data.vLocusInfo[iSnp].ControlGenotypeCount.size());
+	BOOST_ASSERT(this->data->vLocusInfo[iSnp].CaseGenotypeCount.size()
+			== this->data->vLocusInfo[iSnp].ControlGenotypeCount.size());
 
-	int NumOfAlleleType=this->data.vLocusInfo[iSnp].ControlGenotypeCount.size();
+	int NumOfAlleleType=this->data->vLocusInfo[iSnp].ControlGenotypeCount.size();
 	int NumOfPhenotype=2;
 	double* contigency=new double[NumOfPhenotype*NumOfAlleleType];
 
 	boost::unordered_map<std::string, double> ::iterator map_it;
 	int idx=0;
-	for(map_it=this->data.vLocusInfo[iSnp].CaseGenotypeCount.begin();
-			map_it != this->data.vLocusInfo[iSnp].CaseGenotypeCount.end();
+	for(map_it=this->data->vLocusInfo[iSnp].CaseGenotypeCount.begin();
+			map_it != this->data->vLocusInfo[iSnp].CaseGenotypeCount.end();
 			map_it++){
-		BOOST_ASSERT(this->data.vLocusInfo[iSnp].ControlGenotypeCount.end()!=
-				this->data.vLocusInfo[iSnp].ControlGenotypeCount.find(map_it->first));
-		contigency[idx++]=this->data.vLocusInfo[iSnp].ControlGenotypeCount[map_it->first];
+		BOOST_ASSERT(this->data->vLocusInfo[iSnp].ControlGenotypeCount.end()!=
+				this->data->vLocusInfo[iSnp].ControlGenotypeCount.find(map_it->first));
+		contigency[idx++]=this->data->vLocusInfo[iSnp].ControlGenotypeCount[map_it->first];
 		contigency[idx++]=map_it->second;
 	};
 

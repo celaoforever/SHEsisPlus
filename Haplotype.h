@@ -29,24 +29,24 @@ struct HapTestResult{
 
 class Haplotype {
 public:
-	Haplotype(SHEsisData& data):data(data),VarNum(0),ClauseNum(0),
-	occurence(boost::extents[data.getSampleNum()][data.getSnpNum()]),
-	missing(boost::extents[data.getSampleNum()][data.getSnpNum()]),
-	Results(data.getSampleNum(),data.getNumOfChrSet())
+	Haplotype(boost::shared_ptr<SHEsisData> data):data(data),VarNum(0),ClauseNum(0),
+	occurence(boost::extents[data->getSampleNum()][data->getSnpNum()]),
+	missing(boost::extents[data->getSampleNum()][data->getSnpNum()]),
+	Results(data->getSampleNum(),data->getNumOfChrSet())
 	//variables()
 	{
 		res.str("");
 		sat="";
 		this->statOccurence();
-		for(int i=0;i<this->data.getSnpNum();i++){
+		for(int i=0;i<this->data->getSnpNum();i++){
 				this->SnpIdx.push_back(i);
 		}
 	};
 
-	Haplotype(SHEsisData& data, int Snp, std::vector<short> mask):data(data),VarNum(0),ClauseNum(0),
-			occurence(boost::extents[data.getSampleNum()][Snp]),
-			missing(boost::extents[data.getSampleNum()][Snp]),
-			Results(data.getSampleNum(),data.getNumOfChrSet())
+	Haplotype(boost::shared_ptr<SHEsisData>  data, int Snp, std::vector<short> mask):data(data),VarNum(0),ClauseNum(0),
+			occurence(boost::extents[data->getSampleNum()][Snp]),
+			missing(boost::extents[data->getSampleNum()][Snp]),
+			Results(data->getSampleNum(),data->getNumOfChrSet())
 //			SnpIdx(Snp,0)
 	{
 		res.str("");
@@ -66,7 +66,7 @@ public:
 		this->SnpIdx.clear();
 		this->Results.haplotypes.clear();
 	};
-	SHEsisData& data;
+	boost::shared_ptr<SHEsisData> data;
 	void statOccurence();
 	void statOccurenceMask();
 	void getBiallelicCoding(int ploidy,int which_genotype, int which_index, int which_allele, IndexingVariables& variables);
