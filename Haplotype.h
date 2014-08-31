@@ -35,8 +35,7 @@ public:
 	Results(data->getSampleNum(),data->getNumOfChrSet())
 	//variables()
 	{
-		res.str("");
-		sat="";
+
 		this->statOccurence();
 		for(int i=0;i<this->data->getSnpNum();i++){
 				this->SnpIdx.push_back(i);
@@ -49,8 +48,7 @@ public:
 			Results(data->getSampleNum(),data->getNumOfChrSet())
 //			SnpIdx(Snp,0)
 	{
-		res.str("");
-		sat="";
+
 		this->mask=mask;
 		this->statOccurenceMask();
 
@@ -78,6 +76,7 @@ public:
 	int solve();
 	void parseSolution(int assumed_haplotypes);
 	void associationTest();
+	void startHaplotypeAnalysis();
 
 
 private:

@@ -24,6 +24,26 @@ namespace SHEsis {
 #define EOL " 0\n";this->ClauseNum++;
 #define EOL2 "0\n";this->ClauseNum++;
 
+void Haplotype::startHaplotypeAnalysis(){
+//	hp.BuildModel(4);
+//	hp.solve();
+//	hp.parseSolution(4);
+//	hp.associationTest();
+	for(int i=1;i<=this->data->getNumOfChrSet()*this->data->getSampleNum();i++){
+		std::cout<<"assuming "<<i<<" explaing haplotypes...";
+		BuildModel(i);
+		if(solve()){
+			std::cout<<"satisfiable\n";
+			parseSolution(i);
+			associationTest();
+			break;
+		}else
+		{
+			std::cout<<"unsatisfiable\n";
+		}
+	};
+}
+
 void Haplotype::statOccurence(){
 	for(int iSample=0;iSample<data->getSampleNum();iSample++){
 		for(int iSnp=0;iSnp<data->getSnpNum();iSnp++){
@@ -100,8 +120,6 @@ void Haplotype::statOccurenceMask(){
 
 }
 int Haplotype::solve(){
-	//std::stringstream sat;
-
 	Minisat::Solver S;
 	parse_DIMACS(this->res, S);
     if (!S.simplify()){
@@ -258,7 +276,6 @@ void Haplotype::associationTest(){
 void Haplotype::BuildModel(int number_of_explaining_haplotypes){
 //#define res std::cout
 	std::stringstream tmpss;
-	boost::multi_array<int,1> anti_haplotypes;
 	int number_of_genotypes=this->occurence.shape()[0];
 	int length_of_genotypes=this->occurence.shape()[1];
 	int ploidy=this->data->getNumOfChrSet();
@@ -266,6 +283,7 @@ void Haplotype::BuildModel(int number_of_explaining_haplotypes){
 
 	//IndexingVariables variables;
 	createVariables(number_of_explaining_haplotypes);
+//	variables->printHmKey();
 	for(int which_genotype=0;which_genotype<number_of_genotypes;which_genotype++){
 		for(int which_index=0;which_index<length_of_genotypes;which_index++){
 			int width=CEIL(log2(this->occurence[which_genotype][which_index].size()));
@@ -455,7 +473,9 @@ void Haplotype::BuildModel(int number_of_explaining_haplotypes){
 		}
 	}
 //	this->VarNum=variables->getVarnum();
+//	std::cout<<"1111\n";
 //	std::cout<<"\n"<<res.str();
+//	std::cout<<"2222\n";
 //	std::cout<<"\n"<<this->ClauseNum<<","<<this->VarNum<<"\n";
 
 };
@@ -772,9 +792,12 @@ void Haplotype::getGeneralCodingTotalyMissing(int ploidy, int which_genotype, in
 	};
 
 }
-
+#undef res
 
 void Haplotype::createVariables(int number_of_explaining_haplotypes){
+	res.clear();
+	res.str("");
+	sat="";
 	this->variables.reset(new IndexingVariables);
 	int number_of_genotypes=this->occurence.shape()[0];
 	int length_of_genotypes=this->occurence.shape()[1];
