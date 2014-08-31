@@ -19,6 +19,7 @@ public:
 	missing(boost::extents[data.getSampleNum()][data.getSnpNum()])
 	{
 		res.str("");
+		sat.str("");
 		this->statOccurence();
 	};
 
@@ -27,6 +28,7 @@ public:
 			missing(boost::extents[data.getSampleNum()][Snp])
 	{
 		res.str("");
+		sat.str("");
 		this->mask=mask;
 		this->statOccurenceMask();
 	};
@@ -48,13 +50,16 @@ public:
 	void getGeneralCodingTotalyMissing(int ploidy, int which_genotype, int which_index, IndexingVariables& variables);
 	void BuildModel(/*IndexingVariables variables_old,*/ int number_of_explaining_haplotypes);
 	void createVariables(int number_of_explaining_haplotypes,IndexingVariables& variables);
+	int solve();
 	boost::multi_array< std::vector<int>, 2> occurence;
 	boost::multi_array<int, 2> missing;
 private:
 	std::stringstream res;
+	std::stringstream sat;
 	int VarNum;
 	int ClauseNum;
 	std::vector<short> mask;
+
 
 };
 

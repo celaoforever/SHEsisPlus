@@ -62,6 +62,7 @@ void testHp(){
 //	SHEsis::IndexingVariables var;
 //	SHEsis::IndexingVariables var2=
 	hp.BuildModel(4);
+	hp.solve();
 
 }
 

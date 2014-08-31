@@ -8,6 +8,13 @@
 #include "Haplotype.h"
 #include <math.h>
 #include <sstream>
+#include "System.h"
+#include "ParseUtils.h"
+#include "Options.h"
+#include "Dimacs.h"
+#include "Solver.h"
+
+
 namespace SHEsis {
 #define CEIL(x) (x-(int)x)>0?((int)x+1):(x)
 #define MIN(a,b) a<=b?a:b
@@ -46,10 +53,10 @@ void Haplotype::statOccurence(){
 
 
 void Haplotype::statOccurenceMask(){
-	std::cout<<"mask:";
-	for(int i=0;i<mask.size();i++){
-		std::cout<<mask[i]<<",";;
-	}
+//	std::cout<<"mask:";
+//	for(int i=0;i<mask.size();i++){
+//		std::cout<<mask[i]<<",";;
+//	}
 	std::cout<<"\n";
 	int subiSnp;
 	for(int iSample=0;iSample<data.getSampleNum();iSample++){
@@ -84,7 +91,28 @@ void Haplotype::statOccurenceMask(){
 
 
 }
+int Haplotype::solve(){
+	//std::stringstream sat;
+	Minisat::Solver S;
+	parse_DIMACS(this->res, S);
+    if (!S.simplify()){
+        return 0;
+    }
+    Minisat::vec<Minisat::Lit> dummy;
+    Minisat::lbool ret = S.solveLimited(dummy);
+    if (ret == l_True){
+            sat<<"SAT\n";
+            for (int i = 0; i < S.nVars(); i++)
+                if (S.model[i] != l_Undef){
+                	sat<<((i==0)?"":" ")<<((S.model[i]==l_True)?"":"-")<<(i+1);
+//                    printf("%s%s%d", (i==0)?"":" ", (S.model[i]==l_True)?"":"-", i+1);}
+                };
+           sat<<" 0\n";
+        }
+//    std::cout<<sat.str();
+    return 1;
 
+}
 void Haplotype::BuildModel(/*IndexingVariables variables_old,*/ int number_of_explaining_haplotypes){
 //#define res std::cout
 	std::stringstream tmpss;
