@@ -170,26 +170,28 @@ void Haplotype::parseSolution(int assumed_haplotypes){
     	boost::shared_ptr<short[]> haplo(new short[this->SnpIdx.size()]);
     	for(int j=0;j<this->SnpIdx.size();j++){
     		int width=CEIL(log2(this->occurence[0][j].size()));
-    		char* chr_=new char[width+1];
-    		char* chr =new char[width+1];
-    		chr_[width]='\0';
-    		chr[width]='\0';
-    		for(int k=0;k<width;k++){
+    		int* chr_=new int[width];
+    		int* chr =new int[width];
+     		for(int k=0;k<width;k++){
     			tmpss.str("");
     			tmpss<<j<<"_"<<k<<"haplotypes";
     			int f=variables->getEvalutatedId(tmpss.str(),SetSharedPtr(1,i));
     			BOOST_ASSERT(0 != f);
     			if(f<0)
-    				chr_[k]='0';
+    				chr_[k]=0;
     			else
-    				chr_[k]='1';
+    				chr_[k]=1;
     		};
     		int counter=width-1;
     		for(int k=0;k<width;k++){
     			chr[counter--]=chr_[k];
     		}
-    		std::string str_chr(chr);
-    		int index=std::atoi(str_chr.c_str());
+    		int index=0;
+    		for(int i=0;i<width;i++){
+    			index+=(chr[i])*pow(2,width-i-1);
+    		}
+//    		std::string str_chr(chr);
+//    		int index=std::atoi(str_chr.c_str());
     		haplo[j]=this->data->vLocusInfo[this->SnpIdx[j]].getAlleleType(index);
     		delete[] chr;
     		delete[] chr_;
@@ -215,12 +217,12 @@ void Haplotype::parseSolution(int assumed_haplotypes){
     	}
     }
 
-    for(int i=0;i<this->data->getSampleNum();i++){
-    	for(int k=0;k<this->data->getNumOfChrSet();k++){
-    		std::cout<<Results.genotypes[i][k]<<",";
-    	}
-    	std::cout<<"\n";
-    };
+//    for(int i=0;i<this->data->getSampleNum();i++){
+//    	for(int k=0;k<this->data->getNumOfChrSet();k++){
+//    		std::cout<<Results.genotypes[i][k]<<",";
+//    	}
+//    	std::cout<<"\n";
+//    };
 
 
 }
@@ -252,15 +254,14 @@ void Haplotype::associationTest(){
     	std::cout<<this->Results.ControlCount[i]<<","<<this->Results.CaseCount[i]<<"\n";
     };
 
-
-	  double expect = -1.0;
-	  double percnt = 100.0;
-	  double emin = 0;
-	  double pre = 0, prt = 0;
-	  int ws = 300000;
-	  int nrow=2;
-	  fexact(&nrow, &haploNum, contigency, &nrow, &expect, &percnt, &emin, &prt, &pre, &ws);
-	  this->Results.FisherP=pre;
+     int nrow=2;
+//	  double expect = -1.0;
+//	  double percnt = 100.0;
+//	  double emin = 0;
+//	  double pre = 0, prt = 0;
+//	  int ws = 300000;
+//	  fexact(&nrow, &haploNum, contigency, &nrow, &expect, &percnt, &emin, &prt, &pre, &ws);
+//	  this->Results.FisherP=pre;
 
 	  //Pearson's ChiSquare test
 	  PearsonChiSquareTest(contigency,nrow,haploNum,this->Results.ChiSquare,this->Results.PearsonP);
