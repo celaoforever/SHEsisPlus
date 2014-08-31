@@ -60,12 +60,9 @@ void testHp(){
 	data->printLocusInfo();
 	SHEsis::Haplotype hp(data,2,mask);
 //	SHEsis::Haplotype hp(data);
-//	hp.statOccurence();
-	SHEsis::IndexingVariables var;
-//	SHEsis::IndexingVariables var2=
-	hp.BuildModel(var,4);
+	hp.BuildModel(4);
 	hp.solve();
-	hp.parseSolution(var,4);
+	hp.parseSolution(4);
 	hp.associationTest();
 
 }
