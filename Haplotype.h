@@ -7,33 +7,18 @@
 
 #ifndef HAPLOTYPE_H_
 #define HAPLOTYPE_H_
-#include "SHEsisData.h"
+#include "HaplotypeBase.h"
 #include "utility.h"
 #include "ArrayStorage.h"
 #include "IndexingVariables.h"
 namespace SHEsis {
 
-struct HapTestResult{
-	std::vector<boost::shared_ptr<short[]> > haplotypes;
-	boost::multi_array<short,2> genotypes;
-	boost::shared_ptr<int[]> CaseCount;
-	boost::shared_ptr<int[]> ControlCount;
-	double FisherP;
-	double PearsonP;
-	double ChiSquare;
-	HapTestResult(int sample,int ploidy):
-		genotypes(boost::extents[sample][ploidy]),FisherP(1),PearsonP(1),ChiSquare(0)
-	{};
-};
 
-
-class Haplotype {
+class Haplotype :public HaplotypeBase{
 public:
-	Haplotype(boost::shared_ptr<SHEsisData> data):data(data),VarNum(0),ClauseNum(0),
+	Haplotype(boost::shared_ptr<SHEsisData> data):HaplotypeBase(data),VarNum(0),ClauseNum(0),
 	occurence(boost::extents[data->getSampleNum()][data->getSnpNum()]),
-	missing(boost::extents[data->getSampleNum()][data->getSnpNum()]),
-	Results(data->getSampleNum(),data->getNumOfChrSet())
-	//variables()
+	missing(boost::extents[data->getSampleNum()][data->getSnpNum()])
 	{
 
 		this->statOccurence();
@@ -42,14 +27,11 @@ public:
 		}
 	};
 
-	Haplotype(boost::shared_ptr<SHEsisData>  data, int Snp, std::vector<short> mask):data(data),VarNum(0),ClauseNum(0),
+	Haplotype(boost::shared_ptr<SHEsisData>  data, int Snp, std::vector<short> mask):HaplotypeBase(data,mask),VarNum(0),ClauseNum(0),
 			occurence(boost::extents[data->getSampleNum()][Snp]),
-			missing(boost::extents[data->getSampleNum()][Snp]),
-			Results(data->getSampleNum(),data->getNumOfChrSet())
-//			SnpIdx(Snp,0)
+			missing(boost::extents[data->getSampleNum()][Snp])
 	{
 
-		this->mask=mask;
 		this->statOccurenceMask();
 
 	};
@@ -60,11 +42,7 @@ public:
 				this->occurence[i][j].clear();
 			}
 		}
-		this->mask.clear();
-		this->SnpIdx.clear();
-		this->Results.haplotypes.clear();
 	};
-	boost::shared_ptr<SHEsisData> data;
 	void statOccurence();
 	void statOccurenceMask();
 	void getBiallelicCoding(int ploidy,int which_genotype, int which_index, int which_allele);
@@ -76,20 +54,14 @@ public:
 	int solve();
 	void parseSolution(int assumed_haplotypes);
 	void associationTest();
-	void startHaplotypeAnalysis();
-
-
+	virtual void startHaplotypeAnalysis();
 private:
 	std::stringstream res;
 	std::string sat;
 	int VarNum;
 	int ClauseNum;
-	std::vector<short> mask;
-	std::vector<int> SnpIdx;
-
 	boost::multi_array< std::vector<int>, 2> occurence;
 	boost::multi_array<int, 2> missing;
-	HapTestResult Results;
 	boost::shared_ptr<IndexingVariables> variables;
 
 };

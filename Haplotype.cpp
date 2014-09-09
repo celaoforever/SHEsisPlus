@@ -25,10 +25,6 @@ namespace SHEsis {
 #define EOL2 "0\n";this->ClauseNum++;
 
 void Haplotype::startHaplotypeAnalysis(){
-//	hp.BuildModel(4);
-//	hp.solve();
-//	hp.parseSolution(4);
-//	hp.associationTest();
 	for(int i=1;i<=this->data->getNumOfChrSet()*this->data->getSampleNum();i++){
 		std::cout<<"assuming "<<i<<" explaing haplotypes...";
 		BuildModel(i);
