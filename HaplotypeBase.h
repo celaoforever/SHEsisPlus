@@ -23,6 +23,9 @@ struct HapTestResult{
 	HapTestResult(int sample,int ploidy):
 		genotypes(boost::extents[sample][ploidy]),FisherP(1),PearsonP(1),ChiSquare(0)
 	{};
+	~HapTestResult(){
+		haplotypes.clear();
+	}
 };
 
 
@@ -35,7 +38,6 @@ public:
 	virtual ~HaplotypeBase(){
 		this->mask.clear();
 		this->SnpIdx.clear();
-		this->Results.haplotypes.clear();
 	}
 	virtual void startHaplotypeAnalysis()=0;
 protected:
