@@ -24,6 +24,36 @@ namespace SHEsis {
 #define EOL " 0\n";this->ClauseNum++;
 #define EOL2 "0\n";this->ClauseNum++;
 
+Haplotype::Haplotype(boost::shared_ptr<SHEsisData> data):HaplotypeBase(data),VarNum(0),ClauseNum(0),
+occurence(boost::extents[data->getSampleNum()][data->getSnpNum()]),
+missing(boost::extents[data->getSampleNum()][data->getSnpNum()])
+{
+
+	this->statOccurence();
+	for(int i=0;i<this->data->getSnpNum();i++){
+			this->SnpIdx.push_back(i);
+	}
+};
+
+Haplotype::Haplotype(boost::shared_ptr<SHEsisData>  data, int Snp, std::vector<short> mask):HaplotypeBase(data,mask),VarNum(0),ClauseNum(0),
+		occurence(boost::extents[data->getSampleNum()][Snp]),
+		missing(boost::extents[data->getSampleNum()][Snp])
+{
+
+	this->statOccurenceMask();
+
+};
+
+Haplotype::~Haplotype(){
+	for(int i=0;i<occurence.shape()[0];i++){
+		for(int j=0;j<occurence.shape()[1];j++){
+			this->occurence[i][j].clear();
+		}
+	}
+};
+
+
+
 void Haplotype::startHaplotypeAnalysis(){
 	for(int i=1;i<=this->data->getNumOfChrSet()*this->data->getSampleNum();i++){
 		std::cout<<"assuming "<<i<<" explaing haplotypes...";

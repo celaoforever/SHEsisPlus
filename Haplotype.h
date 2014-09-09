@@ -16,33 +16,19 @@ namespace SHEsis {
 
 class Haplotype :public HaplotypeBase{
 public:
-	Haplotype(boost::shared_ptr<SHEsisData> data):HaplotypeBase(data),VarNum(0),ClauseNum(0),
-	occurence(boost::extents[data->getSampleNum()][data->getSnpNum()]),
-	missing(boost::extents[data->getSampleNum()][data->getSnpNum()])
-	{
+	Haplotype(boost::shared_ptr<SHEsisData> data);
+	Haplotype(boost::shared_ptr<SHEsisData>  data, int Snp, std::vector<short> mask);
+	virtual ~Haplotype();
+	virtual void startHaplotypeAnalysis();
+private:
+	std::stringstream res;
+	std::string sat;
+	int VarNum;
+	int ClauseNum;
+	boost::multi_array< std::vector<int>, 2> occurence;
+	boost::multi_array<int, 2> missing;
+	boost::shared_ptr<IndexingVariables> variables;
 
-		this->statOccurence();
-		for(int i=0;i<this->data->getSnpNum();i++){
-				this->SnpIdx.push_back(i);
-		}
-	};
-
-	Haplotype(boost::shared_ptr<SHEsisData>  data, int Snp, std::vector<short> mask):HaplotypeBase(data,mask),VarNum(0),ClauseNum(0),
-			occurence(boost::extents[data->getSampleNum()][Snp]),
-			missing(boost::extents[data->getSampleNum()][Snp])
-	{
-
-		this->statOccurenceMask();
-
-	};
-
-	virtual ~Haplotype(){
-		for(int i=0;i<occurence.shape()[0];i++){
-			for(int j=0;j<occurence.shape()[1];j++){
-				this->occurence[i][j].clear();
-			}
-		}
-	};
 	void statOccurence();
 	void statOccurenceMask();
 	void getBiallelicCoding(int ploidy,int which_genotype, int which_index, int which_allele);
@@ -54,15 +40,6 @@ public:
 	int solve();
 	void parseSolution(int assumed_haplotypes);
 	void associationTest();
-	virtual void startHaplotypeAnalysis();
-private:
-	std::stringstream res;
-	std::string sat;
-	int VarNum;
-	int ClauseNum;
-	boost::multi_array< std::vector<int>, 2> occurence;
-	boost::multi_array<int, 2> missing;
-	boost::shared_ptr<IndexingVariables> variables;
 
 };
 
