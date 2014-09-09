@@ -93,7 +93,7 @@ boost::shared_ptr<int[]> toBooleanInt(int n , int i){
 }
 
 void error(std::string msg){
-	std::cout<<msg<<"\n";
+//	std::cout<<msg<<"\n";
 	throw std::runtime_error("error in calculating fisher's exact test");
 }
 /* translated from clase GenralIndexing*/
