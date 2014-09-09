@@ -141,8 +141,12 @@ void AssociationTest::SingleSnpTestGenotype(int iSnp, double& FisherP, double& P
 	  double emin = 0;
 	  double pre = 0, prt = 0;
 	  int ws = 300000;
+	  try{
 	  fexact(&NumOfPhenotype, &NumOfAlleleType, contigency, &NumOfPhenotype, &expect, &percnt, &emin, &prt, &pre, &ws);
 	  FisherP=pre;
+	  }catch(std::runtime_error &){
+		  FisherP=-1;
+	  }
 
 	  //Pearson's ChiSquare test
 	  PearsonChiSquareTest(contigency,NumOfPhenotype,NumOfAlleleType,ChiSquare,PearsonP);

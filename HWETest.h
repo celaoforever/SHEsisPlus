@@ -13,12 +13,13 @@ namespace SHEsis {
 struct HWETestResult{
 	double CasePearsonP;
 	double CaseChiSquare;
-
+	double CaseFisherP;
 	double ControlPearsonP;
 	double ControlChiSquare;
-
+	double ControlFisherP;
 	double BothPearsonP;
 	double BothChiSquare;
+	double BothFisherP;
 };
 typedef enum{
 	CASE_,
@@ -35,9 +36,9 @@ public:
 	void AllSnpHWETest();
 	void printHWETestResults();
 private:
-	void SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
-			double& ControlChi,double& ControlPearsonP,
-			double& BothChi, double& BothPearsonP);
+	void SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP, double& CaseFisherP,
+			double& ControlChi,double& ControlPearsonP, double & ControlFisherP,
+			double& BothChi, double& BothPearsonP, double& BothFisherP);
 	boost::unordered_map<std::string,size_t> vCoefficient;
 };
 

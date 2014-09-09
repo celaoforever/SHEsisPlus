@@ -91,9 +91,9 @@ double GetExpectedGenotypeFreq(std::string genotype,
 	return res;
 }
 
-void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
-		double& ControlChi,double& ControlPearsonP,
-		double& BothChi, double& BothPearsonP){
+void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP, double& CaseFisherP,
+		double& ControlChi,double& ControlPearsonP, double& ControlFisherP,
+		double& BothChi, double& BothPearsonP, double& BothFisherP){
 	BOOST_ASSERT(this->data->vLocusInfo[iSnp].CaseAlleleCount.size()
 			== this->data->vLocusInfo[iSnp].ControlAlleleCount.size());
 
@@ -129,11 +129,6 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
 	};
 
 	//Fisher's exact test:
-	  double expect = -1.0;
-	  double percnt = 100.0;
-	  double emin = 0;
-	  double pre = 0, prt = 0;
-	  int ws = 300000;
 	  CaseChi=0;
 	  for(int i=0;i<NumOfCol*NumOfRow;i=i+2){
 		  if(contigency[i]<1)
@@ -145,8 +140,18 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
 	  }
 	  boost::math::chi_squared dist(NumOfCol-1);
 	  CasePearsonP= boost::math::cdf(boost::math::complement(dist,CaseChi));
-	  //fexact(&NumOfRow, &NumOfCol, contigency, &NumOfRow, &expect, &percnt, &emin, &prt, &pre, &ws);
-	//  CaseFisherP=pre;
+
+	  double expect = -1.0;
+	  double percnt = 100.0;
+	  double emin = 0;
+	  double pre = 0, prt = 0;
+	  int ws = 300000;
+	  try{
+		  fexact(&NumOfRow, &NumOfCol, contigency, &NumOfRow, &expect, &percnt, &emin, &prt, &pre, &ws);
+		  CaseFisherP=pre;
+	  }catch(std::runtime_error &){
+		  CaseFisherP=-1;
+	  }
 	  //Pearson's ChiSquare test
 	  //PearsonChiSquareTest(contigency,NumOfRow,NumOfCol,CaseChi,CasePearsonP);
 	  delete[] contigency;
@@ -186,8 +191,12 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
 	}
 	ControlPearsonP= boost::math::cdf(boost::math::complement(dist,ControlChi));
 	//PearsonChiSquareTest(contigency,NumOfRow,NumOfCol,ControlChi,ControlPearsonP);
-	//fexact(&NumOfRow, &NumOfCol, contigency, &NumOfRow, &expect, &percnt, &emin, &prt, &pre, &ws);
-	//ControlFisherP=pre;
+	try{
+		fexact(&NumOfRow, &NumOfCol, contigency, &NumOfRow, &expect, &percnt, &emin, &prt, &pre, &ws);
+		ControlFisherP=pre;
+	}catch(std::runtime_error &){
+		ControlFisherP=-1;
+	}
 
 	//Pearson's ChiSquare test
 
@@ -227,8 +236,12 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
 				  *(contigency[i+1]-contigency[i])/contigency[i+1];
 	}
 	BothPearsonP= boost::math::cdf(boost::math::complement(dist,BothChi));
-	//fexact(&NumOfRow, &NumOfCol, contigency, &NumOfRow, &expect, &percnt, &emin, &prt, &pre, &ws);
-	//BothFisherP=pre;
+	try{
+		fexact(&NumOfRow, &NumOfCol, contigency, &NumOfRow, &expect, &percnt, &emin, &prt, &pre, &ws);
+		BothFisherP=pre;
+	}catch(std::runtime_error &){
+		BothFisherP=-1;
+	}
 	//Pearson's ChiSquare test
 	//PearsonChiSquareTest(contigency,NumOfRow,NumOfCol,BothChi,BothPearsonP);
 	delete[] contigency;
@@ -237,24 +250,26 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
 
 void HWETest::AllSnpHWETest(){
 	for(int i=0;i<this->data->getSnpNum();i++){
-		this->SingleSnpHWETest(i,this->vHWETestResult[i].CaseChiSquare,this->vHWETestResult[i].CasePearsonP,
-				this->vHWETestResult[i].ControlChiSquare,this->vHWETestResult[i].ControlPearsonP,
-				this->vHWETestResult[i].BothChiSquare,this->vHWETestResult[i].BothPearsonP);
+		this->SingleSnpHWETest(i,this->vHWETestResult[i].CaseChiSquare,this->vHWETestResult[i].CasePearsonP,this->vHWETestResult[i].CaseFisherP,
+				this->vHWETestResult[i].ControlChiSquare,this->vHWETestResult[i].ControlPearsonP,this->vHWETestResult[i].ControlFisherP,
+				this->vHWETestResult[i].BothChiSquare,this->vHWETestResult[i].BothPearsonP,this->vHWETestResult[i].BothFisherP);
 	};
 };
 
 void HWETest::printHWETestResults(){
 	for(int i=0;i<this->vHWETestResult.size();i++){
-		std::cout<<"\nLocus "<<i<<":\nHWE test for case:\n(chi,pearsonp)=("<<
+		std::cout<<"\nLocus "<<i<<":\nHWE test for case:\n(chi,pearsonp,fisherp)=("<<
 				this->vHWETestResult[i].CaseChiSquare<<","<<
-				this->vHWETestResult[i].CasePearsonP<<")\n"<<
-				"HWE test for control:\n(chi,pearsonp)=("<<
+				this->vHWETestResult[i].CasePearsonP<<","<<
+				this->vHWETestResult[i].CaseFisherP<<")\n"<<
+				"HWE test for control:\n(chi,pearsonp,fisherp)=("<<
 				this->vHWETestResult[i].ControlChiSquare<<","<<
-				this->vHWETestResult[i].ControlPearsonP<<")\n"<<
-				"HWE test for case and control:\n(chi,pearsonp)=("<<
+				this->vHWETestResult[i].ControlPearsonP<<","<<
+				this->vHWETestResult[i].ControlFisherP<<")\n"<<
+				"HWE test for case and control:\n(chi,pearsonp,fisherp)=("<<
 				this->vHWETestResult[i].BothChiSquare<<","<<
-				this->vHWETestResult[i].BothPearsonP<<")\n";
-
+				this->vHWETestResult[i].BothPearsonP<<","<<
+				this->vHWETestResult[i].BothFisherP<<")\n";
 	}
 }
 

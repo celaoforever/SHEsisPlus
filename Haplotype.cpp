@@ -281,13 +281,18 @@ void Haplotype::associationTest(){
     };
 
      int nrow=2;
-//	  double expect = -1.0;
-//	  double percnt = 100.0;
-//	  double emin = 0;
-//	  double pre = 0, prt = 0;
-//	  int ws = 300000;
-//	  fexact(&nrow, &haploNum, contigency, &nrow, &expect, &percnt, &emin, &prt, &pre, &ws);
-//	  this->Results.FisherP=pre;
+	  double expect = -1.0;
+	  double percnt = 100.0;
+	  double emin = 0;
+	  double pre = 0, prt = 0;
+	  int ws = 300000;
+	  try{
+		  fexact(&nrow, &haploNum, contigency, &nrow, &expect, &percnt, &emin, &prt, &pre, &ws);
+		  this->Results.FisherP=pre;
+	  }catch(std::runtime_error &){
+		  this->Results.FisherP=-1;
+	  }
+
 
 	  //Pearson's ChiSquare test
 	  PearsonChiSquareTest(contigency,nrow,haploNum,this->Results.ChiSquare,this->Results.PearsonP);

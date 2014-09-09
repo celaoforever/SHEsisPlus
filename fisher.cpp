@@ -1905,7 +1905,9 @@ f11act(int *irow, int *i1, int *i2, int *knew)
 }
 
 void prterr(int icode, char *mes)
-{ error("FEXACT error "+int2str(icode)); }
+{ /*error("FEXACT error "+int2str(icode)); */
+	throw std::runtime_error("fexact error");
+}
 
 /*
   -----------------------------------------------------------------------
