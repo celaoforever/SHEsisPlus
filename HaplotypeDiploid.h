@@ -16,6 +16,15 @@ public:
 	HaplotypeDiploid(boost::shared_ptr<SHEsisData> data);
 	HaplotypeDiploid(boost::shared_ptr<SHEsisData> data, int Snp, std::vector<short> mask);
 	virtual ~HaplotypeDiploid();
+	virtual void startHaplotypeAnalysis(){};
+	void initSubArray();
+private:
+	boost::multi_array<int, 3> PhasedData;
+	boost::multi_array<int, 3> CurGenotype; //2 loci, diploid
+	std::vector<int> CurGenotypeCount;
+	boost::shared_ptr<int> Sample2Genotype;
+	int phased;
+
 };
 
 } /* namespace SHEsis */
