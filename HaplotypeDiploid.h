@@ -24,6 +24,9 @@ struct OneGenotypeExpandedHaplo{
 	  static std::vector< boost::shared_ptr<short[]> > haploType;
 	  static std::vector<double> hapfreq;
 	  std::vector<HaploPair> hp;
+	  double freq;
+	  int finalhap1;
+	  int finalhap2;
 };
 
 
@@ -32,7 +35,7 @@ public:
 	HaplotypeDiploid(boost::shared_ptr<SHEsisData> data);
 	HaplotypeDiploid(boost::shared_ptr<SHEsisData> data, int Snp, std::vector<short> mask);
 	virtual ~HaplotypeDiploid();
-	virtual void startHaplotypeAnalysis(){};
+	virtual void startHaplotypeAnalysis();
 	void GenerateUniqueGenotype();
 	void GenerateInterMediate();
 	void ReturnGenotypeCode(int sample,short& geno1, short& geno2);
@@ -40,6 +43,11 @@ public:
 	void ExpandAllGenotype();
 	void CalculateFreq();
 	void generateAllPossibleHap();
+	void statMissing();
+	void getFinalHap();
+	void PhaseCurrent();
+	void getResults();
+	std::vector<int> getSampleIdx(int genotype);
 private:
 	boost::multi_array<short, 3> PhasedData;
 	std::vector<int> UniqueGenotypeIdx; //2 loci, diploid
@@ -47,8 +55,9 @@ private:
 	boost::multi_array<short, 3> InterMediate;
 	std::vector<std::string> InterMediateGenoCode;
 	std::vector<int> CurGenotypeCount;
-	boost::shared_ptr<int> Sample2Genotype;
+	boost::shared_ptr<int[]> Sample2Genotype;
 	std::vector<OneGenotypeExpandedHaplo> Expanded;
+	boost::shared_ptr< bool[] > missing;
 	int phased;
 	double err;
 

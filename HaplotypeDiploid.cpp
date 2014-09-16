@@ -6,33 +6,62 @@
  */
 
 #include "HaplotypeDiploid.h"
-
+#include "fisher.h"
+#include "utility.h"
 namespace SHEsis {
-
+std::vector< boost::shared_ptr<short[]> > OneGenotypeExpandedHaplo::haploType;
+std::vector<double> OneGenotypeExpandedHaplo::hapfreq;
 HaplotypeDiploid::HaplotypeDiploid(boost::shared_ptr<SHEsisData> data):HaplotypeBase(data),
 		phased(1),PhasedData(boost::extents[data->getSampleNum()][data->getSnpNum()][2]),
-		InterMediate(boost::extents[data->getSampleNum()][2][2]),err(0.00001){
+		InterMediate(boost::extents[data->getSampleNum()][2][2]),err(0.00001),
+		missing(new bool[data->getSampleNum()]){
 BOOST_ASSERT(data->getNumOfChrSet() == 2);
+for(int i=0;i<this->data->getSnpNum();i++){
+		this->SnpIdx.push_back(i);
+}
 for(int i=0;i<data->getSampleNum();i++){
 	for(int j=0;j<2;j++){
-		PhasedData[i][0][j]=data->mGenotype[i][0][j];
+		PhasedData[i][0][j]=data->mGenotype[i][this->SnpIdx[0]][j];
 	};
 };
+this->statMissing();
 }
 
 HaplotypeDiploid::HaplotypeDiploid(boost::shared_ptr<SHEsisData>  data, int Snp, std::vector<short> mask):HaplotypeBase(data,mask),
 		phased(1),PhasedData(boost::extents[data->getSampleNum()][data->getSnpNum()][2]),
-		InterMediate(boost::extents[data->getSampleNum()][2][2]),err(0.00001){
+		InterMediate(boost::extents[data->getSampleNum()][2][2]),err(0.00001),
+		missing(new bool[data->getSampleNum()]){
 BOOST_ASSERT(data->getNumOfChrSet() == 2);
-for(int i=0;i<data->getSampleNum();i++){
-	for(int j=0;j<2;j++){
-		PhasedData[i][0][j]=data->mGenotype[i][0][j];
+
+for(int i=0;i<this->mask.size();i++){
+	if(this->mask[i]){
+		this->SnpIdx.push_back(i);
 	};
 };
+BOOST_ASSERT(this->SnpIdx.size() == Snp);
+
+for(int i=0;i<data->getSampleNum();i++){
+	for(int j=0;j<2;j++){
+		PhasedData[i][0][j]=data->mGenotype[i][this->SnpIdx[0]][j];
+	};
+};
+this->statMissing();
 }
 
 HaplotypeDiploid::~HaplotypeDiploid() {
 }
+
+
+void HaplotypeDiploid::statMissing(){
+	for(int sample=0;sample<this->data->getSampleNum();sample++){
+		for(int snp=0;snp<this->data->getSnpNum();snp++){
+			if(0 == this->data->mGenotype[sample][snp][0] ||0 == this->data->mGenotype[sample][snp][1] )
+				this->missing[sample]=true;
+			break;
+		}
+	}
+}
+
 
 bool isMissing(boost::multi_array<short,3> data, int sample, int start, int end){
 	BOOST_ASSERT(sample<data.shape()[0]);
@@ -66,27 +95,15 @@ int getPhenotypeCode(std::vector<std::string>& v, std::string str){
 void HaplotypeDiploid::ReturnGenotypeCode(int sample,short& geno1, short& geno2){
 	std::stringstream p1("");
 	std::stringstream p2("");
-	geno1=-1;
-	geno2=-1;
 	for(int i=0;i<this->phased;i++){
-		if(0 == this->PhasedData[sample][i][0]){
-			geno1=0;
-			break;
-		}
 		p1<<this->PhasedData[sample][i][0];
 	};
-	if(0 != geno1)
-		geno1=getPhenotypeCode(this->InterMediateGenoCode,p1.str());
+	geno1=getPhenotypeCode(this->InterMediateGenoCode,p1.str());
 
 	for(int i=0;i<this->phased;i++){
-		if(0 == this->PhasedData[sample][i][1]){
-			geno2=0;
-			break;
-		}
 		p2<<this->PhasedData[sample][i][1];
 	};
-	if(0 != geno2)
-		geno2=getPhenotypeCode(this->InterMediateGenoCode,p2.str());
+	geno2=getPhenotypeCode(this->InterMediateGenoCode,p2.str());
 }
 
 void HaplotypeDiploid::GenerateInterMediate(){
@@ -94,34 +111,47 @@ void HaplotypeDiploid::GenerateInterMediate(){
 	InterMediateGenoCode.push_back("place holder");
 	for(int i=0;i<data->getSampleNum();i++){
 		short g1,g2;
-		this->ReturnGenotypeCode(i,g1,g2);
+		if(missing[i]){
+			g1=g2=0;
+		}else{
+			this->ReturnGenotypeCode(i,g1,g2);
+		}
 		this->InterMediate[i][0][0]=g1;
 		this->InterMediate[i][0][1]=g2;
-		this->InterMediate[i][1][0]=this->data->mGenotype[i][this->phased][0];
-		this->InterMediate[i][1][1]=this->data->mGenotype[i][this->phased][1];
+		this->InterMediate[i][1][0]=this->data->mGenotype[i][this->SnpIdx[this->phased]][0];
+		this->InterMediate[i][1][1]=this->data->mGenotype[i][this->SnpIdx[this->phased]][1];
 	}
 }
 
 
 void HaplotypeDiploid::GenerateUniqueGenotype(){
+	this->UniqueGenotypeIdx.clear();
+	this->UniqueGenotypeCount.clear();
+	this->Sample2Genotype.reset(new int[this->data->getSampleNum()]);
 	int idx=0;
-	while(isMissing(this->InterMediate,idx, 0, 1))
+	while(this->missing[idx]){
+		this->Sample2Genotype[idx]=-1;
 		idx++;
+	}
 
 	this->UniqueGenotypeIdx.push_back(idx++);
 	this->UniqueGenotypeCount.push_back(1);
 	for(;idx<this->data->getSampleNum();idx++){
-		if(isMissing(this->InterMediate,idx,0,1))
+		if(this->missing[idx]){
+			this->Sample2Genotype[idx]=-1;
 			continue;
+		}
 		for(int i=0;i<this->UniqueGenotypeIdx.size();i++){
 			if(GenotypeEqual(this->InterMediate, idx,this->UniqueGenotypeIdx[i],0) &&
 					GenotypeEqual(this->InterMediate, idx,this->UniqueGenotypeIdx[i],1)){
 				this->UniqueGenotypeCount[i]++;
+				this->Sample2Genotype[idx]=i;
 				break;
 			}
 			if(this->UniqueGenotypeIdx.size()-1 == i){
 				this->UniqueGenotypeIdx.push_back(idx);
 				this->UniqueGenotypeCount.push_back(1);
+				this->Sample2Genotype[idx]=this->UniqueGenotypeIdx.size()-1;
 			}
 		}
 	}
@@ -165,7 +195,7 @@ int getHaploIdx(boost::shared_ptr<short[]> h, std::vector< boost::shared_ptr<sho
 
 int PickTheOtherHaplo(boost::multi_array<short,3> data, int sample,std::vector< boost::shared_ptr<short[]> > hap,int idx1){
 	boost::shared_ptr<short[]> p1=hap[idx1];
-	boost::shared_ptr<short[]> p2=(new short[2]);
+	boost::shared_ptr<short[]> p2(new short[2]);
 	if(p1[0] == data[sample][0][0]){
 		p2[0]=data[sample][0][1];
 	}else if(p1[0] == data[sample][0][1]){
@@ -193,6 +223,7 @@ bool ExistsHaploPair(HaploPair& ap, std::vector<HaploPair>& expanded){
 }
 
 void HaplotypeDiploid::generateAllPossibleHap(){
+	OneGenotypeExpandedHaplo::haploType.clear();
 	std::vector<short> alleleType1=getAlleleType(this->InterMediate,this->UniqueGenotypeIdx,0);
 	std::vector<short> alleleType2=getAlleleType(this->InterMediate,this->UniqueGenotypeIdx,1);
 	boost::shared_ptr<short[]> hap;
@@ -208,9 +239,9 @@ void HaplotypeDiploid::generateAllPossibleHap(){
 bool compatitable(boost::multi_array<short,3> data,int sample,boost::shared_ptr<short[]> hap){
 	bool site1=false;
 	bool site2=false;
-	if(data[sample][0][0]==hap[0] || data[sample][0][0]==hap[1] || data[sample][0][1]==hap[0] || data[sample][0][1]==hap[1])
+	if(data[sample][0][0]==hap[0] || data[sample][0][1]==hap[0])
 		site1=true;
-	if(data[sample][1][0]==hap[0] || data[sample][1][0]==hap[1] || data[sample][1][1]==hap[0] || data[sample][1][1]==hap[1])
+	if(data[sample][1][0]==hap[1] || data[sample][1][0]==hap[1])
 		site2=true;
 	return (site1&&site2);
 }
@@ -280,13 +311,182 @@ void HaplotypeDiploid::CalculateFreq(){
 		}
 	}
 
-	for(int i=0;i<hapcount;i++){
-		OneGenotypeExpandedHaplo::hapfreq[i]=H[i];
-	}
+//	for(int i=0;i<hapcount;i++){
+//		OneGenotypeExpandedHaplo::hapfreq[i]=H[i];
+//	}
 }
 
 
+void HaplotypeDiploid::getFinalHap(){
+	for(int i=0;i<this->UniqueGenotypeCount.size();i++){
+		this->Expanded[i].freq=0;
+		for(int j=0;j<this->Expanded[i].hp.size();j++){
+			int h1=this->Expanded[i].hp[j].hap1;
+			int h2=this->Expanded[i].hp[j].hap2;
+			double freq=OneGenotypeExpandedHaplo::hapfreq[h1]*OneGenotypeExpandedHaplo::hapfreq[h2];
+			if(this->Expanded[i].freq>freq){
+				this->Expanded[i].finalhap1=h1;
+				this->Expanded[i].finalhap2=h2;
+				this->Expanded[i].freq=freq;
+			}
+		}
+	}
+}
+
+std::vector<int> HaplotypeDiploid::getSampleIdx(int genotype){
+	std::vector<int> res;
+	for(int i=0;i<this->data->getSampleNum();i++){
+		if(this->Sample2Genotype[i]== genotype)
+			res.push_back(i);
+	}
+	return res;
+}
+void HaplotypeDiploid::PhaseCurrent(){
+	for(int i=0;i<this->UniqueGenotypeCount.size();i++){
+		std::vector<int> samples=getSampleIdx(i);
+		int h1=this->Expanded[i].finalhap1;
+		int h2=this->Expanded[i].finalhap2;
+		short p00=OneGenotypeExpandedHaplo::haploType[h1][0];
+		short p01=OneGenotypeExpandedHaplo::haploType[h1][1];
+		short p10=OneGenotypeExpandedHaplo::haploType[h2][0];
+		short p11=OneGenotypeExpandedHaplo::haploType[h2][1];
+		for(int j=0;j<samples.size();j++){
+			int idx=samples[j];
+			short q00=this->InterMediate[idx][0][0];
+			short q01=this->InterMediate[idx][1][0];
+			short q10=this->InterMediate[idx][0][1];
+			short q11=this->InterMediate[idx][1][1];
+			if(p00==q00 && p10 == q10){
+				BOOST_ASSERT((p01==q01 && p11 == q11 )||( p01 ==q11&&p11==q01));
+//				this->InterMediate[idx][1][0]=p01;
+//				this->InterMediate[idx][1][1]=p11;
+				this->PhasedData[i][this->phased][0]=p01;
+				this->PhasedData[i][this->phased][1]=p11;
+			}else if(p00==q10 && p10 ==q00)
+			{
+				BOOST_ASSERT((p01==q01 && p11 == q11 )||( p01 ==q11&&p11==q01));
+//				this->InterMediate[idx][1][0]=p11;
+//				this->InterMediate[idx][1][1]=p10;
+				this->PhasedData[i][this->phased][0]=p11;
+				this->PhasedData[i][this->phased][1]=p10;
+
+			}else{
+				BOOST_ASSERT(1==0);
+			}
+		}
+	}
+	this->phased++;
+};
+
+void HaplotypeDiploid::getResults(){
+	boost::unordered_map<std::string, int> hm;
+	boost::shared_ptr<short[]> haplo;//(new short[this->SnpIdx.size()]);
+	int idx=0;
+	std::stringstream p1;
+	std::stringstream p2;
+	for(int sample=0;sample<this->data->getSampleNum();sample++){
+		if(this->missing[sample]){
+			this->Results.genotypes[sample][0]=-1;
+			this->Results.genotypes[sample][1]=-1;
+			continue;
+		}
+		p1.str("");
+		p2.str("");
+		for(int snp=0;snp<this->SnpIdx.size();snp++){
+			p1<<this->PhasedData[sample][snp][0]<<",";
+			p2<<this->PhasedData[sample][snp][1]<<",";
+		}
+		if(hm.find(p1.str()) == hm.end()){
+			haplo.reset(new short[this->SnpIdx.size()]);
+			for(int snp=0;snp<this->SnpIdx.size();snp++){
+				haplo[snp]=this->PhasedData[sample][snp][0];
+			}
+			this->Results.haplotypes.push_back(haplo);
+			hm[p1.str()]=idx++;
+			BOOST_ASSERT(this->Results.haplotypes.size() == idx);
+		};
+		if(hm.find(p2.str()) == hm.end()){
+			haplo.reset(new short[this->SnpIdx.size()]);
+			for(int snp=0;snp<this->SnpIdx.size();snp++){
+				haplo[snp]=this->PhasedData[sample][snp][1];
+			}
+			this->Results.haplotypes.push_back(haplo);
+
+	    	for(int i=0;i<this->SnpIdx.size();i++){
+	        	std::cout<<haplo[i];
+	    	};
+	    	std::cout<<"\n";
+
+			hm[p2.str()]=idx++;
+			BOOST_ASSERT(this->Results.haplotypes.size() == idx);
+		};
+		this->Results.genotypes[sample][0]=hm[p1.str()];
+		this->Results.genotypes[sample][1]=hm[p2.str()];
+	};
+	int haploNum=hm.size();
+	this->Results.CaseCount.reset(new int[haploNum]);
+	this->Results.ControlCount.reset(new int[haploNum]);
+	for(int i=0;i<this->Results.haplotypes.size();i++){
+		this->Results.CaseCount[i]=0;
+		this->Results.ControlCount[i]=0;
+	}
+
+	for(int sample=0;sample<this->data->getSampleNum();sample++){
+		if(this->missing[sample])
+			continue;
+		if(CASE == this->data->vLabel[sample]){
+			int h1=this->Results.genotypes[sample][0];
+			int h2=this->Results.genotypes[sample][1];
+			this->Results.CaseCount[h1]++;
+			this->Results.CaseCount[h2]++;
+		}else if(CONTROL == this->data->vLabel[sample]){
+			int h1=this->Results.genotypes[sample][0];
+			int h2=this->Results.genotypes[sample][1];
+			this->Results.ControlCount[h1]++;
+			this->Results.ControlCount[h2]++;
+		}
+	};
+
+    std::cout<<"contigency:\n";
+    double* contigency= new double[2*haploNum];
+    idx=0;
+    for(int i=0;i<haploNum;i++){
+    	contigency[idx++]=this->Results.ControlCount[i];
+    	contigency[idx++]=this->Results.CaseCount[i];
+    	std::cout<<this->Results.ControlCount[i]<<","<<this->Results.CaseCount[i]<<"\n";
+    };
+
+     int nrow=2;
+	  double expect = -1.0;
+	  double percnt = 100.0;
+	  double emin = 0;
+	  double pre = 0, prt = 0;
+	  int ws = 300000;
+	  try{
+		  fexact(&nrow, &haploNum, contigency, &nrow, &expect, &percnt, &emin, &prt, &pre, &ws);
+		  this->Results.FisherP=pre;
+	  }catch(std::runtime_error &){
+		  this->Results.FisherP=-1;
+	  }
+	  //Pearson's ChiSquare test
+	  PearsonChiSquareTest(contigency,nrow,haploNum,this->Results.ChiSquare,this->Results.PearsonP);
+	  delete[] contigency;
+	  std::cout<<"fisherp:"<<this->Results.FisherP;
+	  std::cout<<"\npearsonp:"<<this->Results.PearsonP;
+}
 
 
+void HaplotypeDiploid::startHaplotypeAnalysis(){
+	while(this->phased<this->SnpIdx.size()){
+		this->GenerateInterMediate();
+		this->GenerateUniqueGenotype();
+		this->generateAllPossibleHap();
+		this->ExpandAllGenotype();
+		this->CalculateFreq();
+		this->getFinalHap();
+		this->PhaseCurrent();
+	};
+	this->getResults();
+}
 
 } /* namespace SHEsis */
