@@ -152,6 +152,7 @@ void testHp(){
 //	hp.parseSolution(4);
 //	hp.associationTest();
 	hp.startHaplotypeAnalysis();
+	hp.associationTest();
 
 }
 

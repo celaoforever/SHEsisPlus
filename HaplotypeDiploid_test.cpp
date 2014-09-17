@@ -65,17 +65,22 @@ boost::shared_ptr<SHEsis::SHEsisData> GenerateHaploData(int sampleNum, int snpNu
 
 void testHp(){
 	int sampleNum=1000;
-	int snpNum=2;
+	int snpNum=3;
 	int chrSetNum=2;
 	int HapNum=3;
 	std::vector<boost::shared_ptr<short[]> > haps=createHaplotype(HapNum, snpNum);
 	std::vector<int> hapcount;
 	boost::shared_ptr<SHEsis::SHEsisData> data=GenerateHaploData(sampleNum, snpNum, chrSetNum,haps,hapcount);
 	data->statCount(data->vLabel);
+	std::vector<short> mask(3);
+	mask[0]=0;
+	mask[1]=1;
+	mask[2]=1;
 //	data->printLocusInfo();
 //	SHEsis::Haplotype hp(data,2,mask);
-	SHEsis::HaplotypeDiploid hp(data);
+	SHEsis::HaplotypeDiploid hp(data,2,mask);
 	hp.startHaplotypeAnalysis();
+	hp.AssociationTest();
 
 }
 

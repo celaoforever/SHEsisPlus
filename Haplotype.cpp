@@ -61,7 +61,7 @@ void Haplotype::startHaplotypeAnalysis(){
 		if(solve()){
 			std::cout<<"satisfiable\n";
 			parseSolution(i);
-			associationTest();
+			//associationTest();
 			break;
 		}else
 		{

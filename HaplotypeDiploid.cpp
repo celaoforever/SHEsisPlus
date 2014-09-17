@@ -13,7 +13,7 @@ std::vector< boost::shared_ptr<short[]> > OneGenotypeExpandedHaplo::haploType;
 std::vector<double> OneGenotypeExpandedHaplo::hapfreq;
 HaplotypeDiploid::HaplotypeDiploid(boost::shared_ptr<SHEsisData> data):HaplotypeBase(data),
 		phased(1),PhasedData(boost::extents[data->getSampleNum()][data->getSnpNum()][2]),
-		InterMediate(boost::extents[data->getSampleNum()][2][2]),err(0.00001),
+		InterMediate(boost::extents[data->getSampleNum()][2][2]),err(0.0001),
 		missing(new bool[data->getSampleNum()]){
 BOOST_ASSERT(data->getNumOfChrSet() == 2);
 for(int i=0;i<this->data->getSnpNum();i++){
@@ -333,7 +333,7 @@ void HaplotypeDiploid::CalculateFreq(){
 	std::vector<double> H(OneGenotypeExpandedHaplo::haploType.size(),1.0/(double)hapcount);
 
 	double E=1;
-	while(sqrt(E)>this->err){
+	while(E>this->err){
 		std::vector<double> M(this->UniqueGenotypeCount.size(),0);
 		for(int i=0;i<this->UniqueGenotypeCount.size();i++){
 			for(int j=0;j<this->Expanded[i].hp.size();j++){
@@ -514,10 +514,15 @@ void HaplotypeDiploid::getResults(){
 			this->Results.ControlCount[h2]++;
 		}
 	};
+	//this->AssociationTest();
+}
 
+void HaplotypeDiploid::AssociationTest(){
+
+	int haploNum=this->Results.haplotypes.size();
     std::cout<<"contigency:\n";
     double* contigency= new double[2*haploNum];
-    idx=0;
+    int idx=0;
     for(int i=0;i<haploNum;i++){
     	contigency[idx++]=this->Results.ControlCount[i];
     	contigency[idx++]=this->Results.CaseCount[i];

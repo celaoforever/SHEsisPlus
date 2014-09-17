@@ -36,6 +36,8 @@ public:
 	HaplotypeDiploid(boost::shared_ptr<SHEsisData> data, int Snp, std::vector<short> mask);
 	virtual ~HaplotypeDiploid();
 	virtual void startHaplotypeAnalysis();
+	void AssociationTest();
+private:
 	void GenerateUniqueGenotype();
 	void GenerateInterMediate();
 	void ReturnGenotypeCode(int sample,short& geno1, short& geno2);
@@ -47,8 +49,9 @@ public:
 	void getFinalHap();
 	void PhaseCurrent();
 	void getResults();
+
+
 	std::vector<int> getSampleIdx(int genotype);
-private:
 	boost::multi_array<short, 3> PhasedData;
 	std::vector<int> UniqueGenotypeIdx; //2 loci, diploid
 	std::vector<int> UniqueGenotypeCount;

@@ -20,6 +20,7 @@ public:
 	Haplotype(boost::shared_ptr<SHEsisData>  data, int Snp, std::vector<short> mask);
 	virtual ~Haplotype();
 	virtual void startHaplotypeAnalysis();
+	void associationTest();
 private:
 	std::stringstream res;
 	std::string sat;
@@ -39,7 +40,7 @@ private:
 	void createVariables(int number_of_explaining_haplotypes);
 	int solve();
 	void parseSolution(int assumed_haplotypes);
-	void associationTest();
+
 
 };
 

@@ -39,11 +39,12 @@ public:
 		this->mask.clear();
 		this->SnpIdx.clear();
 	}
-	virtual void startHaplotypeAnalysis()=0;
+	virtual void startHaplotypeAnalysis(){};
+	HapTestResult Results;
 protected:
 	std::vector<short> mask;
 	std::vector<int> SnpIdx;
-	HapTestResult Results;
+
 
 };
 
