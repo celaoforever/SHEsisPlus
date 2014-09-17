@@ -17,7 +17,7 @@ boost::mt19937 boost_rng;
 std::vector<boost::shared_ptr<short[]> > createHaplotype(int HapNum, int SnpNum){
 //	boost::shared_ptr<int> sp(new short[SnpNum]);
 	std::vector<boost::shared_ptr<short[]> > res;
-	double probabilities[]={0,0.3,0.4}; //allele freq
+	double probabilities[]={0,0.3,0.2,0.1,0,1}; //allele freq
 	boost::random::discrete_distribution<> dist(probabilities);
 	for(int i=0;i<HapNum;i++){
 		boost::shared_ptr<short[]> sp(new short[SnpNum]);
@@ -64,7 +64,7 @@ boost::shared_ptr<SHEsis::SHEsisData> GenerateHaploData(int sampleNum, int snpNu
 }
 
 void testHp(){
-	int sampleNum=1200;
+	int sampleNum=1000;
 	int snpNum=2;
 	int chrSetNum=2;
 	int HapNum=3;
