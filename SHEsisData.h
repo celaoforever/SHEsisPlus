@@ -70,8 +70,10 @@ public:
 	void printLocusInfo();
 	int getCaseNum();
 	int getControlNum();
+	short GetAlleleCode(std::string const val);
 protected:
 	boost::unordered_map<short, std::string> code2allele;
+	int codeIdx;
 	void getCaseAndControlNum();
 	int CaseNum;
 	int ControlNum;

@@ -17,7 +17,7 @@ namespace SHEsis {
 SHEsisData::SHEsisData(int SampleNum, int SnpNum, int NumOfChrSet)
 :SampleNum(SampleNum),SnpNum(SnpNum),NumOfChrSet(NumOfChrSet),
  mGenotype(boost::extents[SampleNum][SnpNum][NumOfChrSet]),
- vLocusInfo(SnpNum),CaseNum(-1),ControlNum(-1),
+ vLocusInfo(SnpNum),CaseNum(-1),ControlNum(-1),codeIdx(1),
  vLabel(SampleNum),vPermutateLabel(SampleNum)
 {
 };
@@ -37,6 +37,16 @@ std::string getStrFromSortedGenotype(std::vector<short> v){
 	}
 	ss<<v[v.size()-1];
 	return ss.str();
+}
+
+short SHEsisData::GetAlleleCode(std::string const val){
+	boost::unordered_map<short,std::string>::iterator iter;
+	for(iter=this->code2allele.begin();iter!=this->code2allele.end();iter++){
+		if(val == iter->second)
+			return iter->first;
+	}
+	this->code2allele[this->codeIdx]=val;
+	return this->codeIdx++;
 }
 
 void SHEsisData::printLocusInfo()
