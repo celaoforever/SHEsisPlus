@@ -64,7 +64,6 @@ public:
 	virtual ~SHEsisData();
 	boost::multi_array< short, 3> mGenotype;
 	std::vector< SampleStatus > vLabel;
-	std::vector<SampleStatus> vPermutateLabel;
 	std::vector<LocusInfo> vLocusInfo;
 	void statCount(std::vector< SampleStatus > & label);
 	void printLocusInfo();

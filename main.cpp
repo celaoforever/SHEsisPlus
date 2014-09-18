@@ -258,7 +258,8 @@ int ReadInput(int ploidy, bool containsPhenotype,std::string filepath, std::vect
 		boost::split(strs,line,boost::is_any_of("\t ,"));
 
 		if(containsPhenotype){
-			if(strs[1]!=SHEsis::CASE && strs[1] !=SHEsis::CONTROL){
+			if((SHEsis::SampleStatus)(std::atoi(strs[1].c_str())!=SHEsis::CASE &&
+				(SHEsis::SampleStatus)(std::atoi(strs[1].c_str())) !=SHEsis::CONTROL)){
 				std::stringstream ss;
 				ss<<"Error in line "<<lineidx<<" ,phenotype should be either "<<SHEsis::CASE<<" or "<<SHEsis::CONTROL<<", but "<<strs[1]<<" found";
 				throw std::runtime_error(ss.str());

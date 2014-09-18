@@ -18,14 +18,13 @@ SHEsisData::SHEsisData(int SampleNum, int SnpNum, int NumOfChrSet)
 :SampleNum(SampleNum),SnpNum(SnpNum),NumOfChrSet(NumOfChrSet),
  mGenotype(boost::extents[SampleNum][SnpNum][NumOfChrSet]),
  vLocusInfo(SnpNum),CaseNum(-1),ControlNum(-1),codeIdx(1),
- vLabel(SampleNum),vPermutateLabel(SampleNum)
+ vLabel(SampleNum)
 {
 };
 
 
 SHEsisData::~SHEsisData() {
 	this->vLabel.clear();
-	this->vPermutateLabel.clear();
 	this->vLocusInfo.clear();
 }
 
@@ -108,6 +107,8 @@ int SHEsisData::getControlNum(){
 }
 
 void SHEsisData::statCount(std::vector< SampleStatus > & label){
+	this->vLocusInfo.clear();
+	this->vLocusInfo.resize(SnpNum);
 	std::vector<short> geno;
 	for(int iSample=0;iSample<this->SampleNum;iSample++){
 		for(int iSnp=0;iSnp<this->SnpNum;iSnp++){

@@ -11,11 +11,12 @@
 #include "fisher.h"
 #include <iostream>
 #include <math.h>
+#include <algorithm>
 namespace SHEsis {
 
 AssociationTest::AssociationTest(boost::shared_ptr<SHEsisData>  mdata):data(mdata),
 		vAssocationTestResult(mdata->getSnpNum()),
-		NumOfPermutation(0)
+		NumOfPermutation(1000)
 {
 }
 
@@ -43,22 +44,83 @@ void AssociationTest::AssociationTestForAllSnpsGenotype(){
 				this->vAssocationTestResult[i].GenotypeChiSquare);
 	}
 }
+
+void getTheSmallestP(std::vector<LocusAssiciationTestResult> res,double& allelep,double& genop){
+	allelep=1;
+	genop=1;
+	for(int i=0;i<res.size();i++){
+		if(res[i].AllelePearsonP < allelep){
+			allelep=res[i].AllelePearsonP;
+		};
+		if(res[i].GenoTypePearsonP< genop){
+			genop=res[i].GenoTypePearsonP;
+		}
+	}
+}
+
+int getRank(double p, std::vector<double> v){
+	for(int i=0;i<v.size()-1;i++){
+		if(p>=v[i] && p<=v[i+1])
+			return i;
+	}
+	return v.size();
+}
+
+void AssociationTest::permutation(){
+	this->vPermutateLabel=this->data->vLabel;
+	for(int i=0;i<this->NumOfPermutation;i++){
+		std::random_shuffle(this->vPermutateLabel.begin(), this->vPermutateLabel.end());
+		this->data->statCount(this->vPermutateLabel);
+		this->AssociationTestForAllSnpsAllele();
+		this->AssociationTestForAllSnpsGenotype();
+		double ap,gp;
+		getTheSmallestP(this->vAssocationTestResult,ap,gp);
+		this->PermutationPAllele.push_back(ap);
+		this->PermutationPGenotype.push_back(gp);
+	};
+	std::sort (this->PermutationPAllele.begin(), this->PermutationPAllele.end());
+	std::sort (this->PermutationPGenotype.begin(), this->PermutationPGenotype.end());
+//	std::cout<<"PermutationPAllele:\n";
+//	for(int i=0;i<this->PermutationPAllele.size();i++){
+//		std::cout<<this->PermutationPAllele[i]<<",";
+//	}
+//	std::cout<<"\nPermutationPGenotype:\n";
+//	for(int i=0;i<this->PermutationPGenotype.size();i++){
+//		std::cout<<this->PermutationPGenotype[i]<<",";
+//	}
+
+	this->data->statCount(data->vLabel);
+	this->AssociationTestForAllSnpsAllele();
+	this->AssociationTestForAllSnpsGenotype();
+	for(int i=0;i<this->vAssocationTestResult.size();i++){
+		this->vAssocationTestResult[i].AllelePermutationP=(double)getRank(
+				this->vAssocationTestResult[i].AllelePearsonP,this->PermutationPAllele)
+				/(double)this->NumOfPermutation;
+		this->vAssocationTestResult[i].GenotypePermutationP=(double)getRank(
+				this->vAssocationTestResult[i].GenoTypePearsonP,this->PermutationPGenotype)
+				/(double)this->NumOfPermutation;
+	};
+}
+
+
 void AssociationTest::printAssociationTestResults()
 {
 	for(int i=0;i<this->vAssocationTestResult.size();i++){
 		std::cout<<"\nLocus "<<i<<"\nAllele association test:\n"<<
-				"(fisher's p, pearson's p, chi suqare, or, orLow, orUp)="<<
+				"(fisher's p, pearson's p, chi suqare, permutation p,or, orLow, orUp)="<<
 				"("<<vAssocationTestResult[i].AlleleFisherP<<","<<
 				vAssocationTestResult[i].AllelePearsonP<<","<<
 				vAssocationTestResult[i].AlleleChiSquare<<","<<
+				vAssocationTestResult[i].AllelePermutationP<<","<<
 				vAssocationTestResult[i].AlleleOddsRatio<<","<<
 				vAssocationTestResult[i].AlleleOddsRatioLowLimit<<","<<
 				vAssocationTestResult[i].AlleleOddsRatioUpLimit<<")\n";
 		std::cout<<"Genotype association test:\n"<<
-				"(fisher's p, pearson's p, chi square)=("<<
+				"(fisher's p, pearson's p, chi square,permutation p)=("<<
 				vAssocationTestResult[i].GenotypeFisherP<<","<<
 				vAssocationTestResult[i].GenoTypePearsonP<<","<<
-				vAssocationTestResult[i].GenotypeChiSquare<<")\n";
+				vAssocationTestResult[i].GenotypeChiSquare<<","<<
+				vAssocationTestResult[i].GenotypePermutationP<<")\n";
 
 	}
 }

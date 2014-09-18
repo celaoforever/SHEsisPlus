@@ -58,10 +58,11 @@ test_main(int,char*[])
 	std::cout<<std::endl;
 
 	SHEsis::AssociationTest AssociationTestHandler(testdata);
-	AssociationTestHandler.data->statCount(AssociationTestHandler.data->vLabel);
-	AssociationTestHandler.data->printLocusInfo();
-	AssociationTestHandler.AssociationTestForAllSnpsAllele();
-	AssociationTestHandler.AssociationTestForAllSnpsGenotype();
+	AssociationTestHandler.permutation();
+//	AssociationTestHandler.data->statCount(AssociationTestHandler.data->vLabel);
+//	AssociationTestHandler.data->printLocusInfo();
+//	AssociationTestHandler.AssociationTestForAllSnpsAllele();
+//	AssociationTestHandler.AssociationTestForAllSnpsGenotype();
 	AssociationTestHandler.printAssociationTestResults();
 	return boost::exit_success;
 
