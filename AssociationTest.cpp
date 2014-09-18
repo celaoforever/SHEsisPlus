@@ -24,6 +24,12 @@ AssociationTest::~AssociationTest() {
 	vAssocationTestResult.clear();
 }
 
+void AssociationTest::association(){
+	this->data->statCount(this->data->vLabel);
+	this->AssociationTestForAllSnpsAllele();
+	this->AssociationTestForAllSnpsGenotype();
+}
+
 void AssociationTest::AssociationTestForAllSnpsAllele(){
 	for(int i=0;i<this->vAssocationTestResult.size();i++){
 		this->SingleSnpTestAllele(i,

@@ -31,11 +31,10 @@ public:
 	std::vector<LocusAssiciationTestResult> vAssocationTestResult;
 	AssociationTest(boost::shared_ptr<SHEsisData>  data);
 	void setPermutationTimes(int p){this->NumOfPermutation=p;};
-	void AssociationTestForAllSnpsAllele();
-	void AssociationTestForAllSnpsGenotype();
 	virtual ~AssociationTest();
 	void printAssociationTestResults();
 	void permutation();
+	void association();
 private:
 	int NumOfPermutation;
 	std::vector<double> PermutationPAllele;
@@ -44,6 +43,8 @@ private:
 	void SingleSnpTestAllele(int iSnp, double& FisherP, double& PearsonP,
 			double& ChiSquare,double& oddsRatio,double& ORLowLimit, double& ORUpLimit);
 	void SingleSnpTestGenotype(int iSnp, double &FisherP, double& PearsonP, double & ChiSquare);
+	void AssociationTestForAllSnpsAllele();
+	void AssociationTestForAllSnpsGenotype();
 };
 
 } /* namespace SHEsis */

@@ -59,11 +59,11 @@ test_main(int,char*[])
 
 	SHEsis::AssociationTest AssociationTestHandler(testdata);
 	AssociationTestHandler.permutation();
-//	AssociationTestHandler.data->statCount(AssociationTestHandler.data->vLabel);
-//	AssociationTestHandler.data->printLocusInfo();
-//	AssociationTestHandler.AssociationTestForAllSnpsAllele();
-//	AssociationTestHandler.AssociationTestForAllSnpsGenotype();
 	AssociationTestHandler.printAssociationTestResults();
+	AssociationTestHandler.association();
+	AssociationTestHandler.printAssociationTestResults();
+
+
 	return boost::exit_success;
 
 }
