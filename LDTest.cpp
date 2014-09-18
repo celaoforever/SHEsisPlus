@@ -23,7 +23,7 @@ LDTest::~LDTest() {
 
 double LDTest::TwoLociLDTest(int snp1,int snp2){
 	double D=0;
-	std::vector<int> mask;
+	std::vector<short> mask;
 	for(int i=0;i<this->data->getSnpNum();i++){
 		if(i == snp1 || i == snp2)
 			mask.push_back(1);

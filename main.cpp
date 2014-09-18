@@ -23,7 +23,7 @@ typedef enum{
 }LD_TYPE;
 
 struct arguments{
-	arguments():haploAnalysis(false),assocAnalysis(false),hweAnalysis(false),ldAnalysis(false){};
+	arguments():haploAnalysis(false),assocAnalysis(false),hweAnalysis(false),ldAnalysis(false),permutation(-1){};
 	std::vector<std::string> inputfiles;
 	std::vector<std::string> inputcases;
 	std::vector<std::string> inputctrls;
@@ -34,7 +34,7 @@ struct arguments{
 	bool assocAnalysis;
 	bool hweAnalysis;
 	bool ldAnalysis;
-	std::vector<int> mask;
+	std::vector<short> mask;
 	LD_TYPE ldtype;
 } SHEsisArgs;
 
@@ -51,7 +51,7 @@ boost::shared_ptr<SHEsis::SHEsisData> parseInput();
 
 int main(int argc, char *argv[])
 {
-	po::options_description desc("Allowed options:");
+	po::options_description desc("Allowed options");
 	po::variables_map vm;
 	boost::shared_ptr<SHEsis::SHEsisData> data;
 	addOptions(argc,argv,desc,vm);
@@ -59,15 +59,60 @@ int main(int argc, char *argv[])
 		checkOptions(desc,vm);
 		data=parseInput();
 	}catch(std::runtime_error& e){
-		std::cout<<"ERROR:"<<e.what()<<"\n";
+		std::cout<<"***ERROR:"<<e.what()<<"\n";
 		std::cout<<desc<<"\n";
 		exit(-1);
 	};
+	boost::shared_ptr<SHEsis::AssociationTest> AssocHandle;//(new SHEsis::AssociationTest(data));
+	boost::shared_ptr<SHEsis::HWETest> HWEHandle;//(new SHEsis::HWETest(data));
+	boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle;//(new SHEsis::Haplotype(data));
+	//boost::shared_ptr<SHEsis::HaplotypeDiploid> DiploidHapHandle;//(new SHEsis::Haplotype(data));
+	boost::shared_ptr<SHEsis::LDTest> LDHandle;
 
+	if(SHEsisArgs.assocAnalysis){
+		AssocHandle.reset(new SHEsis::AssociationTest(data));
+		if(SHEsisArgs.permutation!=-1){
+			AssocHandle->setPermutationTimes(SHEsisArgs.permutation);
+			AssocHandle->permutation();
+		}else{
+			AssocHandle->association();
+		}
+	};
 
+	if(SHEsisArgs.hweAnalysis){
+		HWEHandle.reset(new SHEsis::HWETest(data));
+		HWEHandle->AllSnpHWETest();
+	}
 
+	if(SHEsisArgs.haploAnalysis){
+		if(data->getNumOfChrSet()<=2){
+			if(SHEsisArgs.mask.size()!=data->getSnpNum()){
+				HapHandle.reset(new SHEsis::HaplotypeDiploid(data));
+			}else{
+				int snpnum=0;
+				for(int i=0;i<SHEsisArgs.mask.size();i++){
+					snpnum+=SHEsisArgs.mask[i];
+				}
+				HapHandle.reset(new SHEsis::HaplotypeDiploid(data,snpnum,SHEsisArgs.mask));
+			}
+		}else{
+			if(SHEsisArgs.mask.size()!=data->getSnpNum()){
+				HapHandle.reset(new SHEsis::Haplotype(data));
+			}else{
+				int snpnum=0;
+				for(int i=0;i<SHEsisArgs.mask.size();i++){
+					snpnum+=SHEsisArgs.mask[i];
+				}
+				HapHandle.reset(new SHEsis::Haplotype(data,snpnum,SHEsisArgs.mask));
+			}
+		}
+		HapHandle->startHaplotypeAnalysis();
+	};
 
-
+	if(SHEsisArgs.ldAnalysis){
+		LDHandle.reset(new SHEsis::LDTest(data));
+		LDHandle->AllLociLDtest();
+	};
 
 	return 0;
 }
@@ -139,19 +184,19 @@ boost::shared_ptr<SHEsis::SHEsisData> parseDataNoPhenotype(int snpnum,int ploidy
 void addOptions(int argc, char *argv[],po::options_description& desc,po::variables_map& vm ){
 	desc.add_options()
 	    ("help", "produce help message")
-	    ("input",po::value<std::string>(),"path for the input file containing both cases and controls")
-	    ("input-case",po::value<std::string>(),"path for the input file containing cases")
-	    ("input-ctrl",po::value<std::string>(),"path for the input file containing controls")
+	    ("input",po::value<std::vector<std::string> >(),"path for the input file containing both cases and controls")
+	    ("input-case",po::value<std::vector<std::string> >(),"path for the input file containing cases")
+	    ("input-ctrl",po::value<std::vector<std::string> >(),"path for the input file containing controls")
 	    ("ploidy",po::value<int>(),"number of ploidy")
 	    ("assoc","perform case/control association test")
 	    ("permutation",po::value<int>(),"times for permutation")
 	    ("haplo","perform haplotype analysis")
 	    //("error-rate",po::value<double>()->default_value(0.00001),"convergence threshold for haplotype analysis")
-	    ("mask",po::value<std::string>(),"mask of snps for haplotype analysis, eg. mask=101 to use 1st and 3rd SNPs.")
+	    ("mask",po::value<std::string>(),"mask of snps for haplotype analysis, comma delimited. eg. mask=1,0,1 to use 1st and 3rd SNPs when there are 3 SNPs in all.")
 	    ("ld-in-case","perform Linkage disequilibrium test in cases")
 	    ("ld-in-ctrl","perform Linkage disequilibrium test in controls")
 	    ("ld","perform Linkage disequilibrium test in both cases and controls")
-	    ("hwe",po::value<std::string>(),"perform Hardy-weinberg disequilibrium test in case/control/both, allowed value:{CASE,CONTROL,BOTH},default:BOTH")
+	    ("hwe","perform Hardy-Weinberg disequilibrium test")
 	    ;
 		po::store(po::parse_command_line(argc, argv, desc), vm);
 		po::notify(vm);
@@ -163,7 +208,7 @@ void checkOptions(po::options_description& desc,po::variables_map& vm){
 		exit(0);
 	}
 
-	if((0!=vm.count("input"))&&(0!=vm.count("input-case"))&&(0!=vm.count("input-ctrl")))
+	if((0==vm.count("input"))&&(0==vm.count("input-case"))&&(0==vm.count("input-ctrl")))
 		throw std::runtime_error("no input file specified.");
 	if(vm.count("input")&&(vm.count("input-case")||vm.count("input-ctrl")))
 		throw std::runtime_error("--input and --input-case/--input-ctrl cannot be specified at the same time.");
@@ -222,16 +267,16 @@ void checkOptions(po::options_description& desc,po::variables_map& vm){
 	}
 
 	if(vm.count("mask")){
-		std::string maskstr=vm["permutation"].as<std::string>();
+		std::string maskstr=vm["mask"].as<std::string>();
 		std::vector<std::string> maskvec;
 		boost::split(maskvec,maskstr,boost::is_any_of("\t ,"));
 		for(int i=0;i<maskvec.size();i++){
 			if(std::strcmp("0",maskvec[i].c_str()) ==0 ){
 				SHEsisArgs.mask.push_back(0);
-			}else if(std::strcmp("0",maskvec[i].c_str()) ==1){
+			}else if(std::strcmp("1",maskvec[i].c_str()) ==0){
 				SHEsisArgs.mask.push_back(1);
 			}else{
-				throw std::runtime_error("mask should be composed of 0 and 1.");
+				throw std::runtime_error("mask should be composed of 0 and 1. But "+maskvec[i]+" found.");
 			}
 		}
 	}
