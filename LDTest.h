@@ -17,10 +17,11 @@ public:
 	virtual ~LDTest();
 	void AllLociLDtest();
 private:
-	double TwoLociLDTest(int snp1,int snp2);
+	double TwoLociLDTest(int snp1,int snp2,int type);
 	boost::shared_ptr<SHEsisData> data;
 	boost::shared_ptr<HaplotypeBase> hp;
 	boost::multi_array<double,2> res;
+	int ldtype;
 };
 
 } /* namespace SHEsis */
