@@ -16,11 +16,6 @@
 
 namespace po = boost::program_options;
 
-typedef enum{
-	LD_IN_CASE,
-	LD_IN_CTRL,
-	LD_IN_BOTH
-}LD_TYPE;
 
 struct arguments{
 	arguments():haploAnalysis(false),assocAnalysis(false),hweAnalysis(false),ldAnalysis(false),permutation(-1){};
@@ -35,7 +30,7 @@ struct arguments{
 	bool hweAnalysis;
 	bool ldAnalysis;
 	std::vector<short> mask;
-	LD_TYPE ldtype;
+	SHEsis::LD_TYPE ldtype;
 } SHEsisArgs;
 
 
@@ -232,20 +227,20 @@ void checkOptions(po::options_description& desc,po::variables_map& vm){
 	else
 		SHEsisArgs.ploidy=vm["ploidy"].as<int>();
 
-	int ldcase=vm.count("ld-in-case")>0?1:0;
-	int ldctrl=vm.count("ld-in-ctrl")>0?1:0;
-	int ld=vm.count("ld")>0?1:0;
+	int ldcase=vm.count("ld-in-case");
+	int ldctrl=vm.count("ld-in-ctrl");
+	int ld=vm.count("ld");
 	if(ldcase+ldctrl+ld>1){
 		throw std::runtime_error("--ld-in-case/--ld-in-ctrl/--ld cannot be specified at the same time");
 	}else if(ldcase+ldctrl+ld == 1)
 	{
 		SHEsisArgs.ldAnalysis=true;
 		if(ldcase)
-			SHEsisArgs.ldtype=LD_IN_CASE;
+			SHEsisArgs.ldtype=SHEsis::LD_IN_CASE;
 		if(ldctrl)
-			SHEsisArgs.ldtype=LD_IN_CTRL;
+			SHEsisArgs.ldtype=SHEsis::LD_IN_CTRL;
 		if(ld)
-			SHEsisArgs.ldtype=LD_IN_BOTH;
+			SHEsisArgs.ldtype=SHEsis::LD_IN_BOTH;
 	};
 
 	if(vm.count("permutation")>0 && vm.count("assoc") == 0)

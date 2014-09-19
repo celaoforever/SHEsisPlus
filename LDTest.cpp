@@ -11,7 +11,7 @@
 namespace SHEsis {
 
 LDTest::LDTest(boost::shared_ptr<SHEsisData> data):
-		data(data),ldtype(2),
+		data(data),ldtype(LD_IN_BOTH),
 		res(boost::extents[this->data->getSnpNum()][this->data->getSnpNum()]) {
 	// TODO Auto-generated constructor stub
 
@@ -21,7 +21,7 @@ LDTest::~LDTest() {
 	// TODO Auto-generated destructor stub
 }
 //type=0: case, type=1:ctrl, type=2 both
-double LDTest::TwoLociLDTest(int snp1,int snp2,int type){
+double LDTest::TwoLociLDTest(int snp1,int snp2,LD_TYPE type){
 	double normalizedD=0;
 	std::vector<short> mask;
 	for(int i=0;i<this->data->getSnpNum();i++){
@@ -46,7 +46,7 @@ double LDTest::TwoLociLDTest(int snp1,int snp2,int type){
 		double d=0;
 		double dmax=0;
 		switch(type){
-		case 0:
+		case LD_IN_CASE:
 			hapfreq=(double)hp->Results.CaseCount[i]/(double)(2*this->data->getCaseNum());
 			allele=hp->Results.haplotypes[i][0];
 			allelefreq1=(double)data->vLocusInfo[snp1].CaseAlleleCount[allele]/
@@ -55,8 +55,8 @@ double LDTest::TwoLociLDTest(int snp1,int snp2,int type){
 			allelefreq2=(double)data->vLocusInfo[snp2].CaseAlleleCount[allele]/
 					(double)(this->data->getNumOfChrSet()*this->data->getCaseNum());
 			break;
-		case 1:
-			hapfreq=(double)hp->Results.ControlCount[i]/(double)(this->data->getNumOfChrSet()*this->data->getControlNum()());
+		case LD_IN_CTRL:
+			hapfreq=(double)hp->Results.ControlCount[i]/(double)(this->data->getNumOfChrSet()*this->data->getControlNum());
 			allele=hp->Results.haplotypes[i][0];
 			allelefreq1=(double)data->vLocusInfo[snp1].ControlAlleleCount[allele]/
 					(double)(this->data->getNumOfChrSet()*this->data->getControlNum());
@@ -64,7 +64,7 @@ double LDTest::TwoLociLDTest(int snp1,int snp2,int type){
 			allelefreq2=(double)data->vLocusInfo[snp2].ControlAlleleCount[allele]/
 					(double)(this->data->getNumOfChrSet()*this->data->getCaseNum());
 			break;
-		case 2:
+		case LD_IN_BOTH:
 			hapfreq=(double)(hp->Results.CaseCount[i]+hp->Results.ControlCount[i])/(double)(this->data->getNumOfChrSet()*this->data->getSampleNum());
 			allele=hp->Results.haplotypes[i][0];
 			allelefreq1=(double)data->vLocusInfo[snp1].BothAlleleCount[allele]/
@@ -100,5 +100,52 @@ void LDTest::AllLociLDtest(){
 		}
 	}
 }
+void LDTest::DrawLDMap(){
+	double snpnum=(double)this->data->getSnpNum();
+	double height,width;
+	int recnum;
+	recnum=snpnum-1;
+	if(snpnum<20)
+		height=500;
+	else
+		height=snpnum*25;
+	width=(height-230)/snpnum*2*(snpnum-1)+100;
+	double sidelength=(height-230)/snpnum*2;
+	double insidelength=sidelength-2;
+	double from_x=(double)width/2-(double)recnum*(double)sidelength/2;
+	this->ldmap=BMP_new(width,height);
+	BMP_clear(this->ldmap, RGB_GRAY);
+
+	for(int j=0;j<recnum;j++){
+		int count=0;
+		for(int i=1;i<recnum-j;i++){
+			int step=i*sidelength;
+			int begin_x=from_x+sidelength/2*j;
+			int begin_y=200+sidelength/2*j;
+			double score=rand()%50+50;
+			int x1=round(begin_x+step-sidelength/2);
+			int y1=round(begin_y+1);
+			int x2=round(begin_x+step-1);
+			int y2=round(begin_y+sidelength/2);
+			int x3=round(begin_x+step-sidelength/2);
+			int y3=round(begin_y+1+sidelength);
+			int x4=round(begin_x+step-sidelength+1);
+			int y4=round(begin_y+sidelength/2);
+			BMP_line (this->ldmap, x1,y1,x2,y2, RGB_CYAN);
+			BMP_line (this->ldmap, x2,y2,x3,y3, RGB_CYAN);
+			BMP_line (this->ldmap, x3,y3,x4,y4, RGB_CYAN);
+			BMP_line (this->ldmap, x4,y4,x1,y1, RGB_CYAN);
+			std::stringstream ss;
+			ss<<score;
+			int strx=begin_x+step-sidelength/2-7;
+			int stry=begin_y+sidelength/2-7;
+			BMP_draw_string(this->ldmap,ss.str().c_str(),strx,stry,RGB_PURPLE);
+		}
+	}
+	BMP_write (this->ldmap, "ldmap.bmp");
+
+
+}
+
 
 } /* namespace SHEsis */

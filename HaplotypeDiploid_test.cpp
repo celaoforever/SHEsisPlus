@@ -36,6 +36,7 @@ std::vector<boost::shared_ptr<short[]> > createHaplotype(int HapNum, int SnpNum)
 boost::shared_ptr<SHEsis::SHEsisData> GenerateHaploData(int sampleNum, int snpNum, int chrSetNum,std::vector<boost::shared_ptr<short[]> > hap, std::vector<int>& hapcount){
 	boost::shared_ptr<SHEsis::SHEsisData> data( new SHEsis::SHEsisData(sampleNum,snpNum,chrSetNum));
 	boost::random::uniform_int_distribution<> r(0,hap.size()-1);
+	boost::random::uniform_int_distribution<> r01(0,1);
 //	std::cout<<"hap.size()="<<hap.size()<<"\n";
 
 	double probabilities[]={0,0.48,0.48};//0.04 missing phenotype for individuals
@@ -43,13 +44,14 @@ boost::shared_ptr<SHEsis::SHEsisData> GenerateHaploData(int sampleNum, int snpNu
 	hapcount.resize(hap.size(),0);
 	for(int i=0;i<sampleNum;i++){
 		data->vLabel[i]=((SHEsis::SampleStatus)dist(boost_rng));
-		for(int k=0;k<chrSetNum;k++){
-			int idx=r(boost_rng);
-			hapcount[idx]++;
-//			std::cout<<"idx="<<idx;
-			for(int n=0;n<snpNum;n++){
-				data->mGenotype[i][n][k]=hap[idx][n];
-			}
+		int idx1=r(boost_rng);
+		int idx2=r(boost_rng);
+		hapcount[idx1]++;
+		hapcount[idx2]++;
+		for(int n=0;n<snpNum;n++){
+			int p=r01(boost_rng);
+			data->mGenotype[i][n][p]=hap[idx1][n];
+			data->mGenotype[i][n][1-p]=hap[idx2][n];
 		}
 	}
 	std::cout<<"haplotype:\n";
@@ -78,7 +80,7 @@ void testHp(){
 	mask[2]=1;
 //	data->printLocusInfo();
 //	SHEsis::Haplotype hp(data,2,mask);
-	SHEsis::HaplotypeDiploid hp(data,2,mask);
+	SHEsis::HaplotypeDiploid hp(data);//,2,mask);
 	hp.startHaplotypeAnalysis();
 	hp.AssociationTest();
 
