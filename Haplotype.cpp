@@ -26,7 +26,7 @@ namespace SHEsis {
 
 Haplotype::Haplotype(boost::shared_ptr<SHEsisData> data):HaplotypeBase(data),VarNum(0),ClauseNum(0),
 occurence(boost::extents[data->getSampleNum()][data->getSnpNum()]),
-missing(boost::extents[data->getSampleNum()][data->getSnpNum()])
+missing(boost::extents[data->getSampleNum()][data->getSnpNum()]),silent(true)
 {
 
 	this->statOccurence();
@@ -36,7 +36,7 @@ missing(boost::extents[data->getSampleNum()][data->getSnpNum()])
 };
 
 Haplotype::Haplotype(boost::shared_ptr<SHEsisData>  data, int Snp, std::vector<short> mask):HaplotypeBase(data,mask),VarNum(0),ClauseNum(0),
-		occurence(boost::extents[data->getSampleNum()][Snp]),
+		occurence(boost::extents[data->getSampleNum()][Snp]),silent(true),
 		missing(boost::extents[data->getSampleNum()][Snp])
 {
 
@@ -56,16 +56,19 @@ Haplotype::~Haplotype(){
 
 void Haplotype::startHaplotypeAnalysis(){
 	for(int i=1;i<=this->data->getNumOfChrSet()*this->data->getSampleNum();i++){
-		std::cout<<"assuming "<<i<<" explaing haplotypes...";
+		if(!this->silent)
+			std::cout<<"assuming "<<i<<" explaing haplotypes...";
 		BuildModel(i);
 		if(solve()){
-			std::cout<<"satisfiable\n";
+			if(!this->silent)
+				std::cout<<"satisfiable\n";
 			parseSolution(i);
 			//associationTest();
 			break;
 		}else
 		{
-			std::cout<<"unsatisfiable\n";
+			if(!this->silent)
+				std::cout<<"unsatisfiable\n";
 		}
 	};
 }
@@ -105,7 +108,7 @@ void Haplotype::statOccurenceMask(){
 //	for(int i=0;i<mask.size();i++){
 //		std::cout<<mask[i]<<",";;
 //	}
-	std::cout<<"\n";
+//	std::cout<<"\n";
 	int subiSnp;
 	for(int iSample=0;iSample<data->getSampleNum();iSample++){
 		subiSnp=0;
@@ -223,10 +226,10 @@ void Haplotype::parseSolution(int assumed_haplotypes){
     		delete[] chr_;
     	}
     	this->Results.haplotypes.push_back(haplo);
-    	for(int i=0;i<this->SnpIdx.size();i++){
-        	std::cout<<haplo[i];
-    	};
-    	std::cout<<"\n";
+//    	for(int i=0;i<this->SnpIdx.size();i++){
+//        	std::cout<<haplo[i];
+//    	};
+//    	std::cout<<"\n";
 
     }
 
@@ -242,18 +245,6 @@ void Haplotype::parseSolution(int assumed_haplotypes){
     		}
     	}
     }
-
-//    for(int i=0;i<this->data->getSampleNum();i++){
-//    	for(int k=0;k<this->data->getNumOfChrSet();k++){
-//    		std::cout<<Results.genotypes[i][k]<<",";
-//    	}
-//    	std::cout<<"\n";
-//    };
-
-
-}
-
-void Haplotype::associationTest(){
 	int haploNum=this->Results.haplotypes.size();
 	this->Results.CaseCount.reset(new int[haploNum]);
 	this->Results.ControlCount.reset(new int[haploNum]);
@@ -271,39 +262,51 @@ void Haplotype::associationTest(){
     		}
     	}
     }
-    std::cout<<"contigency:\n";
-    double* contigency= new double[2*haploNum];
-    int idx=0;
-    for(int i=0;i<haploNum;i++){
-    	contigency[idx++]=this->Results.ControlCount[i];
-    	contigency[idx++]=this->Results.CaseCount[i];
-    	std::cout<<this->Results.ControlCount[i]<<","<<this->Results.CaseCount[i]<<"\n";
-    };
-
-     int nrow=2;
-	  double expect = -1.0;
-	  double percnt = 100.0;
-	  double emin = 0;
-	  double pre = 0, prt = 0;
-	  int ws = 300000;
-	  try{
-		  fexact(&nrow, &haploNum, contigency, &nrow, &expect, &percnt, &emin, &prt, &pre, &ws);
-		  this->Results.FisherP=pre;
-	  }catch(std::runtime_error &){
-		  this->Results.FisherP=-1;
-	  }
-
-
-	  //Pearson's ChiSquare test
-	  PearsonChiSquareTest(contigency,nrow,haploNum,this->Results.ChiSquare,this->Results.PearsonP);
-	  delete[] contigency;
-	  std::cout<<"fisherp:"<<this->Results.FisherP;
-	  std::cout<<"\npearsonp:"<<this->Results.PearsonP;
-
-
+//    for(int i=0;i<this->data->getSampleNum();i++){
+//    	for(int k=0;k<this->data->getNumOfChrSet();k++){
+//    		std::cout<<Results.genotypes[i][k]<<",";
+//    	}
+//    	std::cout<<"\n";
+//    };
 
 
 }
+//
+//void Haplotype::associationTest(){
+//	int haploNum=this->Results.haplotypes.size();
+////    std::cout<<"contigency:\n";
+//    double* contigency= new double[2*haploNum];
+//    int idx=0;
+//    for(int i=0;i<haploNum;i++){
+//    	contigency[idx++]=this->Results.ControlCount[i];
+//    	contigency[idx++]=this->Results.CaseCount[i];
+////    	std::cout<<this->Results.ControlCount[i]<<","<<this->Results.CaseCount[i]<<"\n";
+//    };
+//
+//     int nrow=2;
+//	  double expect = -1.0;
+//	  double percnt = 100.0;
+//	  double emin = 0;
+//	  double pre = 0, prt = 0;
+//	  int ws = 300000;
+//	  try{
+//		  fexact(&nrow, &haploNum, contigency, &nrow, &expect, &percnt, &emin, &prt, &pre, &ws);
+//		  this->Results.FisherP=pre;
+//	  }catch(std::runtime_error &){
+//		  this->Results.FisherP=-1;
+//	  }
+//
+//
+//	  //Pearson's ChiSquare test
+//	  PearsonChiSquareTest(contigency,nrow,haploNum,this->Results.ChiSquare,this->Results.PearsonP);
+//	  delete[] contigency;
+////	  std::cout<<"fisherp:"<<this->Results.FisherP;
+////	  std::cout<<"\npearsonp:"<<this->Results.PearsonP;
+//
+//
+//
+//
+//}
 
 void Haplotype::BuildModel(int number_of_explaining_haplotypes){
 //#define res std::cout

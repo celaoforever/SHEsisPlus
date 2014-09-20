@@ -20,7 +20,8 @@ public:
 	Haplotype(boost::shared_ptr<SHEsisData>  data, int Snp, std::vector<short> mask);
 	virtual ~Haplotype();
 	virtual void startHaplotypeAnalysis();
-	void associationTest();
+	//void associationTest();
+	void setSilent(bool b){this->silent=b;};
 private:
 	std::stringstream res;
 	std::string sat;
@@ -29,7 +30,7 @@ private:
 	boost::multi_array< std::vector<int>, 2> occurence;
 	boost::multi_array<int, 2> missing;
 	boost::shared_ptr<IndexingVariables> variables;
-
+	bool silent;
 	void statOccurence();
 	void statOccurenceMask();
 	void getBiallelicCoding(int ploidy,int which_genotype, int which_index, int which_allele);

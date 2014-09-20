@@ -482,13 +482,13 @@ void HaplotypeDiploid::getResults(){
 		this->Results.genotypes[sample][1]=hm[p2.str()];
 	};
 
-	std::cout<<"\nHaplotypes:\n";
-	for(int k=0;k<this->Results.haplotypes.size();k++){
-		for(int i=0;i<this->SnpIdx.size();i++){
-	    	std::cout<<this->Results.haplotypes[k][i];
-		}
-		std::cout<<"\n";
-	}
+//	std::cout<<"\nHaplotypes:\n";
+//	for(int k=0;k<this->Results.haplotypes.size();k++){
+//		for(int i=0;i<this->SnpIdx.size();i++){
+//	    	std::cout<<this->Results.haplotypes[k][i];
+//		}
+//		std::cout<<"\n";
+//	}
 
 
 	int haploNum=hm.size();
@@ -516,41 +516,51 @@ void HaplotypeDiploid::getResults(){
 	};
 	//this->AssociationTest();
 }
-
-void HaplotypeDiploid::AssociationTest(){
-
-	int haploNum=this->Results.haplotypes.size();
-    std::cout<<"contigency:\n";
-    double* contigency= new double[2*haploNum];
-    int idx=0;
-    for(int i=0;i<haploNum;i++){
-    	contigency[idx++]=this->Results.ControlCount[i];
-    	contigency[idx++]=this->Results.CaseCount[i];
-    	std::cout<<this->Results.ControlCount[i]<<","<<this->Results.CaseCount[i]<<"\n";
-    };
-
-     int nrow=2;
-	  double expect = -1.0;
-	  double percnt = 100.0;
-	  double emin = 0;
-	  double pre = 0, prt = 0;
-	  int ws = 300000;
-	  try{
-		  fexact(&nrow, &haploNum, contigency, &nrow, &expect, &percnt, &emin, &prt, &pre, &ws);
-		  this->Results.FisherP=pre;
-	  }catch(std::runtime_error &){
-		  this->Results.FisherP=-1;
-	  }
-	  //Pearson's ChiSquare test
-	  PearsonChiSquareTest(contigency,nrow,haploNum,this->Results.ChiSquare,this->Results.PearsonP);
-	  delete[] contigency;
-	  std::cout<<"fisherp:"<<this->Results.FisherP;
-	  std::cout<<"\npearsonp:"<<this->Results.PearsonP;
-}
+//
+//void HaplotypeDiploid::AssociationTest(){
+//
+//	int haploNum=this->Results.haplotypes.size();
+////    std::cout<<"contigency:\n";
+//    double* contigency= new double[2*haploNum];
+//    int idx=0;
+//    for(int i=0;i<haploNum;i++){
+//    	contigency[idx++]=this->Results.ControlCount[i];
+//    	contigency[idx++]=this->Results.CaseCount[i];
+////    	std::cout<<this->Results.ControlCount[i]<<","<<this->Results.CaseCount[i]<<"\n";
+//    };
+//
+//     int nrow=2;
+//	  double expect = -1.0;
+//	  double percnt = 100.0;
+//	  double emin = 0;
+//	  double pre = 0, prt = 0;
+//	  int ws = 300000;
+//	  try{
+//		  fexact(&nrow, &haploNum, contigency, &nrow, &expect, &percnt, &emin, &prt, &pre, &ws);
+//		  this->Results.FisherP=pre;
+//	  }catch(std::runtime_error &){
+//		  this->Results.FisherP=-1;
+//	  }
+//	  //Pearson's ChiSquare test
+//	  PearsonChiSquareTest(contigency,nrow,haploNum,this->Results.ChiSquare,this->Results.PearsonP);
+//	  delete[] contigency;
+////	  std::cout<<"fisherp:"<<this->Results.FisherP;
+////	  std::cout<<"\npearsonp:"<<this->Results.PearsonP;
+//}
 
 
 void HaplotypeDiploid::startHaplotypeAnalysis(){
+	if(!this->silent)
+		std::cout<<"starting haplotype analysis...\n";
 	while(this->phased<this->SnpIdx.size()){
+		if(!this->silent&&this->phased%10==0){
+			int per=100*(double)this->phased/(double)this->SnpIdx.size();
+			printf("\rProgress:%d%%", per);
+			fflush(stdout);
+			//std::cout<<"\b\b\b\b";
+//			std::cout.flags(std::ios::right);
+//			std::cout<<std::setw(8)<<std::setprecision(2)<<"\b\b\b\b"<<<<"%";
+		}
 		this->GenerateInterMediate();
 		this->GenerateUniqueGenotype();
 		this->generateAllPossibleHap();
@@ -559,6 +569,11 @@ void HaplotypeDiploid::startHaplotypeAnalysis(){
 		this->getFinalHap();
 		this->PhaseCurrent();
 	};
+	if(!this->silent){
+		printf("\rProgress:%d%%", 100);
+		fflush(stdout);
+	}
+
 	this->getResults();
 }
 

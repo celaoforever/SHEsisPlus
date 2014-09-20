@@ -54,20 +54,20 @@ boost::shared_ptr<SHEsis::SHEsisData> GenerateHaploData(int sampleNum, int snpNu
 			data->mGenotype[i][n][1-p]=hap[idx2][n];
 		}
 	}
-	std::cout<<"haplotype:\n";
-	for(int i=0;i<hap.size();i++){
-		for(int j=0;j<snpNum;j++){
-			std::cout<<hap[i][j];
-		};
-		std::cout<<"\t"<<hapcount[i]<<"\n";
-	};
+//	std::cout<<"haplotype:\n";
+//	for(int i=0;i<hap.size();i++){
+//		for(int j=0;j<snpNum;j++){
+//			std::cout<<hap[i][j];
+//		};
+//		std::cout<<"\t"<<hapcount[i]<<"\n";
+//	};
 	return data;
 
 }
 
 void testHp(){
-	int sampleNum=1000;
-	int snpNum=3;
+	int sampleNum=400;
+	int snpNum=100;
 	int chrSetNum=2;
 	int HapNum=3;
 	std::vector<boost::shared_ptr<short[]> > haps=createHaplotype(HapNum, snpNum);
@@ -81,9 +81,9 @@ void testHp(){
 //	data->printLocusInfo();
 //	SHEsis::Haplotype hp(data,2,mask);
 	SHEsis::HaplotypeDiploid hp(data);//,2,mask);
+	hp.setSlient(false);
 	hp.startHaplotypeAnalysis();
 	hp.AssociationTest();
-
 }
 
 int

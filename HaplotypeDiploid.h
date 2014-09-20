@@ -36,7 +36,7 @@ public:
 	HaplotypeDiploid(boost::shared_ptr<SHEsisData> data, int Snp, std::vector<short> mask);
 	virtual ~HaplotypeDiploid();
 	virtual void startHaplotypeAnalysis();
-	void AssociationTest();
+//	void AssociationTest();
 private:
 	void GenerateUniqueGenotype();
 	void GenerateInterMediate();

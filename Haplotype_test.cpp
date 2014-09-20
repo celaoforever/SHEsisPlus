@@ -147,12 +147,13 @@ void testHp(){
 //	data->printLocusInfo();
 //	SHEsis::Haplotype hp(data,2,mask);
 	SHEsis::Haplotype hp(data);
+	hp.setSilent(false);
 //	hp.BuildModel(4);
 //	hp.solve();
 //	hp.parseSolution(4);
 //	hp.associationTest();
 	hp.startHaplotypeAnalysis();
-	hp.associationTest();
+	hp.AssociationTest();
 
 }
 
