@@ -21,17 +21,21 @@ typedef enum{
 
 class LDTest {
 public:
-	LDTest(boost::shared_ptr<SHEsisData> data);
+	LDTest(boost::shared_ptr<SHEsisData> data,std::string path);
 	virtual ~LDTest();
 	void AllLociLDtest();
 	void DrawLDMap();
+	void printRes();
+	void setForceSAT(bool b){this->bForceSAT=b;};
 private:
 	double TwoLociLDTest(int snp1,int snp2,LD_TYPE type);
 	boost::shared_ptr<SHEsisData> data;
 	boost::shared_ptr<HaplotypeBase> hp;
 	boost::multi_array<double,2> res;
 	BMP* ldmap;
+	std::string path;
 	LD_TYPE ldtype;
+	bool bForceSAT;
 };
 
 } /* namespace SHEsis */
