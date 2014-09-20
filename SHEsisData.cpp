@@ -18,14 +18,23 @@ SHEsisData::SHEsisData(int SampleNum, int SnpNum, int NumOfChrSet)
 :SampleNum(SampleNum),SnpNum(SnpNum),NumOfChrSet(NumOfChrSet),
  mGenotype(boost::extents[SampleNum][SnpNum][NumOfChrSet]),
  vLocusInfo(SnpNum),CaseNum(-1),ControlNum(-1),codeIdx(1),
- vLabel(SampleNum)
+ vLabel(SampleNum),vLocusName(SnpNum)
 {
+	for(int i=0;i<this->vLocusInfo.size();i++){
+		std::stringstream ss;
+		ss<<"site"<<i+1;
+		this->vLocusName[i]=ss.str();
+	}
 };
 
 
 SHEsisData::~SHEsisData() {
 	this->vLabel.clear();
 	this->vLocusInfo.clear();
+}
+void SHEsisData::setLocusName(int snpidx,std::string s){
+	this->vLocusName[snpidx]=s;
+
 }
 
 std::string getStrFromSortedGenotype(std::vector<short> v){

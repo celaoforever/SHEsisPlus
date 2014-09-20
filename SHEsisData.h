@@ -17,7 +17,6 @@
 namespace SHEsis {
 
 struct LocusInfo{
-	std::string name;
 	boost::unordered_map<short, double> CaseAlleleCount;
 	boost::unordered_map<short, double> ControlAlleleCount;
 	boost::unordered_map<std::string, double> CaseGenotypeCount;
@@ -65,11 +64,13 @@ public:
 	boost::multi_array< short, 3> mGenotype;
 	std::vector< SampleStatus > vLabel;
 	std::vector<LocusInfo> vLocusInfo;
+	std::vector<std::string> vLocusName;
 	void statCount(std::vector< SampleStatus > & label);
 	void printLocusInfo();
 	int getCaseNum();
 	int getControlNum();
 	short GetAlleleCode(std::string const val);
+	void setLocusName(int snpidx,std::string s);
 protected:
 	boost::unordered_map<short, std::string> code2allele;
 	int codeIdx;
