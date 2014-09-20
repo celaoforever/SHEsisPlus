@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <math.h>
 #include "BMP.h"
 #include "font.h"
 #include "minifont.h"
@@ -345,8 +345,10 @@ BMP_vline (BMP *bmp, int x, int y0, int y1, RGB rgb)
  * Purpose:	Draws ature 5x8 characters into the image.
  */
 int
-BMP_draw_string (BMP *bmp,const  char *string, int x, int y, RGB color)
+BMP_draw_string (BMP *bmp,const  char *string, int x, int y, RGB color,double radian)
 {
+	int originx=x;
+	int originy=y;
 	char ch;
 	const char *s;
 	RGB r,g,b;
@@ -414,8 +416,17 @@ BMP_draw_string (BMP *bmp,const  char *string, int x, int y, RGB color)
 					default:
 						draw = 0;
 					}
-					if (draw)
-						BMP_point (bmp,x+j, y+i, color_to_use);
+					if (draw){
+						int oldx=x+j;
+						int oldy=y+i;
+						//int newx=(int)round((x-cx)*cos(r)-(y-cy)*sin(r)+cx);
+						//int newy=(int)round((x-cx)*sin(r)+(y-cy)*cos(r)+cy);
+						int newx=(int)round((oldx-originx)*cos(radian)-(oldy-originy)*sin(radian)+originx);
+						int newy=(int)round((oldx-originx)*sin(radian)+(oldy-originy)*cos(radian)+originy);
+						//BMP_point (bmp,x+j, y+i, color_to_use);
+						BMP_point (bmp,newx, newy, color_to_use);
+					};
+
 					j++;
 				}
 			}
@@ -476,9 +487,10 @@ BMP_string_width (char *string)
  * Purpose:	Draws miniature 5x8 characters into the image.
  */
 int
-BMP_draw_mini_string (BMP *bmp, char *string, int x, int y, RGB color)
+BMP_draw_mini_string (BMP *bmp, const char *string, int x, int y, RGB color)
 {
-	char ch, *s;
+	char ch;
+	const char *s;
 	unsigned long r,g,b;
 	unsigned long light, dark;
 
@@ -679,7 +691,7 @@ BMP_getpixel (BMP *bmp, int x, int y)
  * Purpose:	Writes image to BMP file.
  */
 int 
-BMP_write (BMP* bmp, char *path)
+BMP_write (BMP* bmp, const char *path)
 {
 	FILE *f;
 #define HDRLEN (54)

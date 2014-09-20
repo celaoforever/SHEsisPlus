@@ -42,7 +42,7 @@ typedef struct {
 /*extern*/ BMP* BMP_new (int, int);
 /*extern*/ void BMP_delete (BMP*);
 /*extern*/ void BMP_clear (BMP*, RGB);
-/*extern*/ int BMP_write (BMP*, char *path);
+/*extern*/ int BMP_write (BMP*, const char *path);
 /*extern*/ void BMP_point (BMP*, int, int, RGB);
 /*extern*/ void BMP_line (BMP *, int x0, int y0, int x1, int y1, RGB);
 /*extern*/ void BMP_hline (BMP *, int x0, int x1, int y, RGB);
@@ -51,10 +51,10 @@ typedef struct {
 /*extern*/ void BMP_fillrect (BMP *, int x, int y, int w, int h, RGB);
 /*extern*/ RGB BMP_getpixel (BMP*, int, int);
 
-/*extern*/ int BMP_draw_string (BMP *, const char *, int x, int y, RGB);
+/*extern*/ int BMP_draw_string (BMP *, const char *, int x, int y, RGB,double );
 /*extern*/ int BMP_string_width (char *);
 
-/*extern*/ int BMP_draw_mini_string (BMP *, char *, int x, int y, RGB);
+/*extern*/ int BMP_draw_mini_string (BMP *, const char *, int x, int y, RGB);
 /*extern*/ int BMP_mini_string_width (char *);
 
 #define RGB_BLACK (0)
