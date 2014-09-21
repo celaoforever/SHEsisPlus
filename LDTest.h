@@ -27,6 +27,7 @@ public:
 	void DrawLDMap();
 	void printRes();
 	void setForceSAT(bool b){this->bForceSAT=b;};
+	std::string reporthtml();
 private:
 	double TwoLociLDTest(int snp1,int snp2,LD_TYPE type);
 	boost::shared_ptr<SHEsisData> data;

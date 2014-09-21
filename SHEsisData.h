@@ -71,6 +71,9 @@ public:
 	int getControlNum();
 	short GetAlleleCode(std::string const val);
 	void setLocusName(int snpidx,std::string s);
+	std::string getStrFromSortedGenotype(std::vector<short> v);
+	std::string getallele(short a){return code2allele[a];};
+	std::string getOriginGenotype(std::string geno);
 protected:
 	boost::unordered_map<short, std::string> code2allele;
 	int codeIdx;

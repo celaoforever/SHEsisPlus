@@ -10,7 +10,7 @@
 #include <boost/assert.hpp>
 #include <sstream>
 #include <iostream>
-#include <boost/foreach.hpp>
+#include <boost/algorithm/string.hpp>
 namespace SHEsis {
 
 
@@ -36,8 +36,17 @@ void SHEsisData::setLocusName(int snpidx,std::string s){
 	this->vLocusName[snpidx]=s;
 
 }
+std::string SHEsisData::getOriginGenotype(std::string geno){
+	std::vector<std::string> strs;
+	std::string res;
+	boost::split(strs,geno,boost::is_any_of("/"));
+	for(int i=0;i<strs.size()-1;i++)
+		res+=this->getallele(std::atoi(strs[i].c_str()))+"/";
+	res+=this->getallele(std::atoi(strs[strs.size()-1].c_str()));
+	return res;
+}
 
-std::string getStrFromSortedGenotype(std::vector<short> v){
+std::string SHEsisData::getStrFromSortedGenotype(std::vector<short> v){
 	std::stringstream ss;
 	for(int i=0;i<v.size()-1;i++)
 	{

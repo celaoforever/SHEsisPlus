@@ -35,6 +35,7 @@ public:
 	virtual ~HWETest();
 	void AllSnpHWETest();
 	void printHWETestResults();
+	std::string reporthtml(double pthreshold);
 private:
 	void SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP, double& CaseFisherP,
 			double& ControlChi,double& ControlPearsonP, double & ControlFisherP,

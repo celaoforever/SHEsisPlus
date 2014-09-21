@@ -12,6 +12,8 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 #include <iostream>
+#include "CreatHtmlTable.h"
+template std::string convert2string<double>(double v);
 namespace SHEsis {
 
 HWETest::HWETest(boost::shared_ptr<SHEsisData> data): data(data),
@@ -135,7 +137,8 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP, 
 			  contigency[i]*=totalGenotype;
 		  if(contigency[i+1]<1)
 			  contigency[i+1]*=totalGenotype;
-		  CaseChi+=(contigency[i+1]-contigency[i])
+		  if(contigency[i+1] !=0)
+			  CaseChi+=(contigency[i+1]-contigency[i])
 				  *(contigency[i+1]-contigency[i])/contigency[i+1];
 	  }
 	  boost::math::chi_squared dist(NumOfCol-1);
@@ -186,7 +189,8 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP, 
 			contigency[i]*=totalGenotype;
 		if(contigency[i+1]<1)
 			contigency[i+1]*=totalGenotype;
-		  ControlChi+=(contigency[i+1]-contigency[i])
+		if(contigency[i+1] !=0)
+			ControlChi+=(contigency[i+1]-contigency[i])
 				  *(contigency[i+1]-contigency[i])/contigency[i+1];
 	}
 	ControlPearsonP= boost::math::cdf(boost::math::complement(dist,ControlChi));
@@ -232,7 +236,8 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP, 
 			contigency[i]*=totalGenotype;
 		if(contigency[i+1]<1)
 			contigency[i+1]*=totalGenotype;
-		  BothChi+=(contigency[i+1]-contigency[i])
+		if(contigency[i+1] !=0)
+			BothChi+=(contigency[i+1]-contigency[i])
 				  *(contigency[i+1]-contigency[i])/contigency[i+1];
 	}
 	BothPearsonP= boost::math::cdf(boost::math::complement(dist,BothChi));
@@ -249,12 +254,47 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP, 
 }
 
 void HWETest::AllSnpHWETest(){
+	this->data->statCount(this->data->vLabel);
 	for(int i=0;i<this->data->getSnpNum();i++){
 		this->SingleSnpHWETest(i,this->vHWETestResult[i].CaseChiSquare,this->vHWETestResult[i].CasePearsonP,this->vHWETestResult[i].CaseFisherP,
 				this->vHWETestResult[i].ControlChiSquare,this->vHWETestResult[i].ControlPearsonP,this->vHWETestResult[i].ControlFisherP,
 				this->vHWETestResult[i].BothChiSquare,this->vHWETestResult[i].BothPearsonP,this->vHWETestResult[i].BothFisherP);
 	};
 };
+
+
+std::string HWETest::reporthtml(double p){
+	boost::shared_ptr<SHEsis::CreatHtmlTable> html(new SHEsis::CreatHtmlTable());
+	html->createTable("HWETest");
+	std::vector<std::string> data;
+	data.push_back("SNP");
+	data.push_back("chi2 in case");
+	data.push_back("pearson's p in case");
+	data.push_back("fisher's p in case");
+	data.push_back("chi2 in ctrl");
+	data.push_back("pearson's p in ctrl");
+	data.push_back("fisher's p in ctrl");
+	data.push_back("chi2 in both");
+	data.push_back("pearson's p in both");
+	data.push_back("fisher's p in both");
+
+	html->addHeadRow(data);
+	for(int i=0;i<this->vHWETestResult.size();i++){
+		data.clear();
+		data.push_back(this->data->vLocusName[i]);
+		data.push_back(convert2string(this->vHWETestResult[i].CaseChiSquare));
+		data.push_back(convert2string(this->vHWETestResult[i].CasePearsonP));
+		data.push_back(convert2string(this->vHWETestResult[i].CaseFisherP));
+		data.push_back(convert2string(this->vHWETestResult[i].ControlChiSquare));
+		data.push_back(convert2string(this->vHWETestResult[i].ControlPearsonP));
+		data.push_back(convert2string(this->vHWETestResult[i].ControlFisherP));
+		data.push_back(convert2string(this->vHWETestResult[i].BothChiSquare));
+		data.push_back(convert2string(this->vHWETestResult[i].BothPearsonP));
+		data.push_back(convert2string(this->vHWETestResult[i].BothFisherP));
+		html->addDataRow(data);
+	};
+	return html->getTable();
+}
 
 void HWETest::printHWETestResults(){
 	for(int i=0;i<this->vHWETestResult.size();i++){

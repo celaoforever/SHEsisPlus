@@ -12,16 +12,116 @@
 #include <iostream>
 #include <math.h>
 #include <algorithm>
+#include "CreatHtmlTable.h"
+template std::string convert2string<double>(double v);
 namespace SHEsis {
 
 AssociationTest::AssociationTest(boost::shared_ptr<SHEsisData>  mdata):data(mdata),
 		vAssocationTestResult(mdata->getSnpNum()),
-		NumOfPermutation(1000)
+		NumOfPermutation(-1)
 {
 }
 
 AssociationTest::~AssociationTest() {
 	vAssocationTestResult.clear();
+}
+
+std::string AssociationTest::reporthtml(){
+	std::stringstream res;
+	res<<"<h3>Alleles:</h3>\n";
+	res<<this->reporthtmlAllele();
+	res<<"<h3>Genotypes:</h3>\n";
+	res<<this->reporthtmlGenotype();
+	return res.str();
+}
+
+std::string AssociationTest::reporthtmlAllele(){
+	boost::shared_ptr<SHEsis::CreatHtmlTable> html(new SHEsis::CreatHtmlTable());
+	html->createTable("Allele_Association");
+	std::vector<std::string> data;
+	data.push_back("SNP");
+	data.push_back("Allele Type");
+	data.push_back("Chi2");
+	data.push_back("Pearson's p");
+	data.push_back("Fisher's p");
+	if(this->NumOfPermutation!=-1)
+		data.push_back("Permutaion P");
+	data.push_back("OR [95% CI]");
+	data.push_back("Detail: allele(case freq/control freq)");
+	html->addHeadRow(data);
+	for(int i=0;i<this->vAssocationTestResult.size();i++){
+		data.clear();
+		data.push_back(this->data->vLocusName[i]);
+		std::string alleletype;
+		std::string detail;
+		boost::unordered_map<short,double>::iterator iter;
+		int count=0;
+		for(iter=this->data->vLocusInfo[i].BothAlleleCount.begin();
+			iter!=this->data->vLocusInfo[i].BothAlleleCount.end();iter++){
+				alleletype+= this->data->getallele(iter->first);//
+				detail+=this->data->getallele(iter->first)+"("+
+									convert2string(this->data->vLocusInfo[i].CaseAlleleCount[iter->first]/(double)this->data->getCaseNum()/(double)this->data->getNumOfChrSet())
+									+"/"+convert2string(this->data->vLocusInfo[i].ControlAlleleCount[iter->first]/(double)this->data->getControlNum()/(double)this->data->getNumOfChrSet())+")";
+				if(count!=this->data->vLocusInfo[i].BothAlleleCount.size()-1){
+					alleletype+="/";
+					detail+=", ";
+				};
+				count++;
+
+		}
+		data.push_back(alleletype);
+		data.push_back(convert2string(this->vAssocationTestResult[i].AlleleChiSquare));
+		data.push_back(convert2string(this->vAssocationTestResult[i].AllelePearsonP));
+		data.push_back(convert2string(this->vAssocationTestResult[i].AlleleFisherP));
+		if(this->NumOfPermutation!=-1)
+			data.push_back(convert2string(this->vAssocationTestResult[i].AllelePermutationP));
+		std::string OR=convert2string(this->vAssocationTestResult[i].AlleleOddsRatio)+
+				" ["+convert2string(this->vAssocationTestResult[i].AlleleOddsRatioLowLimit)+
+				","+convert2string(this->vAssocationTestResult[i].AlleleOddsRatioUpLimit)+"]";
+		data.push_back(OR);
+		data.push_back(detail);
+		html->addDataRow(data);
+	};
+	return html->getTable();
+}
+
+
+std::string AssociationTest::reporthtmlGenotype(){
+	boost::shared_ptr<SHEsis::CreatHtmlTable> html(new SHEsis::CreatHtmlTable());
+	html->createTable("Genotype_Association");
+	std::vector<std::string> data;
+	data.push_back("SNP");
+	data.push_back("Chi2");
+	data.push_back("Pearson's p");
+	data.push_back("Fisher's p");
+	if(this->NumOfPermutation!=-1)
+		data.push_back("Permutaion P");
+	data.push_back("Detail: genotype(case freq/control freq)");
+	html->addHeadRow(data);
+	for(int i=0;i<this->vAssocationTestResult.size();i++){
+		data.clear();
+		data.push_back(this->data->vLocusName[i]);
+		data.push_back(convert2string(this->vAssocationTestResult[i].GenotypeChiSquare));
+		data.push_back(convert2string(this->vAssocationTestResult[i].GenoTypePearsonP));
+		data.push_back(convert2string(this->vAssocationTestResult[i].GenotypeFisherP));
+		if(this->NumOfPermutation!=-1)
+			data.push_back(convert2string(this->vAssocationTestResult[i].GenotypePermutationP));
+		std::string detail;
+		boost::unordered_map<std::string,double>::iterator iter;
+		int count=0;
+		for(iter=this->data->vLocusInfo[i].BothGenotypeCount.begin();
+			iter!=this->data->vLocusInfo[i].BothGenotypeCount.end();iter++){
+			detail+=this->data->getOriginGenotype(iter->first)+"("+convert2string(this->data->vLocusInfo[i].CaseGenotypeCount[iter->first]/(double)this->data->getCaseNum())+"/"
+					+convert2string(this->data->vLocusInfo[i].ControlGenotypeCount[iter->first]/(double)this->data->getControlNum())+")";
+			if(count!=this->data->vLocusInfo[i].BothGenotypeCount.size()-1){
+				detail+=", ";
+			};
+			count++;
+		}
+		data.push_back(detail);
+		html->addDataRow(data);
+	};
+	return html->getTable();
 }
 
 void AssociationTest::association(){
@@ -221,6 +321,11 @@ void AssociationTest::SingleSnpTestGenotype(int iSnp, double& FisherP, double& P
 	  delete[] contigency;
 	  contigency = 0 ;
 }
+
+void AssociationTest::report(){
+
+}
+
 
 
 } /* namespace SHEsis */

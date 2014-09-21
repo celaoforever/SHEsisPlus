@@ -14,6 +14,7 @@
 namespace SHEsis {
 
 struct singleHapRes{
+	singleHapRes():chisquare(-1),fisherp(-1),pearsonp(-1),OR(-1),orlow(-1),orUp(-1){}
 	double chisquare;
 	double fisherp;
 	double pearsonp;
@@ -31,7 +32,7 @@ struct HapTestResult{
 	double PearsonP;
 	double ChiSquare;
 	HapTestResult(int sample,int ploidy):
-		genotypes(boost::extents[sample][ploidy]),FisherP(1),PearsonP(1),ChiSquare(0)
+		genotypes(boost::extents[sample][ploidy]),FisherP(-1),PearsonP(-1),ChiSquare(-1)
 	{};
 	~HapTestResult(){
 		haplotypes.clear();
@@ -43,20 +44,24 @@ struct HapTestResult{
 class HaplotypeBase {
 public:
 	boost::shared_ptr<SHEsisData> data;
-	HaplotypeBase(boost::shared_ptr<SHEsisData> data,std::vector<short> mask):data(data),mask(mask),Results(data->getSampleNum(),data->getNumOfChrSet()),silent(true){};
-	HaplotypeBase(boost::shared_ptr<SHEsisData> data):data(data),Results(data->getSampleNum(),data->getNumOfChrSet()),silent(false){};
+	HaplotypeBase(boost::shared_ptr<SHEsisData> data,std::vector<short> mask):data(data),mask(mask),Results(data->getSampleNum(),data->getNumOfChrSet()),silent(true),freqthreshold(0.03){};
+	HaplotypeBase(boost::shared_ptr<SHEsisData> data):data(data),Results(data->getSampleNum(),data->getNumOfChrSet()),silent(true),freqthreshold(0.03){};
 	virtual ~HaplotypeBase(){
 		this->mask.clear();
 		this->SnpIdx.clear();
 	}
 	virtual void startHaplotypeAnalysis(){};
 	void AssociationTest();
-	void setSlient(bool b){this->silent=b;};
+	void setSilent(bool b){this->silent=b;};
+	void setFreqThreshold(double t){this->freqthreshold=t;};
+	std::string reporthtml();
+	std::string reporthtmltable();
 	HapTestResult Results;
 protected:
 	std::vector<short> mask;
 	std::vector<int> SnpIdx;
 	bool silent;
+	double freqthreshold;
 };
 
 

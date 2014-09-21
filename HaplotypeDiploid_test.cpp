@@ -81,7 +81,7 @@ void testHp(){
 //	data->printLocusInfo();
 //	SHEsis::Haplotype hp(data,2,mask);
 	SHEsis::HaplotypeDiploid hp(data);//,2,mask);
-	hp.setSlient(false);
+	hp.setSilent(false);
 	hp.startHaplotypeAnalysis();
 	hp.AssociationTest();
 }

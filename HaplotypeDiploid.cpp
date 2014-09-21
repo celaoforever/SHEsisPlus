@@ -570,7 +570,7 @@ void HaplotypeDiploid::startHaplotypeAnalysis(){
 		this->PhaseCurrent();
 	};
 	if(!this->silent){
-		printf("\rProgress:%d%%", 100);
+		printf("\rProgress:%d%%\n", 100);
 		fflush(stdout);
 	}
 

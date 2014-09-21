@@ -33,8 +33,10 @@ public:
 	void setPermutationTimes(int p){this->NumOfPermutation=p;};
 	virtual ~AssociationTest();
 	void printAssociationTestResults();
+	void report();
 	void permutation();
 	void association();
+	std::string reporthtml();
 private:
 	int NumOfPermutation;
 	std::vector<double> PermutationPAllele;
@@ -45,6 +47,8 @@ private:
 	void SingleSnpTestGenotype(int iSnp, double &FisherP, double& PearsonP, double & ChiSquare);
 	void AssociationTestForAllSnpsAllele();
 	void AssociationTestForAllSnpsGenotype();
+	std::string reporthtmlAllele();
+	std::string reporthtmlGenotype();
 };
 
 } /* namespace SHEsis */

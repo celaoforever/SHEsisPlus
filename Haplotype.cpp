@@ -26,7 +26,7 @@ namespace SHEsis {
 
 Haplotype::Haplotype(boost::shared_ptr<SHEsisData> data):HaplotypeBase(data),VarNum(0),ClauseNum(0),
 occurence(boost::extents[data->getSampleNum()][data->getSnpNum()]),
-missing(boost::extents[data->getSampleNum()][data->getSnpNum()]),silent(true)
+missing(boost::extents[data->getSampleNum()][data->getSnpNum()])
 {
 
 	this->statOccurence();
@@ -36,7 +36,7 @@ missing(boost::extents[data->getSampleNum()][data->getSnpNum()]),silent(true)
 };
 
 Haplotype::Haplotype(boost::shared_ptr<SHEsisData>  data, int Snp, std::vector<short> mask):HaplotypeBase(data,mask),VarNum(0),ClauseNum(0),
-		occurence(boost::extents[data->getSampleNum()][Snp]),silent(true),
+		occurence(boost::extents[data->getSampleNum()][Snp]),
 		missing(boost::extents[data->getSampleNum()][Snp])
 {
 

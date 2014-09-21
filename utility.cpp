@@ -7,6 +7,9 @@
 #include "utility.h"
 #include <boost/array.hpp>
 #include <stdarg.h>
+
+
+
 boost::shared_ptr<int[]> SetSharedPtr( int Num,...){
 	boost::shared_ptr<int[]> sp(new int[Num+1]);
 	sp[0]=Num;

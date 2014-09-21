@@ -40,6 +40,18 @@ private:
 	int msize;
 	bool isStatic;
 };
+template <typename T>
+std::string convert2string(T v){
+	std::stringstream ss;
+	int tmp=v*1000;
+	v=(T)tmp/1000.0;
+	if(v != -1)
+		ss<<v;
+	else
+		ss<<"NA";
+	return ss.str();
+}
+
 
 std::string ToBinaryString(int i);
 boost::shared_ptr<int[]> SetSharedPtr( int Num,...);

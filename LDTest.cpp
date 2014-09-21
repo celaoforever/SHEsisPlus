@@ -9,6 +9,7 @@
 #include "HaplotypeDiploid.h"
 #include "Haplotype.h"
 #include <boost/shared_ptr.hpp>
+#include "CreatHtmlTable.h"
 #define PI 3.1415926535898
 #define ABS(x) x<0?(-1*(x)):(x)
 namespace SHEsis {
@@ -298,7 +299,13 @@ void LDTest::DrawLDMap(){
 		}
 	}
 	BMP_write (this->ldmap, this->path.c_str());
+	BMP_delete(this->ldmap);
+}
 
+std::string LDTest::reporthtml(){
+std::string res;
+res=+"<img src=\""+this->path+"\""+" alt=\"LD map\">";
+return res;
 
 }
 

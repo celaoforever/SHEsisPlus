@@ -28,9 +28,9 @@ SHEsis::SHEsisData GenerateRandomData(int sampleNum, int snpNum, int chrSetNum){
 			}
 		}
 	}
-	BOOST_CHECK(sampleNum==data.mGenotype.shape()[0]);
-	BOOST_CHECK(snpNum==data.mGenotype.shape()[1]);
-	BOOST_CHECK(chrSetNum==data.mGenotype.shape()[2]);
+//	BOOST_CHECK(sampleNum==data.mGenotype.shape()[0]);
+//	BOOST_CHECK(snpNum==data.mGenotype.shape()[1]);
+//	BOOST_CHECK(chrSetNum==data.mGenotype.shape()[2]);
 	return data;
 }
 
