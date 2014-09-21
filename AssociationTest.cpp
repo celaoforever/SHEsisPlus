@@ -173,8 +173,11 @@ int getRank(double p, std::vector<double> v){
 }
 
 void AssociationTest::permutation(){
+	//std::cout<<"Permutating..."
 	this->vPermutateLabel=this->data->vLabel;
 	for(int i=0;i<this->NumOfPermutation;i++){
+		printf("\rPermutating...%d%%", (int)(100*(double)i/(double)this->NumOfPermutation));
+		fflush(stdout);
 		std::random_shuffle(this->vPermutateLabel.begin(), this->vPermutateLabel.end());
 		this->data->statCount(this->vPermutateLabel);
 		this->AssociationTestForAllSnpsAllele();
@@ -184,6 +187,8 @@ void AssociationTest::permutation(){
 		this->PermutationPAllele.push_back(ap);
 		this->PermutationPGenotype.push_back(gp);
 	};
+	printf("\rPermutating...%d%%\n", 100);
+	fflush(stdout);
 	std::sort (this->PermutationPAllele.begin(), this->PermutationPAllele.end());
 	std::sort (this->PermutationPGenotype.begin(), this->PermutationPGenotype.end());
 //	std::cout<<"PermutationPAllele:\n";

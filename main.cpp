@@ -13,6 +13,9 @@
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
 #include <fstream>
+#ifdef _WIN32
+	#include <windows.h>
+#endif
 #define VERSION 2.0
 
 namespace po = boost::program_options;
@@ -83,15 +86,15 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
-	boost::shared_ptr<SHEsis::AssociationTest> AssocHandle;//(new SHEsis::AssociationTest(data));
-	boost::shared_ptr<SHEsis::HWETest> HWEHandle;//(new SHEsis::HWETest(data));
-	boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle;//(new SHEsis::Haplotype(data));
-	//boost::shared_ptr<SHEsis::HaplotypeDiploid> DiploidHapHandle;//(new SHEsis::Haplotype(data));
+	boost::shared_ptr<SHEsis::AssociationTest> AssocHandle;
+	boost::shared_ptr<SHEsis::HWETest> HWEHandle;
+	boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle;
 	boost::shared_ptr<SHEsis::LDTest> LDHandle;
 
 	report<<"<h1>SHEsis </h1>\n";
 
 	if(SHEsisArgs.assocAnalysis){
+		std::cout<<"Starting association test...\n";
 		AssocHandle.reset(new SHEsis::AssociationTest(data));
 		if(SHEsisArgs.permutation!=-1){
 			AssocHandle->setPermutationTimes(SHEsisArgs.permutation);
@@ -99,20 +102,22 @@ int main(int argc, char *argv[])
 		}else{
 			AssocHandle->association();
 		}
-		//AssocHandle->printAssociationTestResults();
 		report<<"\n<h2> Single Locus Association Test: </h2>\n";
 		report<<AssocHandle->reporthtml();
+		std::cout<<"done\n";
 	};
 
 	if(SHEsisArgs.hweAnalysis){
+		std::cout<<"Starting Hardy-Weinberg equilibrium test...\n";
 		HWEHandle.reset(new SHEsis::HWETest(data));
 		HWEHandle->AllSnpHWETest();
-		//HWEHandle->printHWETestResults();
 		report<<"\n<h2> Hardy-Weinberg Equilibrium Test: </h2>\n";
 		report<<HWEHandle->reporthtml(0.1);
+		std::cout<<"done\n";
 	}
 
 	if(SHEsisArgs.haploAnalysis){
+		std::cout<<"Starting haplotype analysis...\n";
 		if(data->getNumOfChrSet()<=2){
 			if(SHEsisArgs.mask.size()!=data->getSnpNum()){
 				if(SHEsisArgs.mask.size()!=0)
@@ -142,19 +147,22 @@ int main(int argc, char *argv[])
 			HapHandle->setFreqThreshold(SHEsisArgs.lft);
 		else
 			std::cout<<"***WARNING: lowest frequency threshold for haplotype analysis is invalid..defaulting to 0.03\n";
+		HapHandle->setSilent(false);
 		HapHandle->startHaplotypeAnalysis();
 		HapHandle->AssociationTest();
 		report<<"\n<h2> Haplotype Analysis: </h2>\n";
 		report<<HapHandle->reporthtml();
+		std::cout<<"done\n";
 	};
 
 	if(SHEsisArgs.ldAnalysis){
+		std::cout<<"Starting linkage disequilibrium analysis...\n";
 		LDHandle.reset(new SHEsis::LDTest(data,SHEsisArgs.output+".bmp"));
 		LDHandle->AllLociLDtest();
 		LDHandle->DrawLDMap();
-		LDHandle->printRes();
 		report<<"\n<h2> Linkage Disequilibrium Analysis: </h2>\n";
 		report<<LDHandle->reporthtml();
+		std::cout<<"done\n";
 	};
 	if(SHEsisArgs.html){
 		report<<"</body>\n</html>\n";
@@ -162,6 +170,12 @@ int main(int argc, char *argv[])
 
 	ofile<<report.str();
 	ofile.close();
+	std::string cmd="firefox "+SHEsisArgs.output+".html";
+#ifdef _WIN32
+	ShellExecute(NULL,"open",SHEsisArgs.output+".html",NULL,NULL,SW_SHOWNORMAL);
+#else
+	system(cmd.c_str());
+#endif
 
 	return 0;
 }

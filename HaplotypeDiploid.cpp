@@ -550,8 +550,6 @@ void HaplotypeDiploid::getResults(){
 
 
 void HaplotypeDiploid::startHaplotypeAnalysis(){
-	if(!this->silent)
-		std::cout<<"starting haplotype analysis...\n";
 	while(this->phased<this->SnpIdx.size()){
 		if(!this->silent&&this->phased%10==0){
 			int per=100*(double)this->phased/(double)this->SnpIdx.size();

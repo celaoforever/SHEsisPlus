@@ -132,12 +132,18 @@ double LDTest::TwoLociLDTest(int snp1,int snp2,LD_TYPE type){
 void LDTest::AllLociLDtest(){
 	this->data->statCount(this->data->vLabel);
 //	std::cout<<this->data->vLocusInfo[0].name<<"-"<<this->data->vLocusInfo[1].name<<"\n";
-
+	int total=this->data->getSnpNum()*(this->data->getSnpNum()-1)/2;
+	int count=0;
 	for(int i=0;i<this->data->getSnpNum();i++){
 		for(int j=i+1;j<this->data->getSnpNum();j++){
 			this->res[i][j]=this->TwoLociLDTest(i,j,this->ldtype);
+			printf("\rProgress:%d%%", (double)count/(double)total);
+			fflush(stdout);
+			count++;
 		}
 	}
+	printf("\rProgress:%d%%\n", 100);
+	fflush(stdout);
 }
 bool existsNonZeroPixel(int x_start, int x_end,int y,int length,boost::shared_ptr<bool[]> p){
 	for(int x=x_start;x<=x_end;x++){
