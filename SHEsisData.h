@@ -16,77 +16,79 @@
 #define GENOTYPE_MISSING 0
 namespace SHEsis {
 
-struct LocusInfo{
-	boost::unordered_map<short, double> CaseAlleleCount;
-	boost::unordered_map<short, double> ControlAlleleCount;
-	boost::unordered_map<std::string, double> CaseGenotypeCount;
-	boost::unordered_map<std::string, double> ControlGenotypeCount;
+struct LocusInfo {
+  boost::unordered_map<short, double> CaseAlleleCount;
+  boost::unordered_map<short, double> ControlAlleleCount;
+  boost::unordered_map<std::string, double> CaseGenotypeCount;
+  boost::unordered_map<std::string, double> ControlGenotypeCount;
 
-	boost::unordered_map<short, double> BothAlleleCount;
-	boost::unordered_map<std::string, double> BothGenotypeCount;
-	int getAlleleIndex(short a){
-		BOOST_ASSERT(BothAlleleCount.end() != BothAlleleCount.find(a));
-		boost::unordered_map<short,double>::iterator iter;
-		int idx=0;
-		for(iter=BothAlleleCount.begin();iter!=BothAlleleCount.end();iter++){
-			if(a == iter->first)
-				return idx;
-			idx++;
-		}
-		return -1;
-	};
-	short getAlleleType(int idx){
-		BOOST_ASSERT(idx<BothAlleleCount.size());
-		boost::unordered_map<short,double>::iterator iter;
-		int i=0;
-		for(iter=BothAlleleCount.begin();iter!=BothAlleleCount.end();iter++){
-			if(i==idx)
-				return iter->first;
-			i++;
-		}
-		return -1;
-	}
+  boost::unordered_map<short, double> BothAlleleCount;
+  boost::unordered_map<std::string, double> BothGenotypeCount;
+  int getAlleleIndex(short a) {
+    BOOST_ASSERT(BothAlleleCount.end() != BothAlleleCount.find(a));
+    boost::unordered_map<short, double>::iterator iter;
+    int idx = 0;
+    for (iter = BothAlleleCount.begin(); iter != BothAlleleCount.end();
+         iter++) {
+      if (a == iter->first) return idx;
+      idx++;
+    }
+    return -1;
+  };
+  short getAlleleType(int idx) {
+    BOOST_ASSERT(idx < BothAlleleCount.size());
+    boost::unordered_map<short, double>::iterator iter;
+    int i = 0;
+    for (iter = BothAlleleCount.begin(); iter != BothAlleleCount.end();
+         iter++) {
+      if (i == idx) return iter->first;
+      i++;
+    }
+    return -1;
+  }
 };
 
-typedef enum{
-	MISSING,
-	CONTROL,
-	CASE
-} SampleStatus;
+typedef enum { MISSING, CONTROL, CASE } SampleStatus;
 
 class SHEsisData {
-public:
-	SHEsisData(int SampleNum, int SnpNum, int NumOfChrSet);
-	int getNumOfChrSet(){return this->NumOfChrSet;};
-	int getSampleNum(){return this->SampleNum;};
-	int getSnpNum(){return this->SnpNum;};
-	virtual ~SHEsisData();
-	boost::multi_array< short, 3> mGenotype;
-	std::vector< SampleStatus > vLabel;
-	std::vector<LocusInfo> vLocusInfo;
-	std::vector<std::string> vLocusName;
-	void statCount(std::vector< SampleStatus > & label);
-	void printLocusInfo();
-	int getCaseNum();
-	int getControlNum();
-	short GetAlleleCode(std::string const val);
-	void setLocusName(int snpidx,std::string s);
-	std::string getStrFromSortedGenotype(std::vector<short> v);
-	std::string getallele(short a){return code2allele[a];};
-	std::string getOriginGenotype(std::string geno);
-protected:
-	boost::unordered_map<short, std::string> code2allele;
-	int codeIdx;
-	void getCaseAndControlNum();
-	int CaseNum;
-	int ControlNum;
-	const int SampleNum;
-	const int SnpNum;
-	const int NumOfChrSet;
+ public:
+  SHEsisData(int SampleNum, int SnpNum, int NumOfChrSet);
+  int getNumOfChrSet() {
+    return this->NumOfChrSet;
+  };
+  int getSampleNum() {
+    return this->SampleNum;
+  };
+  int getSnpNum() {
+    return this->SnpNum;
+  };
+  virtual ~SHEsisData();
+  boost::multi_array<short, 3> mGenotype;
+  std::vector<SampleStatus> vLabel;
+  std::vector<LocusInfo> vLocusInfo;
+  std::vector<std::string> vLocusName;
+  void statCount(std::vector<SampleStatus>& label);
+  void printLocusInfo();
+  int getCaseNum();
+  int getControlNum();
+  short GetAlleleCode(std::string const val);
+  void setLocusName(int snpidx, std::string s);
+  std::string getStrFromSortedGenotype(std::vector<short> v);
+  std::string getallele(short a) {
+    return code2allele[a];
+  };
+  std::string getOriginGenotype(std::string geno);
 
+ protected:
+  boost::unordered_map<short, std::string> code2allele;
+  int codeIdx;
+  void getCaseAndControlNum();
+  int CaseNum;
+  int ControlNum;
+  const int SampleNum;
+  const int SnpNum;
+  const int NumOfChrSet;
 };
-
 };
-
 
 #endif /* SHESISDATA_H_ */

@@ -20,4 +20,3 @@ class Cloneable {
 }
 
 #endif /* CLONEABLE_H_ */
-

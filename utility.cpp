@@ -8,129 +8,104 @@
 #include <boost/array.hpp>
 #include <stdarg.h>
 
-
-
-boost::shared_ptr<int[]> SetSharedPtr( int Num,...){
-	boost::shared_ptr<int[]> sp(new int[Num+1]);
-	sp[0]=Num;
-	va_list args;
-	va_start(args,Num);
-	int idx=1;
-	while(Num>0){
-		sp[idx++]=va_arg(args,int);
-		Num--;
-	}
-	return sp;
+boost::shared_ptr<int[]> SetSharedPtr(int Num, ...) {
+  boost::shared_ptr<int[]> sp(new int[Num + 1]);
+  sp[0] = Num;
+  va_list args;
+  va_start(args, Num);
+  int idx = 1;
+  while (Num > 0) {
+    sp[idx++] = va_arg(args, int);
+    Num--;
+  }
+  return sp;
 }
 
-char digits[]=
-{
-'0', '1', '2', '3', '4', '5',
-'6', '7', '8', '9', 'a', 'b',
-'c', 'd', 'e', 'f', 'g', 'h',
-'i', 'j', 'k', 'l', 'm', 'n',
-'o', 'p', 'q', 'r', 's', 't',
-'u', 'v', 'w', 'x', 'y', 'z'
-};
+char digits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b',
+                 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+                 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
 
-std::string ToUnsignedString(int i, int shift)
-{
-    char  buf[32];
-    char * pBuf = buf;
-    int charPos = 32;
-    int radix = 1<<shift;
-    int mask = radix - 1;
-    do
-    {
-        pBuf[--charPos] = digits[i&mask];
-        i = i>>shift;
-    }while(i != 0);
+std::string ToUnsignedString(int i, int shift) {
+  char buf[32];
+  char* pBuf = buf;
+  int charPos = 32;
+  int radix = 1 << shift;
+  int mask = radix - 1;
+  do {
+    pBuf[--charPos] = digits[i & mask];
+    i = i >> shift;
+  } while (i != 0);
 
-    std::string str;
-    int strLen = 32 - charPos;
-    pBuf = pBuf+charPos;
-    while(strLen)
-    {
-        str.push_back(*pBuf);
-        pBuf++;
-        strLen--;
-    }
+  std::string str;
+  int strLen = 32 - charPos;
+  pBuf = pBuf + charPos;
+  while (strLen) {
+    str.push_back(*pBuf);
+    pBuf++;
+    strLen--;
+  }
 
-    return str;
+  return str;
 }
 
-std::string ToBinaryString(int i)
-{
-    return  ToUnsignedString(i, 1);
-}
-std::string int2str(int n)
-{
-  std::ostringstream s2( std::stringstream::out );
+std::string ToBinaryString(int i) { return ToUnsignedString(i, 1); }
+std::string int2str(int n) {
+  std::ostringstream s2(std::stringstream::out);
   s2 << n;
   return s2.str();
 }
 
-boost::shared_ptr<int[]> toBooleanInt(int n , int i){
+boost::shared_ptr<int[]> toBooleanInt(int n, int i) {
 
-	//boost::shared_ptr<int[]> spb(new int[n+1]);
-	boost::shared_ptr<int[]> spb(new int[n]);
-	for(int i=0;i<n;i++){
-		spb[i]=0;
-	}
-	boost::shared_ptr<int[] > spb_(new int[n]);
-	for(int i=0;i<n;i++){
-		spb_[i]=0;
-	}
-	std::string s = ToBinaryString(i);
-	for(int j=n-s.length();j<n;j++){
-		char c= s[j-n+s.length()];
-		if(c=='1')
-			spb_[j]=1;
-	}
-	int counter = n-1;
-	for(int j=0;j<n;j++){
-		spb[j]=spb_[counter];
-		counter--;
-	}
-	return spb;
+  // boost::shared_ptr<int[]> spb(new int[n+1]);
+  boost::shared_ptr<int[]> spb(new int[n]);
+  for (int i = 0; i < n; i++) {
+    spb[i] = 0;
+  }
+  boost::shared_ptr<int[]> spb_(new int[n]);
+  for (int i = 0; i < n; i++) {
+    spb_[i] = 0;
+  }
+  std::string s = ToBinaryString(i);
+  for (int j = n - s.length(); j < n; j++) {
+    char c = s[j - n + s.length()];
+    if (c == '1') spb_[j] = 1;
+  }
+  int counter = n - 1;
+  for (int j = 0; j < n; j++) {
+    spb[j] = spb_[counter];
+    counter--;
+  }
+  return spb;
 }
 
-void error(std::string msg){
-//	std::cout<<msg<<"\n";
-	throw std::runtime_error("error in calculating fisher's exact test");
+void error(std::string msg) {
+  //	std::cout<<msg<<"\n";
+  throw std::runtime_error("error in calculating fisher's exact test");
 }
 /* translated from clase GenralIndexing*/
-int GeneralIndexingGetIndex(boost::shared_ptr<int[]> sizes,boost::shared_ptr<int[]> indices ){
-    int index = 0;
-    for(int i = 1; i <=indices[0]; i++)
-    {
-        int p = 1;
-        for(int j = i + 1; j <= sizes[0]; j++)
-            p *= sizes[j];
+int GeneralIndexingGetIndex(boost::shared_ptr<int[]> sizes,
+                            boost::shared_ptr<int[]> indices) {
+  int index = 0;
+  for (int i = 1; i <= indices[0]; i++) {
+    int p = 1;
+    for (int j = i + 1; j <= sizes[0]; j++) p *= sizes[j];
 
-        p *= indices[i];
-        index += p;
-    }
-    return ++index;
+    p *= indices[i];
+    index += p;
+  }
+  return ++index;
 };
 
-int GeneralIndexingGetSize(boost::shared_ptr<int[]>  sizes)
-{
-     int p = 1;
-     for(int i = 1; i <=sizes[0]; i++)
-         p *= sizes[i];
-     return p;
+int GeneralIndexingGetSize(boost::shared_ptr<int[]> sizes) {
+  int p = 1;
+  for (int i = 1; i <= sizes[0]; i++) p *= sizes[i];
+  return p;
 };
 
-
-
-
-
-
-
-//template<typename T>
+// template<typename T>
 //
-//double CalChiSquareFromContigencyTable(boost::multi_array<T, 2> &array){
+// double CalChiSquareFromContigencyTable(boost::multi_array<T, 2> &array){
 //	boost::multi_array<T,1> RowSum;
 //	RowSum(boost::extents[array.shape()[0]]);
 //	std::fill(RowSum.begin(),RowSum.end(),0);
@@ -165,11 +140,13 @@ int GeneralIndexingGetSize(boost::shared_ptr<int[]>  sizes)
 //	return chi;
 //}
 //
-////template double CalChiSquareFromContigencyTable<double>(boost::multi_array<double, 2> array);
+////template double
+/// CalChiSquareFromContigencyTable<double>(boost::multi_array<double, 2>
+/// array);
 //
 //
 ////Copied from fisher.c - Coded by Matthew Belmonte
-//double fisher(int m, int n, double x)
+// double fisher(int m, int n, double x)
 //{
 //	int a, b, i, j;
 //	double w, y, z, zk, d, p;
@@ -228,14 +205,15 @@ int GeneralIndexingGetSize(boost::shared_ptr<int[]>  sizes)
 //	return(p<0.0? 0.0: p>1.0? 1.0: p);
 //}
 //
-//double getFisherP(double chi2, int df)
+// double getFisherP(double chi2, int df)
 //{
 //	if(fabs(chi2)<1e-10) return 1.0;
 //	else return 1.0-fisher(df, 5000, chi2/df);
 //}
 //
-//// upper one sided tail probability of the normal distribution for a given normal deviate
-//double probnorm(double x)
+//// upper one sided tail probability of the normal distribution for a given
+/// normal deviate
+// double probnorm(double x)
 //{
 //	double z,t,p,xa;
 //	xa=fabs(x);
@@ -252,7 +230,7 @@ int GeneralIndexingGetSize(boost::shared_ptr<int[]>  sizes)
 //
 //
 //// Pearson's chi2prob
-//double getPearsonP(double x2,int ndf)
+// double getPearsonP(double x2,int ndf)
 //{
 //	double z,p,x,sum,re,ch,chp;
 //	short i,n1,n2;
@@ -310,6 +288,3 @@ int GeneralIndexingGetSize(boost::shared_ptr<int[]>  sizes)
 //		}
 //	}
 //}
-
-
-
