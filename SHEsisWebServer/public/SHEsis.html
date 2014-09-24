@@ -45,7 +45,7 @@
 
 <div class="container" style="padding:30px 30px" >
 <font size="4">
-          <form>
+          <form name="SHEsisMain" action="Results" method="post">
           <fildset>
 	    <table style="width:90%">
 	    <tr>
@@ -159,13 +159,13 @@
 		  <tr>
 		    <td>
 		      <div class="input-control textarea">
-			<textarea rows="30" cols="20" wrap="OFF" placeholder="eg. "></textarea>
+			<textarea name="caseldata" rows="30" cols="20" wrap="OFF"></textarea>
 		      </div>
 		    </td>
 		    <td style="width:15px"></td>
 		    <td>
 		      <div class="input-control textarea">
-			<textarea rows="30" cols="20" wrap="OFF"></textarea>
+			<textarea name="controldata" rows="30" cols="20" wrap="OFF"></textarea>
 		      </div>		      
 		    </td>
 		  </tr>
@@ -175,7 +175,7 @@
 	    <tr>
 	      <td colspan="5">
 		<div style="text-align:center">
-		  <button  class="large">Calculate</button>
+		  <input type="submit" class="large"></input>
 		</div>
 	      </td>
 	    </tr>
