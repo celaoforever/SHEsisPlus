@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="stylesheets/metro-bootstrap.css">
+	<link rel="stylesheet" href="stylesheets/iconFont.min.css">
+        <script src="javascripts/jquery.min.js"></script>
+        <script src="javascripts/jquery-ui.js"></script>
+        <script src="javascripts/metro.min.js"></script>
+    </head>
+    <body class="metro">
+<div class="navigation-bar">
+  <div class="navigation-bar-content container">
+    <a class="element" href="http://analysis2.bio-x.cn/SHEsisMain.htm" title="Back to SHEsis main page">
+    <span class="icon-home"></span>
+	SHEsis
+	<sup>2.0</sup>
+     </a>
+    <span class="element-divider"></span>
+    <a class="element">
+      Help
+    </a>
+    <span class="element-divider"></span>
+    <a class="element">
+      Cite Us 
+    </a>   
+    <span class="element-divider"></span>
+    <a class="element">
+      Contact Us 
+    </a> 
+    <span class="element-divider"></span>
+    <a class="element place-right" href="https://github.com/celaoforever/SHEsis" title="Follow us on github">
+      Follow us on github
+      <span class="icon-github-2"> 
+    </a>
+ </div>
+</div>
+<div style="background: url(images/dna5-corp.jpg) top left no-repeat;background-size:cover;height:200px;">
+   <div class="container"  style="padding:50px 20px">
+      <h1 class="fg-white"><strong>SHEsis</strong> <sup>v2.0</sup></h1>
+      <a class="fg-white" style="font-family:Verdana">
+	<font size="4">A web-based platform for association test on polyploid and multiallelic species.</font>
+      </a>
+    </div>
+</div>
+
+<div class="container" style="padding:30px 30px" >
+<font size="4">
+          <form>
+          <fildset>
+	    <table style="width:90%">
+	    <tr>
+	      <td colspan=5>
+	      <legend>
+	      Enter Input:
+	      </legend>
+	      </td>
+	     </tr>
+	    <tr>  
+	    <div class="input-control checkbox" data-role="input-control">
+	      <td>
+		Choose analysis :
+	      </td>
+	      <td>
+	      <label class="inline-block">
+		<input type="checkbox"></input>
+		<span class="check"></span>
+		Association Test
+	      </label>
+	      </td>
+	      <td>
+	      <label class="inline-block">
+		<input type="checkbox"></input>
+		<span class="check"></span>
+		Hardy-Weinberg Equilibrium Analysis
+	      </label>
+	      </td>
+	      <td>
+	      <label class="inline-block">
+		<input type="checkbox"></input>
+		<span class="check"></span>
+		Haplptype Analysis
+	      </label>	 
+	      </td>
+	      <td>
+	      <label class="inline-block">
+		<input type="checkbox"></input>
+		<span class="check"></span>
+		Linkage Disequilibrium Analysis
+	      </label>
+	      </td>
+	    </div>
+	    </tr>	    
+	    <tr>
+	     <td>
+	      Enter Ploidy:
+	     </td>
+	     <td>
+	         <div class="input-control select">
+		 <select style="width:85%; text-align:center">
+		   <option value="2">2</option>
+		   <option value="3">3</option>
+		   <option value="4">4</option>
+		   <option value="5">5</option>
+		   <option value="6">6</option>
+		  </select>  
+		  </div>
+	     </td>
+	     <td>
+	       Selected site for haplotype analysis:
+	     </td>
+	     <td colspan=3>
+	       <div class="input-control text">
+	       <input style="width:100%" type="text" placeholder="eg. 1,0,1,1 to choose 1st,2nd&4th sites for when there are 4 sites."></input>
+	       </div>
+	     </td>  
+	    </tr>
+	    <tr>
+	      <td>
+		Calculate LD in:
+              </td>
+	     <td>
+	         <div class="input-control select">
+		 <select style="width:85%; text-align:center">
+		   <option value="Both case and control">Both case and control</option>
+		   <option value="Just case">Just case</option>
+		   <option value="Just control">Just control</option>
+		  </select>  
+		 </div>
+	     </td>
+	     <td>
+	       Lowest frequency for haplotype analysis:
+	     </td>
+	     <td colspan=2>
+	        <div class="input-control text">
+	       <input style="width:100%" type="number" min="0" max="1" step="0.01" value="0.03"></input>
+	       </div>
+	    </tr>
+	    <tr>
+	      <td>
+		Marker name:
+              </td>
+	      <td colspan="4">
+		<div class="input-control text">
+		<input style="width:100%" type="text" placeholder="eg. rs11,rs22,rs33,rs44 when there are 4 sites."
+		</div>
+	      </td>
+            </tr>
+	    <tr>
+	      <td><br> </td>
+	    </tr>
+	    <tr>
+	      <td colspan="5">
+		<table style="width:100%">
+		  <tr>
+		    <td>Input data for cases:</td>
+		    <td></td>
+		    <td>Input data for controls:</td>
+		  </tr>
+		  <tr>
+		    <td>
+		      <div class="input-control textarea">
+			<textarea rows="30" cols="20" wrap="OFF" placeholder="eg. "></textarea>
+		      </div>
+		    </td>
+		    <td style="width:15px"></td>
+		    <td>
+		      <div class="input-control textarea">
+			<textarea rows="30" cols="20" wrap="OFF"></textarea>
+		      </div>		      
+		    </td>
+		  </tr>
+		</table>		  
+	      </td>
+	    </tr>
+	    <tr>
+	      <td colspan="5">
+		<div style="text-align:center">
+		  <button  class="large">Calculate</button>
+		</div>
+	      </td>
+	    </tr>
+	  </table>
+          </fildset>
+         </form>
+</font>
+</div>
+
+
+
+</body>
+</html>
