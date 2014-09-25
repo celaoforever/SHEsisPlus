@@ -6,6 +6,7 @@
         <script src="javascripts/jquery.min.js"></script>
         <script src="javascripts/jquery-ui.js"></script>
         <script src="javascripts/metro.min.js"></script>
+	<script src="javascripts/checkform.js"></script>
     </head>
     <body class="metro">
 <div class="navigation-bar">
@@ -45,12 +46,12 @@
 
 <div class="container" style="padding:30px 30px" >
 <font size="4">
-          <form name="SHEsisMain" action="Results" method="post">
+          <form name="SHEsisMain" onsubmit="return validateForm()" action="Results" method="post">
           <fildset>
 	    <table style="width:90%">
 	    <tr>
 	      <td colspan=5>
-	      <legend>
+	      <legend name="legend">
 	      Enter Input:
 	      </legend>
 	      </td>
@@ -62,28 +63,28 @@
 	      </td>
 	      <td>
 	      <label class="inline-block">
-		<input type="checkbox"></input>
+		<input name="CheckBoxAnalysisType" type="checkbox"></input>
 		<span class="check"></span>
 		Association Test
 	      </label>
 	      </td>
 	      <td>
 	      <label class="inline-block">
-		<input type="checkbox"></input>
+		<input name="CheckBoxAnalysisType" type="checkbox"></input>
 		<span class="check"></span>
 		Hardy-Weinberg Equilibrium Analysis
 	      </label>
 	      </td>
 	      <td>
 	      <label class="inline-block">
-		<input type="checkbox"></input>
+		<input name="CheckBoxAnalysisType" type="checkbox"></input>
 		<span class="check"></span>
 		Haplptype Analysis
 	      </label>	 
 	      </td>
 	      <td>
 	      <label class="inline-block">
-		<input type="checkbox"></input>
+		<input name="CheckBoxAnalysisType"  type="checkbox"></input>
 		<span class="check"></span>
 		Linkage Disequilibrium Analysis
 	      </label>
@@ -96,7 +97,7 @@
 	     </td>
 	     <td>
 	         <div class="input-control select">
-		 <select style="width:85%; text-align:center">
+		 <select name="SelectPloidy" style="width:85%; text-align:center">
 		   <option value="2">2</option>
 		   <option value="3">3</option>
 		   <option value="4">4</option>
@@ -110,7 +111,7 @@
 	     </td>
 	     <td colspan=3>
 	       <div class="input-control text">
-	       <input style="width:100%" type="text" placeholder="eg. 1,0,1,1 to choose 1st,2nd&4th sites for when there are 4 sites."></input>
+	       <input name="TextMask" style="width:100%" type="text" placeholder="eg. 1,0,1,1 to choose 1st,2nd&4th sites for when there are 4 sites."></input>
 	       </div>
 	     </td>  
 	    </tr>
@@ -120,7 +121,7 @@
               </td>
 	     <td>
 	         <div class="input-control select">
-		 <select style="width:85%; text-align:center">
+		 <select name="SelectLDType" style="width:85%; text-align:center">
 		   <option value="Both case and control">Both case and control</option>
 		   <option value="Just case">Just case</option>
 		   <option value="Just control">Just control</option>
@@ -132,7 +133,7 @@
 	     </td>
 	     <td colspan=2>
 	        <div class="input-control text">
-	       <input style="width:100%" type="number" min="0" max="1" step="0.01" value="0.03"></input>
+	       <input name="TextLFT" style="width:100%" type="number" min="0" max="1" step="0.01" value="0.03"></input>
 	       </div>
 	    </tr>
 	    <tr>
@@ -141,7 +142,7 @@
               </td>
 	      <td colspan="4">
 		<div class="input-control text">
-		<input style="width:100%" type="text" placeholder="eg. rs11,rs22,rs33,rs44 when there are 4 sites."
+		<input name="TextMarkername" style="width:100%" type="text" placeholder="eg. rs11,rs22,rs33,rs44 when there are 4 sites."
 		</div>
 	      </td>
             </tr>
@@ -159,13 +160,13 @@
 		  <tr>
 		    <td>
 		      <div class="input-control textarea">
-			<textarea name="caseldata" rows="30" cols="20" wrap="OFF"></textarea>
+			<textarea name="TextareaCasedata" rows="30" cols="20" wrap="OFF"></textarea>
 		      </div>
 		    </td>
 		    <td style="width:15px"></td>
 		    <td>
 		      <div class="input-control textarea">
-			<textarea name="controldata" rows="30" cols="20" wrap="OFF"></textarea>
+			<textarea name="TextareaControldata" rows="30" cols="20" wrap="OFF"></textarea>
 		      </div>		      
 		    </td>
 		  </tr>

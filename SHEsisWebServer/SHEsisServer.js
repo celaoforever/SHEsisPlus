@@ -19,14 +19,14 @@ fs.readFile("public/Results.html",'utf8',function(err,data){
  if(err){
 	return console.log(err);
  };
- var results=data.replace(/SHOWRESULTSHERE/g,req.body.controldata);
+ var results=data.replace(/SHOWRESULTSHERE/g,req.body);
  res.write(results);
  res.end();
 });
-console.log(req.body.controldata);
+console.log(req.body);
 });
 
 
-app.listen(8888);
+app.listen(8885);
 console.log("SHEsis web server has started.");
 
