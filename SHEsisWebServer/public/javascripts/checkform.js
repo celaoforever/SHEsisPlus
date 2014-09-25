@@ -1,11 +1,18 @@
 function validateAnalysisType(){
-	var x=document.getElementsByName('CheckBoxAnalysisType');
 	var count=0;
-	for(i=0;i<x.length;i++){
-		if(x[i].checked){
-			count++;
-		};
+	if(document.getElementsByName('CheckBoxAnalysisTypeAssoc')[0].checked){
+		count++;
 	};
+        if(document.getElementsByName('CheckBoxAnalysisTypeHWE')[0].checked){
+                count++;
+        };
+        if(document.getElementsByName('CheckBoxAnalysisTypeHap')[0].checked){
+                count++;
+        };
+        if(document.getElementsByName('CheckBoxAnalysisTypeLD')[0].checked){
+                count++;
+        };
+
 	if(count == 0 ){
 		setLegend("At least one analysis type should be checked.");
 		return false;
