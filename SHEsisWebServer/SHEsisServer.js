@@ -5,6 +5,7 @@ var bodyParser=require('body-parser');
 var fs=require('fs');
 var util=require('util');
 var cp=require('child_process');
+var path=require('path');
 app.use(express.compress());
 app.use(express.static('public'));
 app.use(bodyParser.json());
@@ -23,42 +24,46 @@ var ip=req.connection.remoteAddress;
 var time=getDateTime();
 var args=setArgs(req,ip,time);
 //console.log(args);
-var bin=cp.spawn('bin/SHEsis',[]);
-
 var anyerr="";
-bin.stdout.on("data",function(data){
-	//var rePattern=new RegExp('/*ERROR.*$/');
-	var arrMatches=data.toString().match('ERROR.*');
-        if(arrMatches != null){
-	if(arrMatches.length>0){
-                anyerr=arrMatches[0];
-		console.log(anyerr);
+console.log("cmd:bin/SHEsis "+args);
+var bin=cp.exec('bin/SHEsis '+args,{timeout:6000000},function(err,stdout,stderr){
+if(err){
+ console.log(err);
+}
+//console.log(stdout);
+var arrMatches=stdout.toString().match('ERROR.*');
+if(arrMatches != null){
+       if(arrMatches.length>0){
+               anyerr=arrMatches[0];
+               console.log(anyerr);
         };
-	};
-});
-bin.on('exit',function(code){
-    console.log('exited with code '+code);
-});
+};
+
+var results="";
 fs.readFile("public/Results.html",'utf8',function(err,data){
  if(err){
 	return console.log(err);
  }; 
-var results="";
 if(anyerr!=""){
  results=data.replace(/SHOWRESULTSHERE/g,anyerr);
+ res.write(results);
+ res.end();
 }else
  {
-  fs.readFile("tmp/"+ip+time+"output.html",'utf8',function(err,data){
+ var filepath=ip+time+"output.html";
+ 
+  fs.readFile(path.join("tmp/",filepath),'utf8',function(err,html){
  	if(err){
 		return console.log(err);
 	};
- results=data.replace(/SHOWRESULTSHERE/g,data); 
-});
- }
- res.write(results);
+//})
+ results=data.replace(/SHOWRESULTSHERE/g,html); 
+  res.write(results);
  res.end();
 });
-//console.log(req.body);
+ }
+});
+});
 });
 
 function setArgs(req,ip,time){
@@ -104,6 +109,7 @@ args+=" --lft "+req.body.TextLFT;
 args+=" --snpname-line \""+req.body.TextMarkername  + "\"";
 args+=" --mask "+"\""+req.body.TextMask+"\"";
 args+=" --output "+output;
+args+=" --webserver";
 return args;
 };
 

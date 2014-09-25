@@ -74,7 +74,11 @@ void PearsonChiSquareTest(T* tab, int row, int col, double& chi, double& p) {
   std::fill(ColSum.begin(), ColSum.end(), 0);
 
   int degreeOfFreedom = (row - 1) * (col - 1);
-
+  if(degreeOfFreedom<=0){
+	  	 chi=-1;
+	  	 p=-1;
+	  	 return;
+  }
   T total = 0;
   chi = 0;
   for (int i = 0; i < RowSum.shape()[0]; i++)

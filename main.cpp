@@ -12,6 +12,7 @@
 #include "HWETest.h"
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/erase.hpp>
 #include <fstream>
 #ifdef _WIN32
 #include <windows.h>
@@ -29,6 +30,7 @@ struct arguments {
         hweAnalysis(false),
         ldAnalysis(false),
         permutation(-1),
+        webserver(false),
         lft(0.03) {};
   std::vector<std::string> inputfiles;
   std::vector<std::string> inputcases;
@@ -42,6 +44,7 @@ struct arguments {
   bool assocAnalysis;
   bool hweAnalysis;
   bool ldAnalysis;
+  bool webserver;
   double lft;
   std::vector<short> mask;
   SHEsis::LD_TYPE ldtype;
@@ -86,7 +89,7 @@ int main(int argc, char* argv[]) {
   for (int i = 0; i < SHEsisArgs.snpnames.size(); i++) {
     data->setLocusName(i, SHEsisArgs.snpnames[i]);
   }
-  if (SHEsisArgs.html) {
+  if (SHEsisArgs.html&&!SHEsisArgs.webserver) {
     writeHtmlHeader();
   }
 
@@ -103,8 +106,8 @@ int main(int argc, char* argv[]) {
   boost::shared_ptr<SHEsis::HWETest> HWEHandle;
   boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle;
   boost::shared_ptr<SHEsis::LDTest> LDHandle;
-
-  report << "<h1>SHEsis </h1>\n";
+  if(!SHEsisArgs.webserver)
+	  report << "<h1>SHEsis </h1>\n";
 
   if (SHEsisArgs.assocAnalysis) {
     std::cout << "Starting association test...\n";
@@ -187,6 +190,7 @@ int main(int argc, char* argv[]) {
 
   ofile << report.str();
   ofile.close();
+  if(!SHEsisArgs.webserver){
   std::string cmd = "firefox " + SHEsisArgs.output + ".html";
 #ifdef _WIN32
   ShellExecute(NULL, "open", SHEsisArgs.output + ".html", NULL, NULL,
@@ -194,7 +198,7 @@ int main(int argc, char* argv[]) {
 #else
   system(cmd.c_str());
 #endif
-
+  };
   return 0;
 }
 
@@ -300,7 +304,8 @@ void addOptions(int argc, char* argv[], po::options_description& desc,
       "lowest frequency threshold for haplotype analysis")(
       "ld-in-case", "perform Linkage disequilibrium test in cases")(
       "ld-in-ctrl", "perform Linkage disequilibrium test in controls")(
-      "ld", "perform Linkage disequilibrium test in both cases and controls");
+      "ld", "perform Linkage disequilibrium test in both cases and controls")(
+       "webserver","Internal use for webserver");
   po::store(po::parse_command_line(argc, argv, desc), vm);
   po::notify(vm);
 }
@@ -313,6 +318,7 @@ void getSnpNamefile(std::string path, std::vector<std::string>& snp) {
   while (getline(file, line)) {
     if (line.empty()) continue;
     boost::trim_if(line, boost::is_any_of("\t "));
+    boost::erase_all(line,"\r");
     boost::split(strs, line, boost::is_any_of("\t "), boost::token_compress_on);
     if (strs.size() > 1) {
       std::cout << "***WARNING: " << path
@@ -326,6 +332,8 @@ void getSnpNamefile(std::string path, std::vector<std::string>& snp) {
 }
 
 void getSnpNameline(std::string names, std::vector<std::string>& snp) {
+	if(names.empty())
+		return;
   boost::trim_if(names, boost::is_any_of("\t ,"));
   boost::split(snp, names, boost::is_any_of("\t ,"), boost::token_compress_on);
 }
@@ -422,12 +430,17 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
       } else if (std::strcmp("1", maskvec[i].c_str()) == 0) {
         SHEsisArgs.mask.push_back(1);
       } else {
-        throw std::runtime_error("mask should be composed of 0 and 1. But " +
-                                 maskvec[i] + " found.");
+        //throw std::runtime_error("mask should be composed of 0 and 1. But " +
+         //                        maskvec[i] + " found.");
+    	  SHEsisArgs.mask.clear();
+    	  std::cout<<"***WARNING: mask should be composed of 0 and 1. But " +
+                                maskvec[i] + " found. No mask will be used. \n";
       }
     }
   }
-
+  if(vm.count("webserver")){
+	  SHEsisArgs.webserver=true;
+  }
   if (!SHEsisArgs.hweAnalysis && !SHEsisArgs.haploAnalysis &&
       !SHEsisArgs.assocAnalysis && !SHEsisArgs.ldAnalysis)
     throw std::runtime_error(
@@ -449,6 +462,7 @@ int ReadInput(int ploidy, bool containsPhenotype, std::string filepath,
       continue;
     }
     std::vector<std::string> strs;
+    boost::erase_all(line,"\r");
     boost::trim_if(line, boost::is_any_of("\t ,"));
     boost::split(strs, line, boost::is_any_of("\t ,"),
                  boost::token_compress_on);
