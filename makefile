@@ -1,9 +1,10 @@
 
-LIB= /results/software/boost_1_55_0/stage/lib
-INC= /results/software/boost_1_55_0/ 
-
-#CXXFLAGS =	 -O0  -g -Wall -std=c++11 -fmessage-length=0  -I/home/ada/git/SHEsis/boost/boost_1_55_0 -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS  -Wno-parentheses -L/home/ada/git/SHEsis/boost/boost_1_55_0/stage/lib 
-CXXFLAGS =	-O0 -g -Wall -fmessage-length=0   -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS  -Wno-parentheses -L$(LIB) -I$(INC)
+LIB= /home/ada/git/SHEsis/boost/boost_1_55_0/stage/lib
+INC= /home/ada/git/SHEsis/boost/boost_1_55_0/
+#LIB= /results/software/boost_1_55_0/stage/lib
+#INC= /results/software/boost_1_55_0/ 
+CXXFLAGS =	 -O0   -Wall -std=c++11 -fmessage-length=0   -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS  -Wno-parentheses -L$(LIB) -I$(INC)
+#CXXFLAGS =	-O0 -g -Wall -fmessage-length=0   -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS  -Wno-parentheses 
  
 
 TARGET = SHEsis SHEsisData_test AssociationTest_test HWETest_test HaplotypeDiploid_test LDTest_test

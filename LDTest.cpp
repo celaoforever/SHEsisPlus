@@ -322,6 +322,7 @@ void LDTest::DrawLDMap() {
 
 std::string LDTest::reporthtml() {
   std::string res;
+  //std::string filename=get_file_name_from_full_path(this->path);
   res = +"<img src=\"" + this->path + "\"" + " alt=\"LD map\">";
   return res;
 }

@@ -52,7 +52,7 @@ if(anyerr!=""){
  {
  var filepath=ip+time+"output.html";
  
-  fs.readFile(path.join("tmp/",filepath),'utf8',function(err,html){
+  fs.readFile(path.join("public/tmp/",filepath),'utf8',function(err,html){
  	if(err){
 		return console.log(err);
 	};
@@ -67,9 +67,9 @@ if(anyerr!=""){
 });
 
 function setArgs(req,ip,time){
-var casedatafile="tmp/"+ip+time+"case.txt";
-var ctrldatafile="tmp/"+ip+time+"ctrl.txt";
-var output="tmp/"+ip+time+"output";
+var casedatafile="public/tmp/"+ip+time+"case.txt";
+var ctrldatafile="public/tmp/"+ip+time+"ctrl.txt";
+var output="public/tmp/"+ip+time+"output";
 var args="";
 fs.writeFile(casedatafile,req.body.TextareaCasedata,function(err){
 	if(err){

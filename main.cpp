@@ -181,7 +181,16 @@ int main(int argc, char* argv[]) {
     LDHandle->AllLociLDtest();
     LDHandle->DrawLDMap();
     report << "\n<h2> Linkage Disequilibrium Analysis: </h2>\n";
-    report << LDHandle->reporthtml();
+    std::string filepath=SHEsisArgs.output + ".bmp";
+    std::string filename=get_file_name_from_full_path(filepath);
+    std::string ldreport=LDHandle->reporthtml();
+    if(!SHEsisArgs.webserver){
+    boost::replace_all(ldreport,filepath,filename);
+    report << ldreport;
+    }else{
+    boost::replace_all(ldreport,filepath,"tmp/"+filename);
+    report <<ldreport;
+    };
     std::cout << "done\n";
   };
   if (SHEsisArgs.html) {

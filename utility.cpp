@@ -7,6 +7,8 @@
 #include "utility.h"
 #include <boost/array.hpp>
 #include <stdarg.h>
+#include <string>
+#include <algorithm>
 
 boost::shared_ptr<int[]> SetSharedPtr(int Num, ...) {
   boost::shared_ptr<int[]> sp(new int[Num + 1]);
@@ -20,6 +22,22 @@ boost::shared_ptr<int[]> SetSharedPtr(int Num, ...) {
   }
   return sp;
 }
+
+std::string get_file_name_from_full_path(const std::string& file_path)
+{
+    std::string file_name;
+
+    std::string::const_reverse_iterator it = std::find(file_path.rbegin(), file_path.rend(), '/');
+    if (it != file_path.rend())
+    {
+        file_name.assign(file_path.rbegin(), it);
+        std::reverse(file_name.begin(), file_name.end());
+        return file_name;
+    }
+    else
+        return file_name;
+}
+
 
 char digits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b',
                  'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',

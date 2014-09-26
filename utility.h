@@ -54,7 +54,7 @@ std::string convert2string(T v) {
     ss << "NA";
   return ss.str();
 }
-
+std::string get_file_name_from_full_path(const std::string& file_path);
 std::string ToBinaryString(int i);
 boost::shared_ptr<int[]> SetSharedPtr(int Num, ...);
 std::string int2str(int n);
