@@ -16,7 +16,8 @@ CreatHtmlTable::~CreatHtmlTable() {
 }
 
 void CreatHtmlTable::createTable(std::string id) {
-  res << "<table id=\"" << id << "\">\n";
+	//striped bordered hovered
+  res << "<table style=\"width:auto\" class=\"table  bordered hovered \" id=\"" << id << "\">\n";
 };
 void CreatHtmlTable::createTable() {
   res << "<table>\n";
@@ -26,11 +27,12 @@ std::string CreatHtmlTable::getTable() {
   return res.str();
 }
 void CreatHtmlTable::addHeadRow(std::vector<std::string>& v) {
-  res << "<tr>\n";
+
+  res << "<tr class=\"bg-cyan fg-white\"  >\n";
   for (int i = 0; i < v.size(); i++) {
-    res << "<th>" << v[i] << "</th>\n";
+    res << "<th class=\"text-left info\"> " << v[i] << "</th>\n";
   }
-  res << "</tr>\n";
+  res << "</tr> \n";
 }
 void CreatHtmlTable::addDataRow(std::vector<std::string>& v) {
   res << "<tr>\n";
