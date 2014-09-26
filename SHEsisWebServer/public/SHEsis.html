@@ -9,39 +9,61 @@
 	<script src="javascripts/checkform.js"></script>
     </head>
     <body class="metro">
-<div class="navigation-bar">
-  <div class="navigation-bar-content container">
-    <a class="element" href="http://analysis2.bio-x.cn/SHEsisMain.htm" title="Back to SHEsis main page">
-    <span class="icon-home"></span>
-	SHEsis
-	<sup>2.0</sup>
-     </a>
-    <span class="element-divider"></span>
-    <a class="element">
-      Help
-    </a>
-    <span class="element-divider"></span>
-    <a class="element">
-      Cite Us 
-    </a>   
-    <span class="element-divider"></span>
-    <a class="element">
-      Contact Us 
-    </a> 
-    <span class="element-divider"></span>
-    <a class="element place-right" href="https://github.com/celaoforever/SHEsis" title="Follow us on github">
-      Follow us on github
-      <span class="icon-github-2"> 
-    </a>
- </div>
-</div>
 <div style="background: url(images/dna5-corp.jpg) top left no-repeat;background-size:cover;height:200px;">
    <div class="container"  style="padding:50px 20px">
-      <h1 class="fg-white"><strong>SHEsis</strong> <sup>v2.0</sup></h1>
+      <h1 class="fg-white"><strong>SHEsis</strong> <sup><font size="3"> v2.0 </font></sup></h1>
       <a class="fg-white" style="font-family:Verdana">
 	<font size="4">A web-based platform for association test on polyploid and multiallelic species.</font>
       </a>
     </div>
+</div>
+
+<div class="navigation-bar">
+  <div class="navigation-bar-content container">
+    <a class="element" href="http://analysis2.bio-x.cn/SHEsisMain.htm" title="Back to SHEsis main page">
+    <span class="icon-home"  ></span>
+    <font size="5">
+	Home
+    </font>
+     </a>
+    <span class="element-divider"></span>
+    <div class="element">
+       <a class="dropdown-toggle" href="#">
+	     <font size="4">
+	       Help
+	     </font>
+       </a>
+       <ul class="dropdown-menu " data-role="dropdown" style="display:none">
+	 <li><a href="#">Web-based Version</a></li>
+	 <li><a href="#">Standalone Version</a></li>
+       </ul>
+    </div>
+    <span class="element-divider"></span>
+    <a class="element" href="#">
+    <font size="4">
+      Download
+    </font>
+    </a>   
+    <span class="element-divider"></span>
+    <a class="element" href="CiteUs.html">
+    <font size="4">
+      Cite Us
+    </font>
+    </a> 
+    <span class="element-divider"></span>
+    <a class="element" href="mailto:jiawei.shen@outlook.com">
+    <font size="4">
+      Contact Us
+    </font>
+    </a>     
+    <span class="element-divider"></span>
+    <a class="element place-right" href="https://github.com/celaoforever/SHEsis" title="Follow us on github">
+    <font size="4">
+      Follow us on github
+    </font>
+      <span class="icon-github-2"> 
+    </a>
+ </div>
 </div>
 
 <div class="container" style="padding:30px 30px" >
@@ -176,7 +198,8 @@
 	    <tr>
 	      <td colspan="5">
 		<div style="text-align:center">
-		  <input type="submit" class="large"></input>
+		  <input type="submit" class="large info" value="Calculate" ></input>
+		  <input type="reset" class="large" value="  Reset  "></input>
 		</div>
 	      </td>
 	    </tr>
@@ -185,8 +208,5 @@
          </form>
 </font>
 </div>
-
-
-
 </body>
 </html>
