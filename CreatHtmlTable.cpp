@@ -28,7 +28,7 @@ std::string CreatHtmlTable::getTable() {
 }
 void CreatHtmlTable::addHeadRow(std::vector<std::string>& v) {
 
-  res << "<tr class=\"bg-cyan fg-white\"  >\n";
+  res << "<tr class=\"bg-cyan fg-white\" style=\"font-weight:normal \" >\n";
   for (int i = 0; i < v.size(); i++) {
     res << "<th class=\"text-left info\"> " << v[i] << "</th>\n";
   }

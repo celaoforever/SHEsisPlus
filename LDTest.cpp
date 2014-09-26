@@ -277,7 +277,7 @@ void LDTest::DrawLDMap() {
   double insidelength = sidelength - 2;
   double from_x = (double)width / 2 - (double)recnum * (double)sidelength / 2;
   this->ldmap = BMP_new(width, height);
-  BMP_clear(this->ldmap, 0xd0d0d0);
+  BMP_clear(this->ldmap, 0xeeeeee);
 
   for (int i = 0; i < snpnum; i++) {
     int step = i * sidelength;
