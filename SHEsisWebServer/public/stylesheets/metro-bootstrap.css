@@ -663,7 +663,7 @@ a {
   font-family: "Open Sans Light";
   font-style: normal;
   font-weight: 300;
-  src: local("Segoe UI Light"), local("Open Sans Light"), local("OpenSans-Light"), url(https://themes.googleusercontent.com/static/fonts/opensans/v8/DXI1ORHCpsQm3Vp6mXoaTZ1r3JsPcQLi8jytr04NNhU.woff) format('woff');
+  src: local("Segoe UI Light"), local("Open Sans Light"), local("OpenSans-Light"), url(../fonts/DXI1ORHCpsQm3Vp6mXoaTZ1r3JsPcQLi8jytr04NNhU.woff) format('woff');
 }
 @font-face {
   font-family: "Open Sans";
@@ -675,7 +675,7 @@ a {
   font-family: "Open Sans Bold";
   font-style: normal;
   font-weight: 700;
-  src: local("Segoe UI Bold"), local("Open Sans Bold"), local("OpenSans-Bold"), url(https://themes.googleusercontent.com/static/fonts/opensans/v8/k3k702ZOKiLJc3WVjuplzJ1r3JsPcQLi8jytr04NNhU.woff) format('woff');
+  src: local("Segoe UI Bold"), local("Open Sans Bold"), local("OpenSans-Bold"), url(../fonts/k3k702ZOKiLJc3WVjuplzJ1r3JsPcQLi8jytr04NNhU.woff) format('woff');
 }
 .metro .text-rest-state {
   color: #000000;

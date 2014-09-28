@@ -10,8 +10,7 @@ app.use(express.compress());
 app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
-
-
+bodyParser({strict:false});
 
 app.get('/',function(req,res){
 console.log("request /");
@@ -130,6 +129,6 @@ function getDateTime() {
     return (year + month + day + hour +  min +  sec);
 
 }
-app.listen(8885);
+app.listen(5903);
 console.log("SHEsis web server has started.");
 
