@@ -87,7 +87,7 @@ void HaplotypeBase::AssociationTest() {
     this->Results.FisherP = -1;
   }
   // Pearson's ChiSquare test
-  PearsonChiSquareTest(contigency, nrow, haploNum, this->Results.ChiSquare,
+  PearsonChiSquareTest(contigency, nrow, validHap, this->Results.ChiSquare,
                        this->Results.PearsonP);
   delete[] contigency;
 }
