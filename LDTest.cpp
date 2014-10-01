@@ -6,7 +6,8 @@
  */
 
 #include "LDTest.h"
-#include "HaplotypeDiploid.h"
+//#include "HaplotypeDiploid.h"
+#include "HaplotypeEM.h"
 #include "Haplotype.h"
 #include <boost/shared_ptr.hpp>
 #include "CreatHtmlTable.h"
@@ -52,14 +53,19 @@ double LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type) {
       mask.push_back(0);
   }
   BOOST_ASSERT(mask.size() == this->data->getSnpNum());
-  if (this->data->getNumOfChrSet() <= 2) {
-    if (this->bForceSAT)
-      this->hp.reset(new Haplotype(this->data, 2, mask));
-    else
-      this->hp.reset(new HaplotypeDiploid(this->data, 2, mask));
-  } else {
-    this->hp.reset(new Haplotype(this->data, 2, mask));
+  if(this->bForceSAT){
+	  this->hp.reset(new Haplotype(this->data, 2, mask));
+  }else{
+	  this->hp.reset(new HaplotypeEM(this->data, 2, mask));
   }
+//  if (this->data->getNumOfChrSet() <= 2) {
+//    if (this->bForceSAT)
+//      this->hp.reset(new Haplotype(this->data, 2, mask));
+//    else
+//      this->hp.reset(new HaplotypeDiploid(this->data, 2, mask));
+//  } else {
+//    this->hp.reset(new Haplotype(this->data, 2, mask));
+//  }
   hp->startHaplotypeAnalysis();
 
   boost::unordered_map<short, double>::iterator iter1;
@@ -318,6 +324,7 @@ void LDTest::DrawLDMap() {
   }
   BMP_write(this->ldmap, this->path.c_str());
   BMP_delete(this->ldmap);
+  std::cout<<"LD map saved to "<<this->path<<"\n";
 }
 
 std::string LDTest::reporthtml() {
