@@ -5,8 +5,9 @@
  *      Author: ionadmin
  */
 #include "SHEsisData.h"
+#include "HaplotypeEM.h"
 #include "Haplotype.h"
-#include "HaplotypeDiploid.h"
+//#include "HaplotypeDiploid.h"
 #include "AssociationTest.h"
 #include "LDTest.h"
 #include "HWETest.h"
@@ -21,6 +22,10 @@
 
 namespace po = boost::program_options;
 std::stringstream report;
+typedef enum HaploMethod{
+	EM,
+	SAT
+}HapMethod;
 
 struct arguments {
   arguments()
@@ -31,7 +36,9 @@ struct arguments {
         ldAnalysis(false),
         permutation(-1),
         webserver(false),
-        lft(0.03) {};
+        lft(0.03),
+        hapmethod(EM)
+        {};
   std::vector<std::string> inputfiles;
   std::vector<std::string> inputcases;
   std::vector<std::string> inputctrls;
@@ -48,6 +55,7 @@ struct arguments {
   double lft;
   std::vector<short> mask;
   SHEsis::LD_TYPE ldtype;
+  HapMethod hapmethod;
   bool html;
 } SHEsisArgs;
 
@@ -133,47 +141,83 @@ int main(int argc, char* argv[]) {
   }
 
   if (SHEsisArgs.haploAnalysis) {
-    std::cout << "Starting haplotype analysis...\n";
-    if (data->getNumOfChrSet() <= 2) {
-      if (SHEsisArgs.mask.size() != data->getSnpNum()) {
-        if (SHEsisArgs.mask.size() != 0)
+	  std::cout << "Starting haplotype analysis...\n";
+	  int snpnum=0;
+	  if (SHEsisArgs.mask.size() != 0 && SHEsisArgs.mask.size() != data->getSnpNum()) {
           std::cout << "***WARNING: length of given mask is wrong. Ignoring "
                        "mask...\n";
-        HapHandle.reset(new SHEsis::HaplotypeDiploid(data));
-      } else {
-        int snpnum = 0;
-        for (int i = 0; i < SHEsisArgs.mask.size(); i++) {
-          snpnum += SHEsisArgs.mask[i];
-        }
-        HapHandle.reset(
-            new SHEsis::HaplotypeDiploid(data, snpnum, SHEsisArgs.mask));
-      }
-    } else {
-      if (SHEsisArgs.mask.size() != data->getSnpNum()) {
-        if (SHEsisArgs.mask.size() != 0)
-          std::cout << "***WARNING: length of given mask is wrong. Ignoring "
-                       "mask...\n";
-        HapHandle.reset(new SHEsis::Haplotype(data));
-      } else {
-        int snpnum = 0;
-        for (int i = 0; i < SHEsisArgs.mask.size(); i++) {
-          snpnum += SHEsisArgs.mask[i];
-        }
-        HapHandle.reset(new SHEsis::Haplotype(data, snpnum, SHEsisArgs.mask));
-      }
-    }
-    if (SHEsisArgs.lft > 0 && SHEsisArgs.lft < 1)
-      HapHandle->setFreqThreshold(SHEsisArgs.lft);
-    else
-      std::cout << "***WARNING: lowest frequency threshold for haplotype "
-                   "analysis is invalid..defaulting to 0.03\n";
-    HapHandle->setSilent(false);
-    HapHandle->startHaplotypeAnalysis();
-    HapHandle->AssociationTest();
-    report << "\n<h2> Haplotype Analysis: </h2>\n";
-    report << HapHandle->reporthtml();
-    std::cout << "done\n";
-  };
+          SHEsisArgs.mask.clear();
+	  }
+      for (int i = 0; i < SHEsisArgs.mask.size(); i++) {
+        snpnum += SHEsisArgs.mask[i];
+      };
+	  if(EM == SHEsisArgs.hapmethod){
+		  if(0 == snpnum) //no mask
+			  HapHandle.reset(new SHEsis::HaplotypeEM(data));
+		  else
+			  HapHandle.reset(new SHEsis::HaplotypeEM(data,snpnum, SHEsisArgs.mask));
+	  }
+	  if(SAT == SHEsisArgs.hapmethod){
+		  if(0 == snpnum) //no mask
+			  HapHandle.reset(new SHEsis::Haplotype(data));
+		  else
+			  HapHandle.reset(new SHEsis::Haplotype(data,snpnum, SHEsisArgs.mask));
+	  }
+	    if (SHEsisArgs.lft >= 0 && SHEsisArgs.lft < 1)
+	      HapHandle->setFreqThreshold(SHEsisArgs.lft);
+	    else
+	      std::cout << "***WARNING: lowest frequency threshold for haplotype "
+	                   "analysis is invalid..defaulting to 0.03\n";
+	    HapHandle->setSilent(false);
+	    HapHandle->startHaplotypeAnalysis();
+	    HapHandle->AssociationTest();
+	    report << "\n<h2> Haplotype Analysis: </h2>\n";
+	    report << HapHandle->reporthtml();
+	    std::cout << "done\n";
+  }
+
+//  if (SHEsisArgs.haploAnalysis) {
+//    std::cout << "Starting haplotype analysis...\n";
+//    if (data->getNumOfChrSet() <= 2) {
+//      if (SHEsisArgs.mask.size() != data->getSnpNum()) {
+//        if (SHEsisArgs.mask.size() != 0)
+//          std::cout << "***WARNING: length of given mask is wrong. Ignoring "
+//                       "mask...\n";
+//        HapHandle.reset(new SHEsis::HaplotypeDiploid(data));
+//      } else {
+//        int snpnum = 0;
+//        for (int i = 0; i < SHEsisArgs.mask.size(); i++) {
+//          snpnum += SHEsisArgs.mask[i];
+//        }
+//        HapHandle.reset(
+//            new SHEsis::HaplotypeDiploid(data, snpnum, SHEsisArgs.mask));
+//      }
+//    } else {
+//      if (SHEsisArgs.mask.size() != data->getSnpNum()) {
+//        if (SHEsisArgs.mask.size() != 0)
+//          std::cout << "***WARNING: length of given mask is wrong. Ignoring "
+//                       "mask...\n";
+//        HapHandle.reset(new SHEsis::Haplotype(data));
+//      } else {
+//        int snpnum = 0;
+//        for (int i = 0; i < SHEsisArgs.mask.size(); i++) {
+//          snpnum += SHEsisArgs.mask[i];
+//        }
+//        HapHandle.reset(new SHEsis::Haplotype(data, snpnum, SHEsisArgs.mask));
+//      }
+//    }
+//    if (SHEsisArgs.lft > 0 && SHEsisArgs.lft < 1)
+//      HapHandle->setFreqThreshold(SHEsisArgs.lft);
+//    else
+//      std::cout << "***WARNING: lowest frequency threshold for haplotype "
+//                   "analysis is invalid..defaulting to 0.03\n";
+//    HapHandle->setSilent(false);
+//    HapHandle->startHaplotypeAnalysis();
+//    HapHandle->AssociationTest();
+//    report << "\n<h2> Haplotype Analysis: </h2>\n";
+//    report << HapHandle->reporthtml();
+//    std::cout << "done\n";
+//  };
 
   if (SHEsisArgs.ldAnalysis) {
     std::cout << "Starting linkage disequilibrium analysis...\n";
@@ -303,7 +347,8 @@ void addOptions(int argc, char* argv[], po::options_description& desc,
       "hwe", "perform Hardy-Weinberg disequilibrium test")(
       "assoc", "perform case/control association test")(
       "permutation", po::value<int>(), "times for permutation")(
-      "haplo", "perform haplotype analysis")(
+      "haplo-EM", "perform haplotype analysis using EM algorithm")(
+      "haplo-SAT", "perform haplotype analysis using SAT-based algorithm")(
       "mask", po::value<std::string>(),
       "mask of snps for haplotype analysis, comma delimited. eg. mask=1,0,1 to "
       "use 1st and 3rd SNPs when there are 3 SNPs in all.")(
@@ -423,9 +468,17 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
   if (vm.count("hwe")) {
     SHEsisArgs.hweAnalysis = true;
   };
-  if (vm.count("haplo")) {
-    SHEsisArgs.haploAnalysis = true;
-  }
+  if (vm.count("haplo-SAT")!=0 && vm.count("haplo-EM")!=0 ) {
+	  throw std::runtime_error("--haplo-SAT and --haplo-EM cannot be specified at the same time.");
+  };
+  if (vm.count("haplo-SAT")!=0){
+	  SHEsisArgs.haploAnalysis = true;
+	  SHEsisArgs.hapmethod=SAT;
+  };
+  if (vm.count("haplo-EM")!=0){
+	  SHEsisArgs.haploAnalysis = true;
+	  SHEsisArgs.hapmethod=EM;
+  };
 
   if (vm.count("mask")) {
     std::string maskstr = vm["mask"].as<std::string>();
