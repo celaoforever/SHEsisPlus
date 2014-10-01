@@ -35,7 +35,7 @@ std::string get_file_name_from_full_path(const std::string& file_path)
         return file_name;
     }
     else
-        return file_name;
+        return file_path;
 }
 
 
