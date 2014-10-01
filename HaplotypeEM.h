@@ -5,8 +5,8 @@
  *      Author: ada
  */
 
-#ifndef HAPLOTYPEDIPLOID_H_
-#define HAPLOTYPEDIPLOID_H_
+#ifndef HAPLOTYPEDEM_H_
+#define HAPLOTYPEDEM_H_
 #include "HaplotypeBase.h"
 
 namespace SHEsis {
@@ -14,7 +14,6 @@ namespace SHEsis {
 struct HaploCombination {
   std::vector<int> hapIdx;
   bool operator==(const HaploCombination& p) {
-	  std::sort(hapIdx.begin(),hapIdx.end());
 	  for(int i=0;i<p.hapIdx.size();i++){
 		  if(p.hapIdx[i]!=hapIdx[i])
 			  return false;
@@ -41,6 +40,7 @@ class HaplotypeEM : public HaplotypeBase {
 
  private:
   void sortGenotype();
+  void sortInterMediate();
   void GenerateUniqueGenotype();
   void GenerateInterMediate();
   void ReturnGenotypeCode(int sample, std::vector<short>& geno);

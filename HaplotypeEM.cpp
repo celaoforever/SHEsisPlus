@@ -261,10 +261,10 @@ void HaplotypeEM::GenerateUniqueGenotype() {
 }
 
 std::vector<short> getAlleleType(boost::multi_array<short, 3> data, int sample,
-                                 int snp) {
+                                 int snp , int ploidy) {
   std::vector<short> alleleType;
   boost::unordered_map<short, int> hm;
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < ploidy; i++) {
     if (hm.end() == hm.find(data[sample][snp][i])) {
       hm[data[sample][snp][i]] = 1;
       alleleType.push_back(data[sample][snp][i]);
@@ -433,70 +433,77 @@ long choose(boost::shared_ptr<int[]> got, int n_chosen, int len, int at, int max
 void OneSampleGetCombination(std::vector< boost::shared_ptr<short[]> >& Haplotypes,int ploidy,std::vector< std::vector<int> >& combination){
 	boost::shared_ptr<int[]> got(new int[ploidy+1]);
 	choose(got,0,ploidy,0,Haplotypes.size(), combination);
-	std::cout<<"One sample haplotypes:";
-	for(int i=0;i<Haplotypes.size();i++){
-		std::cout<<Haplotypes[i][0]<<Haplotypes[i][1]<<",";
-	}
-	std::cout<<"\nCombinatin:";
-	for(int i=0;i<combination.size();i++){
-		for(int j=0;j<combination[i].size();j++){
-			int hap=combination[i][j];
-			std::cout<<Haplotypes[hap][0]<<Haplotypes[hap][1]<<",";
-			//std::cout<<combination[i][j]<<",";
-		}
-		std::cout<<"\n";
-	}
+//	std::cout<<"Combination.size:"<<combination.size()<<"\n";
+//	std::cout<<"One sample haplotypes:";
+//	for(int i=0;i<Haplotypes.size();i++){
+//		std::cout<<Haplotypes[i][0]<<Haplotypes[i][1]<<",";
+//	}
+//	std::cout<<"\nCombinatin:";
+//	for(int i=0;i<combination.size();i++){
+//		for(int j=0;j<combination[i].size();j++){
+//			int hap=combination[i][j];
+//			std::cout<<Haplotypes[hap][0]<<Haplotypes[hap][1]<<",";
+//			//std::cout<<combination[i][j]<<",";
+//		}
+//		std::cout<<"\n";
+//	}
 }
 
 OneGenotypeExpandedHaplo HaplotypeEM::oneGenoGetCombination(int sample){
 	OneGenotypeExpandedHaplo res;
-	std::vector< boost::shared_ptr<short[]> > OneSampleHaplotype;
+	std::vector< boost::shared_ptr<short[]> > OneSampleHaplotypes;
 	boost::shared_ptr<short[]> curHap;
-	std::vector<short> alleleType1=getAlleleType(this->InterMediate,sample,0);
-	std::vector<short> alleleType2=getAlleleType(this->InterMediate,sample,1);
+	std::vector<short> alleleType1=getAlleleType(this->InterMediate,sample,0,this->data->getNumOfChrSet());
+	std::vector<short> alleleType2=getAlleleType(this->InterMediate,sample,1,this->data->getNumOfChrSet());
+//	std::cout<<"Current genotype:";
+//	for(int k=0;k<2;k++){
+//		for(int i=0;i<this->data->getNumOfChrSet();i++){
+//			std::cout<<this->InterMediate[sample][0][i];
+//		}
+//		std::cout<<" ";
+//	};
+//	std::cout<<"\n";
 	for(int i=0;i<alleleType1.size();i++){
 		for(int j=0;j<alleleType2.size();j++){
 			curHap.reset(new short[2]);
 			curHap[0]=alleleType1[i];
 			curHap[1]=alleleType2[j];
-			OneSampleHaplotype.push_back(curHap);
+			OneSampleHaplotypes.push_back(curHap);
 		}
 	}
-	std::vector< std::vector<int> > combination;
-	OneSampleGetCombination(OneSampleHaplotype,this->data->getNumOfChrSet(),combination);
+	std::vector< std::vector<int> > OneSampleCombination;
+	OneSampleGetCombination(OneSampleHaplotypes,this->data->getNumOfChrSet(),OneSampleCombination);
 
 
 
-	std::vector< boost::shared_ptr<short[]> > v;
-	std::vector<int> repeatHap;
-	for(int i=0;i<this->data->getNumOfChrSet();i++){
-		for(int j=0;j<this->data->getNumOfChrSet();j++){
-			boost::shared_ptr<short[]> hp(new short[2]);
-			hp[0]=this->InterMediate[sample][0][i];
-			hp[1]=this->InterMediate[sample][1][j];
-			std::cout<<"hap:"<<hp[0]<<hp[1]<<"\n";
-			if(ExistsHap(hp,v)){
-				repeatHap.push_back(v.size());
-			}
-			v.push_back(hp);
-		}
-	}
+//	std::vector< boost::shared_ptr<short[]> > v;
+//	std::vector<int> repeatHap;
+//	for(int i=0;i<this->data->getNumOfChrSet();i++){
+//		for(int j=0;j<this->data->getNumOfChrSet();j++){
+//			boost::shared_ptr<short[]> hp(new short[2]);
+//			hp[0]=this->InterMediate[sample][0][i];
+//			hp[1]=this->InterMediate[sample][1][j];
+//			std::cout<<"hap:"<<hp[0]<<hp[1]<<"\n";
+//			if(ExistsHap(hp,v)){
+//				repeatHap.push_back(v.size());
+//			}
+//			v.push_back(hp);
+//		}
+//	}
 //	std::cout<<"all v:";
 //	for(int i=0;i<v.size();i++){
 //		std::cout<<v[i][0]<<v[i][1]<<",";
 //	}
 //	std::cout<<"\n";
-	std::cout<<"combination.size:"<<this->combination.size()<<"\n";
-	for(int i=0;i<this->combination.size();i++){
-		std::vector<int> cur=this->combination[i];
-		if(containsRepeatHap(cur,repeatHap))
-			continue;
+//	std::cout<<"combination.size:"<<this->combination.size()<<"\n";
+	for(int i=0;i<OneSampleCombination.size();i++){
+		std::vector<int> cur=OneSampleCombination[i];
 		std::vector<short> snp1;
 		std::vector<short> snp2;
 		for(int k=0;k<cur.size();k++){
 			int curIdx=cur[k];
-			snp1.push_back(v[curIdx][0]);
-			snp2.push_back(v[curIdx][1]);
+			snp1.push_back(OneSampleHaplotypes[curIdx][0]);
+			snp2.push_back(OneSampleHaplotypes[curIdx][1]);
 		}
 		std::sort(snp1.begin(),snp1.end());
 		std::sort(snp2.begin(),snp2.end());
@@ -530,7 +537,7 @@ OneGenotypeExpandedHaplo HaplotypeEM::oneGenoGetCombination(int sample){
 			HaploCombination hc;
 			for(int n=0;n<cur.size();n++){
 				int curIdx=cur[n];
-				int hap=getHaploIdx(v[curIdx],OneGenotypeExpandedHaplo::haploType);
+				int hap=getHaploIdx(OneSampleHaplotypes[curIdx],OneGenotypeExpandedHaplo::haploType);
 				if(hap==-1){
 					int a=0;
 				}
@@ -613,8 +620,8 @@ void HaplotypeEM::CalculateFreq() {
 
   double E = 1;
   while (E > this->err) {
-    //std::vector<double> M(this->UniqueGenotypeCount.size(), 0);
-	  boost::shared_ptr<double[]> M(new double[this->UniqueGenotypeCount.size()]);
+    std::vector<double> M(this->UniqueGenotypeCount.size(), 0);
+	//  boost::shared_ptr<double[]> M(new double[this->UniqueGenotypeCount.size()]);
     for (int i = 0; i < this->UniqueGenotypeCount.size(); i++) {
       for (int j = 0; j < this->Expanded[i].hp.size(); j++) {
     	  double m=1;
@@ -810,20 +817,20 @@ void HaplotypeEM::getResults() {
   };
 
 
-	std::cout<<"\nHaplotypes:\n";
-	for(int k=0;k<this->Results.haplotypes.size();k++){
-		for(int i=0;i<this->SnpIdx.size();i++){
-	    	std::cout<<this->Results.haplotypes[k][i];
-		}
-		std::cout<<":"<< (this->Results.ControlCount[k]+this->Results.CaseCount[k])<<"\n";
-	}
+//	std::cout<<"\nHaplotypes:\n";
+//	for(int k=0;k<this->Results.haplotypes.size();k++){
+//		for(int i=0;i<this->SnpIdx.size();i++){
+//	    	std::cout<<this->Results.haplotypes[k][i];
+//		}
+//		std::cout<<":"<< (this->Results.ControlCount[k]+this->Results.CaseCount[k])<<"\n";
+//	}
 
 }
 
 void HaplotypeEM::startHaplotypeAnalysis() {
 	//this->sortGenotype();
-	std::cout<<"generating combination...\n";
-	this->getCombination();
+//	std::cout<<"generating combination...\n";
+//	this->getCombination();
   while (this->phased < this->SnpIdx.size()) {
     if (!this->silent && this->phased % 10 == 0) {
       int per = 100 * (double)this->phased / (double)this->SnpIdx.size();
