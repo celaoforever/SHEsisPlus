@@ -58,6 +58,8 @@ std::string SHEsisData::getStrFromSortedGenotype(std::vector<short> v) {
 }
 
 short SHEsisData::GetAlleleCode(std::string const val) {
+  if(std::strcmp("0",val.c_str())==0)
+	  return 0;
   boost::unordered_map<short, std::string>::iterator iter;
   for (iter = this->code2allele.begin(); iter != this->code2allele.end();
        iter++) {
