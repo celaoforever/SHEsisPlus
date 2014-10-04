@@ -20,7 +20,8 @@ LDTest::LDTest(boost::shared_ptr<SHEsisData> data, std::string path)
       ldtype(LD_IN_BOTH),
       path(path),
       bForceSAT(false),
-      res(boost::extents[this->data->getSnpNum()][this->data->getSnpNum()]) {
+      resD(boost::extents[this->data->getSnpNum()][this->data->getSnpNum()]),
+      resR2(boost::extents[this->data->getSnpNum()][this->data->getSnpNum()]) {
   // TODO Auto-generated constructor stub
 }
 
@@ -29,12 +30,22 @@ LDTest::~LDTest() {
 }
 
 void LDTest::printRes() {
-  for (int i = 0; i < this->res.shape()[0]; i++) {
-    for (int j = 0; j < this->res.shape()[1]; j++) {
-      std::cout << this->res[i][j] << "\t";
+
+  std::cout<<"D':\n";
+  for (int i = 0; i < this->resD.shape()[0]; i++) {
+    for (int j = 0; j < this->resD.shape()[1]; j++) {
+      std::cout << this->resD[i][j] << "\t";
     }
     std::cout << "\n";
   }
+  std::cout<<"R2:\n";
+  for (int i = 0; i < this->resR2.shape()[0]; i++) {
+    for (int j = 0; j < this->resR2.shape()[1]; j++) {
+      std::cout << this->resR2[i][j] << "\t";
+    }
+    std::cout << "\n";
+  }
+
 }
 int getHapIdx(std::vector<boost::shared_ptr<short[]> >& v, int a1, int a2) {
   for (int i = 0; i < v.size(); i++) {
@@ -43,8 +54,9 @@ int getHapIdx(std::vector<boost::shared_ptr<short[]> >& v, int a1, int a2) {
   return -1;
 }
 
-double LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type) {
-  double normalizedD = 0;
+void LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type, double& R2, double& D) {
+  D = 0;
+  R2=0;
   std::vector<short> mask;
   for (int i = 0; i < this->data->getSnpNum(); i++) {
     if (i == snp1 || i == snp2)
@@ -139,13 +151,15 @@ double LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type) {
       } else {
         dmax = p1q < q1p ? p1q : q1p;
       }
-      double adsd = ABS(d / dmax);
-      normalizedD += allelefreq1 * allelefreq2 * adsd;
+      double absd = ABS(d / dmax);
+      D += allelefreq1 * allelefreq2 * absd;
+      R2+=d*d/(1-allelefreq1)/(1-allelefreq2);
 //      std::cout<<",d="<<d<<",dmax="<<dmax<<",d/dmax="<<adsd<<",normalizedd="<<normalizedD<<"\n";
     }
   }
-  return normalizedD;
+
 }
+
 
 void LDTest::AllLociLDtest() {
 	if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()>0){
@@ -166,7 +180,10 @@ void LDTest::AllLociLDtest() {
   int count = 0;
   for (int i = 0; i < this->data->getSnpNum(); i++) {
     for (int j = i + 1; j < this->data->getSnpNum(); j++) {
-      this->res[i][j] = this->TwoLociLDTest(i, j, this->ldtype);
+      double D,R2;
+      this->TwoLociLDTest(i, j, this->ldtype,R2,D);
+      this->resD[i][j] =D ;
+      this->resR2[i][j] =R2 ;
       printf("\rProgress:%d%%", (int)(100 * (double)count / (double)total));
       fflush(stdout);
       count++;
@@ -283,7 +300,7 @@ void DrawSquare(BMP* bmp, RGB rgb, int center_x, int center_y, double l) {
   }
 }
 
-void LDTest::DrawLDMap() {
+void LDTest::DrawLDMap(int type) {// 0 for D', 1 for R2
   double snpnum = (double)this->data->getSnpNum();
   double height, width;
   int recnum;
@@ -321,7 +338,7 @@ void LDTest::DrawLDMap() {
       int step = i * sidelength;
       int begin_x = from_x + sidelength / 2 * j;
       int begin_y = 200 + sidelength / 2 * j;
-      double score = this->res[count][count + j + 1];
+      double score =type==0? this->resD[count][count + j + 1]:this->resR2[count][count + j + 1];
       RGB color = (1 - score) * 0xff;
       color = color << 8;
       color += (1 - score) * 0xff + 0xff0000;
@@ -336,15 +353,28 @@ void LDTest::DrawLDMap() {
       count++;
     }
   }
-  BMP_write(this->ldmap, this->path.c_str());
+  std::string curPath=this->path+(type==0?"_D.bmp":"_R2.bmp");
+  BMP_write(this->ldmap, curPath.c_str());
   BMP_delete(this->ldmap);
-  std::cout<<"LD map saved to "<<this->path<<"\n";
+  std::cout<<"LD map "<<(type==0? "(D')":"(R2)" )<< "saved to "<<curPath<<"\n";
 }
+
+
+
+void LDTest::DrawLDMapDandR2() {
+ this->DrawLDMap(0);
+ this->DrawLDMap(1);
+}
+
+
 
 std::string LDTest::reporthtml() {
   std::string res;
   std::string filename=get_file_name_from_full_path(this->path);
-  res = +"<img src=\"" + filename + "\"" + " alt=\"LD map\">";
+  res+="<h3>D'</h3>\n";
+  res+="<img src=\"" + filename + "_D.bmp"+"\"" + " alt=\"LD (D') map\">\n";
+  res+="<h3>R<sup>2</sup></h3>\n";
+  res+="<img src=\"" + filename + "_R2.bmp"+"\"" + " alt=\"LD (R2) map\">\n";
   return res;
 }
 

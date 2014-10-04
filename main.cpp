@@ -248,10 +248,10 @@ int main(int argc, char* argv[]) {
 
   if (SHEsisArgs.ldAnalysis) {
     std::cout << "Starting linkage disequilibrium analysis...\n";
-    LDHandle.reset(new SHEsis::LDTest(data, SHEsisArgs.output + ".bmp"));
+    LDHandle.reset(new SHEsis::LDTest(data, SHEsisArgs.output));
     LDHandle->setLDType(SHEsisArgs.ldtype);
     LDHandle->AllLociLDtest();
-    LDHandle->DrawLDMap();
+    LDHandle->DrawLDMapDandR2();
     report << "\n<h2> Linkage Disequilibrium Analysis: </h2>\n";
 
     std::string ldreport=LDHandle->reporthtml();

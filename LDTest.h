@@ -19,7 +19,7 @@ class LDTest {
   LDTest(boost::shared_ptr<SHEsisData> data, std::string path);
   virtual ~LDTest();
   void AllLociLDtest();
-  void DrawLDMap();
+  void DrawLDMapDandR2();
   void printRes();
   void setLDType(LD_TYPE t){this->ldtype=t;};
   void setForceSAT(bool b) {
@@ -28,10 +28,12 @@ class LDTest {
   std::string reporthtml();
 
  private:
-  double TwoLociLDTest(int snp1, int snp2, LD_TYPE type);
+  void TwoLociLDTest(int snp1, int snp2, LD_TYPE type,double& R2 ,double& D);
+  void DrawLDMap(int type);
   boost::shared_ptr<SHEsisData> data;
   boost::shared_ptr<HaplotypeBase> hp;
-  boost::multi_array<double, 2> res;
+  boost::multi_array<double, 2> resD;
+  boost::multi_array<double, 2> resR2;
   BMP* ldmap;
   std::string path;
   LD_TYPE ldtype;
