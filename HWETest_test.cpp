@@ -27,6 +27,7 @@ boost::shared_ptr<SHEsis::SHEsisData> GenerateRandomData(int sampleNum,
   for (int iSample = 0; iSample < sampleNum; iSample++) {
     BOOST_ASSERT(iSample < data->vLabel.size());
     data->vLabel[iSample] = ((SHEsis::SampleStatus)dist(boost_rng));
+//    data->vQuantitativeTrait.push_back(dist(boost_rng));
     for (int iSnp = 0; iSnp < snpNum; iSnp++) {
       for (int iChrset = 0; iChrset < chrSetNum; iChrset++) {
         data->mGenotype[iSample][iSnp][iChrset] = dist2(boost_rng);
@@ -42,7 +43,7 @@ boost::shared_ptr<SHEsis::SHEsisData> GenerateRandomData(int sampleNum,
 int test_main(int, char * []) {
   int sampleNum = 20000;
   int snpNum = 1;
-  int chrSetNum = 10;
+  int chrSetNum = 2;
   boost::shared_ptr<SHEsis::SHEsisData> testdata =
       GenerateRandomData(sampleNum, snpNum, chrSetNum);
   std::cout << "Genotype Matrix:\n";
@@ -55,14 +56,16 @@ int test_main(int, char * []) {
     }
     std::cout << "\n";
   }
-  std::cout << "vLabel:\n";
-  for (int i = 0; i < testdata->vLabel.size(); i++)
-    std::cout << testdata->vLabel[i] << " ";
-  std::cout << std::endl;
+//  std::cout << "vLabel:\n";
+//  for (int i = 0; i < testdata->vLabel.size(); i++)
+//    std::cout << testdata->vLabel[i] << " ";
+////  testdata->vQuantitativeTrait.push_back(1);
+//  std::cout << std::endl;
 
   SHEsis::HWETest HWETestHandler(testdata);
-  HWETestHandler.data->statCount(HWETestHandler.data->vLabel);
-  HWETestHandler.data->printLocusInfo();
+ // HWETestHandler.data->statCount(HWETestHandler.data->vLabel);
+//  HWETestHandler.data->statCount();
+//  HWETestHandler.data->printLocusInfo();
   HWETestHandler.AllSnpHWETest();
   HWETestHandler.printHWETestResults();
 

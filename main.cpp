@@ -11,6 +11,7 @@
 #include "AssociationTest.h"
 #include "LDTest.h"
 #include "HWETest.h"
+#include "QTL.h"
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/erase.hpp>
@@ -36,6 +37,7 @@ struct arguments {
         ldAnalysis(false),
         permutation(-1),
         webserver(false),
+        qtl(false),
         lft(0.03),
         hapmethod(EM)
         {};
@@ -49,6 +51,7 @@ struct arguments {
   bool containsPhenotype;
   bool haploAnalysis;
   bool assocAnalysis;
+  bool qtl;
   bool hweAnalysis;
   bool ldAnalysis;
   bool webserver;
@@ -111,6 +114,7 @@ int main(int argc, char* argv[]) {
   }
 
   boost::shared_ptr<SHEsis::AssociationTest> AssocHandle;
+  boost::shared_ptr<SHEsis::QTL> QTLHandle;
   boost::shared_ptr<SHEsis::HWETest> HWEHandle;
   boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle;
   boost::shared_ptr<SHEsis::LDTest> LDHandle;
@@ -119,16 +123,29 @@ int main(int argc, char* argv[]) {
 
   if (SHEsisArgs.assocAnalysis) {
     std::cout << "Starting association test...\n";
-    AssocHandle.reset(new SHEsis::AssociationTest(data));
-    if (SHEsisArgs.permutation != -1) {
-      AssocHandle->setPermutationTimes(SHEsisArgs.permutation);
-      AssocHandle->permutation();
-    } else {
-      AssocHandle->association();
+    if(data->vQuantitativeTrait.size() == 0){
+		AssocHandle.reset(new SHEsis::AssociationTest(data));
+		if (SHEsisArgs.permutation != -1) {
+		  AssocHandle->setPermutationTimes(SHEsisArgs.permutation);
+		  AssocHandle->permutation();
+		} else {
+		  AssocHandle->association();
+		}
+		report << "\n<h2> Single Locus Association Test (Binary phenotype): </h2>\n";
+		report << AssocHandle->reporthtml();
+		std::cout << "done\n";
+    }else{
+    	QTLHandle.reset(new SHEsis::QTL(data));
+    	if(SHEsisArgs.permutation!=-1){
+    		QTLHandle->setPermutation(SHEsisArgs.permutation);
+    		QTLHandle->QTLPermutation();
+    	}else{
+    		QTLHandle->QTLTest();
+    	}
+		report << "\n<h2> Single Locus Association Test (QTL): </h2>\n";
+		report << QTLHandle->reporthtml();
+		std::cout << "done\n";
     }
-    report << "\n<h2> Single Locus Association Test: </h2>\n";
-    report << AssocHandle->reporthtml();
-    std::cout << "done\n";
   };
 
   if (SHEsisArgs.hweAnalysis) {
@@ -136,7 +153,7 @@ int main(int argc, char* argv[]) {
     HWEHandle.reset(new SHEsis::HWETest(data));
     HWEHandle->AllSnpHWETest();
     report << "\n<h2> Hardy-Weinberg Equilibrium Test: </h2>\n";
-    report << HWEHandle->reporthtml(0.1);
+    report << HWEHandle->reporthtml();
     std::cout << "done\n";
   }
 
@@ -168,6 +185,16 @@ int main(int argc, char* argv[]) {
 	    else
 	      std::cout << "***WARNING: lowest frequency threshold for haplotype "
 	                   "analysis is invalid..defaulting to 0.03\n";
+	    std::cout << "Genotype Matrix:\n";
+	    for (int iSample = 0; iSample <data->getSampleNum(); iSample++) {
+	      for (int iSnp = 0; iSnp < data->getSnpNum(); iSnp++) {
+	        for (int iChrset = 0; iChrset < data->getNumOfChrSet(); iChrset++) {
+	          std::cout << data->mGenotype[iSample][iSnp][iChrset] << "/";
+	        }
+	        std::cout << " ";
+	      }
+	      std::cout << "\n";
+	    }
 	    HapHandle->setSilent(false);
 	    HapHandle->startHaplotypeAnalysis();
 	    HapHandle->AssociationTest();
@@ -222,6 +249,7 @@ int main(int argc, char* argv[]) {
   if (SHEsisArgs.ldAnalysis) {
     std::cout << "Starting linkage disequilibrium analysis...\n";
     LDHandle.reset(new SHEsis::LDTest(data, SHEsisArgs.output + ".bmp"));
+    LDHandle->setLDType(SHEsisArgs.ldtype);
     LDHandle->AllLociLDtest();
     LDHandle->DrawLDMap();
     report << "\n<h2> Linkage Disequilibrium Analysis: </h2>\n";
@@ -290,8 +318,12 @@ boost::shared_ptr<SHEsis::SHEsisData> parseDataWithPhenotype(
   boost::shared_ptr<SHEsis::SHEsisData> pdata(
       new SHEsis::SHEsisData(samplenum, snpnum, ploidy));
   for (int sample = 0; sample < samplenum; sample++) {
-    pdata->vLabel[sample] =
-        (SHEsis::SampleStatus)std::atoi(content[sample][1].c_str());
+	  if(SHEsisArgs.qtl){
+		  pdata->vQuantitativeTrait.push_back(atof(content[sample][1].c_str()));
+	  }else{
+		pdata->vLabel[sample] =
+			(SHEsis::SampleStatus)std::atoi(content[sample][1].c_str());
+	  }
     for (int snp = 0; snp < snpnum; snp++) {
       for (int p = 0; p < ploidy; p++) {
         pdata->mGenotype[sample][snp][p] =
@@ -334,21 +366,22 @@ void addOptions(int argc, char* argv[], po::options_description& desc,
                 po::variables_map& vm) {
   desc.add_options()("help", "produce help message")(
       "input", po::value<std::vector<std::string> >(),
-      "path for the input file containing both cases and controls")(
+      "path for the input file containing both cases and controls, can be specified for multiple times")(
       "input-case", po::value<std::vector<std::string> >(),
-      "path for the input file containing cases")(
+      "path for the input file containing cases, can be specified for multiple times")(
       "input-ctrl", po::value<std::vector<std::string> >(),
-      "path for the input file containing controls")(
+      "path for the input file containing controls, can be specified for multiple times")(
       "snpname-file", po::value<std::string>(),
       "path for file that contains names of snps")(
       "snpname-line", po::value<std::string>(), "snp names are as arguments")(
       "output", po::value<std::string>(), "prefix of output files")(
       "ploidy", po::value<int>(), "number of ploidy")(
       "hwe", "perform Hardy-Weinberg disequilibrium test")(
-      "assoc", "perform case/control association test")(
+      "assoc", "perform association test, case/control analysis by default. To perform quantitative trait loci analysis, please specified together with --qtl.")(
+      "qtl","input phenotype is quantitative traits. input file should be specified with --input, the second column of the input file is the quantitative trait")(
       "permutation", po::value<int>(), "times for permutation")(
-      "haplo-EM", "perform haplotype analysis using EM algorithm")(
-      "haplo-SAT", "perform haplotype analysis using SAT-based algorithm")(
+      "haplo-EM", "perform haplotype analysis using expectation maximization algorithm")(
+      "haplo-SAT","perform haplotype analysis using SAT-based algorithm")(
       "mask", po::value<std::string>(),
       "mask of snps for haplotype analysis, comma delimited. eg. mask=1,0,1 to "
       "use 1st and 3rd SNPs when there are 3 SNPs in all.")(
@@ -403,6 +436,10 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
     throw std::runtime_error(
         "--input and --input-case/--input-ctrl cannot be specified at the same "
         "time.");
+  if(vm.count("qtl")>0 && (vm.count("input-case") || vm.count("input-ctrl")))
+	  throw std::runtime_error("input file for quantitative trait analaysis should be specified with --input.");
+  if(vm.count("qtl")>0 && (vm.count("input")==0))
+	  throw std::runtime_error("no input file specified.");
   if ((0 == vm.count("input-case") && (0 != vm.count("input-ctrl"))) ||
       (0 == vm.count("input-ctrl") && (0 != vm.count("input-case"))))
     throw std::runtime_error(
@@ -456,6 +493,8 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
 
   if (vm.count("permutation") > 0 && vm.count("assoc") == 0)
     throw std::runtime_error("--permutaion should be used along with --assoc");
+//  if(vm.count("assoc")!=0 && vm.count("qtl")!=0)
+//	  throw std::runtime_error("--assoc cannot be specified together with --qtl");
   if (vm.count("assoc")) {
     SHEsisArgs.assocAnalysis = true;
     if (vm.count("permutation")) {
@@ -464,6 +503,9 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
         throw std::runtime_error("permutation times should be higher than 0.");
     }
   };
+  if(vm.count("qtl")){
+	  SHEsisArgs.qtl=true;
+  }
 
   if (vm.count("hwe")) {
     SHEsisArgs.hweAnalysis = true;
@@ -517,25 +559,25 @@ int ReadInput(int ploidy, bool containsPhenotype, std::string filepath,
   int snpnum = 0;
   int expectedfileds = 0;
   while (getline(file, line)) {
+    std::vector<std::string> strs;
+    boost::erase_all(line,"\r");
+    boost::trim_if(line, boost::is_any_of("\t ,"));
     if (line.empty()) {
       lineidx++;
       continue;
     }
-    std::vector<std::string> strs;
-    boost::erase_all(line,"\r");
-    boost::trim_if(line, boost::is_any_of("\t ,"));
     boost::split(strs, line, boost::is_any_of("\t ,"),
                  boost::token_compress_on);
 
     if (containsPhenotype) {
-      if ((SHEsis::SampleStatus)(std::atoi(strs[1].c_str()) != SHEsis::CASE &&
+      if (!SHEsisArgs.qtl && (SHEsis::SampleStatus)(std::atoi(strs[1].c_str()) != SHEsis::CASE &&
                                  (SHEsis::SampleStatus)(std::atoi(
                                      strs[1].c_str())) != SHEsis::CONTROL)) {
         std::stringstream ss;
         ss << "Error in line " << lineidx << ", file:" << filepath
            << ", phenotype should be either " << SHEsis::CASE
            << " for cases or " << SHEsis::CONTROL << " for controls, but "
-           << strs[1] << " found";
+           << strs[1] << " found. For quantitative trait analysis, please use --qtl.";
         throw std::runtime_error(ss.str());
       };
     };

@@ -110,12 +110,13 @@ std::string convert2string(T v) {
   std::stringstream ss;
   int tmp = v * 1000;
   v = (T)tmp / 1000.0;
-  if (v != -1)
+  if (v != -999)
     ss << v;
   else
     ss << "NA";
   return ss.str();
 }
+int getRank(double p, std::vector<double> v) ;
 std::string get_file_name_from_full_path(const std::string& file_path);
 std::string ToBinaryString(int i);
 boost::shared_ptr<int[]> SetSharedPtr(int Num, ...);
@@ -137,8 +138,8 @@ void PearsonChiSquareTest(T* tab, int row, int col, double& chi, double& p) {
 
   int degreeOfFreedom = (row - 1) * (col - 1);
   if(degreeOfFreedom<=0){
-	  	 chi=-1;
-	  	 p=-1;
+	  	 chi=-999;
+	  	 p=-999;
 	  	 return;
   }
   T total = 0;

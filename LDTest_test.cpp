@@ -26,6 +26,7 @@ boost::shared_ptr<SHEsis::SHEsisData> GenerateRandomData(int sampleNum,
   for (int iSample = 0; iSample < sampleNum; iSample++) {
     BOOST_ASSERT(iSample < data->vLabel.size());
     data->vLabel[iSample] = ((SHEsis::SampleStatus)dist(boost_rng));
+//    data->vQuantitativeTrait.push_back(dist(boost_rng));
     for (int iSnp = 0; iSnp < snpNum; iSnp++) {
       for (int iChrset = 0; iChrset < chrSetNum; iChrset++) {
         data->mGenotype[iSample][iSnp][iChrset] = dist2(boost_rng);
@@ -39,15 +40,16 @@ boost::shared_ptr<SHEsis::SHEsisData> GenerateRandomData(int sampleNum,
 };
 int test_main(int, char * []) {
   int sampleNum = 100;
-  int chrSetNum = 3;
-  int snpNum = 4;
+  int chrSetNum = 2;
+  int snpNum = 5;
   boost::shared_ptr<SHEsis::SHEsisData> data = GenerateRandomData(
       sampleNum, snpNum,
       chrSetNum);  //(new SHEsis::SHEsisData(sampleNum,snpNum,chrSetNum));
 
   std::stringstream ss;
-  ss << "snpnum_" << snpNum << ".bmp";
+  ss << "snpnum_"<<"in_case"<<".bmp";
   SHEsis::LDTest ld(data, ss.str());
+//  ld.setLDType(SHEsis::LD_IN_CASE);
   ld.AllLociLDtest();
   ld.printRes();
   ld.DrawLDMap();

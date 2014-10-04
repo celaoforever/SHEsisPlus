@@ -31,7 +31,7 @@ class HWETest {
   virtual ~HWETest();
   void AllSnpHWETest();
   void printHWETestResults();
-  std::string reporthtml(double pthreshold);
+  std::string reporthtml();
 
  private:
   void SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
@@ -39,6 +39,10 @@ class HWETest {
                         double& ControlPearsonP, double& ControlFisherP,
                         double& BothChi, double& BothPearsonP,
                         double& BothFisherP);
+  void SingleSnpHWETestBoth(int iSnp, double& BothChi, double& BothPearsonP,
+                                 double& BothFisherP);
+  void AllSnpHWETestQTL();
+  void AllSnpHWETestBinary();
   boost::unordered_map<std::string, size_t> vCoefficient;
 };
 

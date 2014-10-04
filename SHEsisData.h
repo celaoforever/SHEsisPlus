@@ -17,6 +17,7 @@
 namespace SHEsis {
 
 struct LocusInfo {
+	LocusInfo():AlleleCallrate(0),GenoCallrate(0){};
   boost::unordered_map<short, double> CaseAlleleCount;
   boost::unordered_map<short, double> ControlAlleleCount;
   boost::unordered_map<std::string, double> CaseGenotypeCount;
@@ -24,6 +25,8 @@ struct LocusInfo {
 
   boost::unordered_map<short, double> BothAlleleCount;
   boost::unordered_map<std::string, double> BothGenotypeCount;
+  double AlleleCallrate;
+  double GenoCallrate;
   int getAlleleIndex(short a) {
     BOOST_ASSERT(BothAlleleCount.end() != BothAlleleCount.find(a));
     boost::unordered_map<short, double>::iterator iter;
@@ -64,10 +67,12 @@ class SHEsisData {
   };
   virtual ~SHEsisData();
   boost::multi_array<short, 3> mGenotype;
+  std::vector<double> vQuantitativeTrait;
   std::vector<SampleStatus> vLabel;
   std::vector<LocusInfo> vLocusInfo;
   std::vector<std::string> vLocusName;
   void statCount(std::vector<SampleStatus>& label);
+  void statCount();//for qtl
   void printLocusInfo();
   int getCaseNum();
   int getControlNum();

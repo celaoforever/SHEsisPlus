@@ -129,6 +129,55 @@ int SHEsisData::getControlNum() {
   return this->ControlNum;
 }
 
+void SHEsisData::statCount(){
+	  this->vLocusInfo.clear();
+	  this->vLocusInfo.resize(SnpNum);
+	  std::vector<short> geno;
+	  for (int iSample = 0; iSample < this->SampleNum; iSample++) {
+	    for (int iSnp = 0; iSnp < this->SnpNum; iSnp++) {
+	      geno.clear();
+	      for (int iChrset = 0; iChrset < this->NumOfChrSet; iChrset++) {
+	        BOOST_ASSERT(iSample < this->mGenotype.shape()[0] &&
+	                     iSnp < this->mGenotype.shape()[1] &&
+	                     iChrset < this->mGenotype.shape()[2]);
+	        short Cur = this->mGenotype[iSample][iSnp][iChrset];
+	        if (GENOTYPE_MISSING == Cur) {
+	        	this->vLocusInfo[iSnp].AlleleCallrate++;
+	        	continue;
+	        }
+	        {
+	          if (this->vLocusInfo[iSnp].BothAlleleCount.end() ==
+	              this->vLocusInfo[iSnp].BothAlleleCount.find(Cur))
+	            this->vLocusInfo[iSnp].BothAlleleCount[Cur] = 1;
+	          else
+	            (this->vLocusInfo[iSnp].BothAlleleCount[Cur])++;
+
+	          if (iChrset == (this->NumOfChrSet - 1)) {
+	            geno.push_back(Cur);
+	            if (this->NumOfChrSet > geno.size()){
+	            	this->vLocusInfo[iSnp].GenoCallrate++;
+	                continue;  // indicating there is missing data within this site
+	                           // for the specific individual
+	            }
+	            std::sort(geno.begin(), geno.end());
+	            std::string genoStr = getStrFromSortedGenotype(geno);
+	            if (this->vLocusInfo[iSnp].BothGenotypeCount.end() ==
+	                this->vLocusInfo[iSnp].BothGenotypeCount.find(genoStr))
+	              this->vLocusInfo[iSnp].BothGenotypeCount[genoStr] = 1;
+	            else
+	              (this->vLocusInfo[iSnp].BothGenotypeCount[genoStr])++;
+	          } else
+	            geno.push_back(Cur);
+	        }
+	      }
+	    }
+	  }
+	  for(int iSnp=0;iSnp<this->SnpNum;iSnp++){
+		  this->vLocusInfo[iSnp].AlleleCallrate=1-(this->vLocusInfo[iSnp].AlleleCallrate/(double)this->getNumOfChrSet()/this->getSampleNum());
+		  this->vLocusInfo[iSnp].GenoCallrate=1-( this->vLocusInfo[iSnp].GenoCallrate/(double)this->getSampleNum());
+	  }
+}
+
 void SHEsisData::statCount(std::vector<SampleStatus>& label) {
   this->vLocusInfo.clear();
   this->vLocusInfo.resize(SnpNum);
@@ -141,7 +190,10 @@ void SHEsisData::statCount(std::vector<SampleStatus>& label) {
                      iSnp < this->mGenotype.shape()[1] &&
                      iChrset < this->mGenotype.shape()[2]);
         short Cur = this->mGenotype[iSample][iSnp][iChrset];
-        if (GENOTYPE_MISSING == Cur) continue;
+        if (GENOTYPE_MISSING == Cur) {
+        	this->vLocusInfo[iSnp].AlleleCallrate++;
+        	continue;
+        }
         if (CASE == label[iSample]) {
           if (this->vLocusInfo[iSnp].CaseAlleleCount.end() ==
               this->vLocusInfo[iSnp].CaseAlleleCount.find(Cur))
@@ -153,9 +205,12 @@ void SHEsisData::statCount(std::vector<SampleStatus>& label) {
             this->vLocusInfo[iSnp].ControlAlleleCount[Cur] = 0;
           if (iChrset == (this->NumOfChrSet - 1)) {
             geno.push_back(Cur);
-            if (this->NumOfChrSet > geno.size())
-              continue;  // indicating there is missing data within this site
-                         // for the specific individual
+            if (this->NumOfChrSet > geno.size()){
+            	this->vLocusInfo[iSnp].GenoCallrate++;
+                continue;  // indicating there is missing data within this site
+                           // for the specific individual
+            }
+
             std::sort(geno.begin(), geno.end());
             std::string genoStr = getStrFromSortedGenotype(geno);
             if (this->vLocusInfo[iSnp].CaseGenotypeCount.end() ==
@@ -183,9 +238,12 @@ void SHEsisData::statCount(std::vector<SampleStatus>& label) {
             this->vLocusInfo[iSnp].CaseAlleleCount[Cur] = 0;
           if (iChrset == (this->NumOfChrSet - 1)) {
             geno.push_back(Cur);
-            if (this->NumOfChrSet > geno.size())
-              continue;  // indicating there is missing data within this site
-                         // for the specific individual
+            if (this->NumOfChrSet > geno.size()){
+            	this->vLocusInfo[iSnp].GenoCallrate++;
+                continue;  // indicating there is missing data within this site
+                           // for the specific individual
+            }
+
             std::sort(geno.begin(), geno.end());
             std::string genoStr = getStrFromSortedGenotype(geno);
             if (this->vLocusInfo[iSnp].ControlGenotypeCount.end() ==
@@ -223,5 +281,12 @@ void SHEsisData::statCount(std::vector<SampleStatus>& label) {
           this->vLocusInfo[iSnp].ControlAlleleCount[iter2->first];
     }
   }
+
+  for(int iSnp=0;iSnp<this->SnpNum;iSnp++){
+	  this->vLocusInfo[iSnp].AlleleCallrate=1-(this->vLocusInfo[iSnp].AlleleCallrate/(double)this->getNumOfChrSet()/this->getSampleNum());
+	  this->vLocusInfo[iSnp].GenoCallrate=1-( this->vLocusInfo[iSnp].GenoCallrate/(double)this->getSampleNum());
+  }
 }
+
+
 }

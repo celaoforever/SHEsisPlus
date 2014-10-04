@@ -112,8 +112,7 @@ double LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type) {
               (double)(this->data->getNumOfChrSet() * this->data->getCaseNum());
           break;
         case LD_IN_BOTH:
-          hapfreq = i == -1 ? 0 : (double)(hp->Results.CaseCount[i] +
-                                           hp->Results.ControlCount[i]) /
+          hapfreq = i == -1 ? 0 : (double)(hp->Results.BothCount[i]) /
                                       (double)(this->data->getNumOfChrSet() *
                                                this->data->getSampleNum());
           allele = iter1->first;
@@ -124,6 +123,7 @@ double LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type) {
           allelefreq2 = (double)data->vLocusInfo[snp2].BothAlleleCount[allele] /
                         (double)(this->data->getNumOfChrSet() *
                                  this->data->getSampleNum());
+//          std::cout<<"hapfreq="<<hapfreq<<",a1="<<allelefreq1<<",a2="<<allelefreq2;
           break;
         default:
           std::cout << "***ERROR:no such ld analysis type\n";
@@ -141,13 +141,27 @@ double LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type) {
       }
       double adsd = ABS(d / dmax);
       normalizedD += allelefreq1 * allelefreq2 * adsd;
+//      std::cout<<",d="<<d<<",dmax="<<dmax<<",d/dmax="<<adsd<<",normalizedd="<<normalizedD<<"\n";
     }
   }
   return normalizedD;
 }
 
 void LDTest::AllLociLDtest() {
-  this->data->statCount(this->data->vLabel);
+	if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()>0){
+		this->data->statCount();
+		this->ldtype=LD_IN_BOTH;
+	}
+	else if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()==0)
+		this->data->statCount(this->data->vLabel);
+
+//  if(data->vQuantitativeTrait.size()>0){
+//
+//	  this->data->statCount();
+//	  this->ldtype=LD_IN_BOTH;
+//  }
+//  else
+//	  this->data->statCount(this->data->vLabel);
   int total = this->data->getSnpNum() * (this->data->getSnpNum() - 1) / 2;
   int count = 0;
   for (int i = 0; i < this->data->getSnpNum(); i++) {

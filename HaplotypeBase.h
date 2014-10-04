@@ -15,7 +15,7 @@ namespace SHEsis {
 
 struct singleHapRes {
   singleHapRes()
-      : chisquare(-1), fisherp(-1), pearsonp(-1), OR(-1), orlow(-1), orUp(-1) {}
+      : chisquare(-999), fisherp(-999), pearsonp(-999), OR(-999), orlow(-999), orUp(-999) {}
   double chisquare;
   double fisherp;
   double pearsonp;
@@ -23,20 +23,31 @@ struct singleHapRes {
   double orlow;
   double orUp;
 };
+struct singHapQTLRes{
+	singHapQTLRes():p(1),ValidSampleNum(0),beta(0),se(0),R2(0),T(0){};
+	double ValidSampleNum;
+	double beta;
+	double se;
+	double R2;
+	double T;
+	double p;
+};
 struct HapTestResult {
   std::vector<boost::shared_ptr<short[]> > haplotypes;
   std::vector<singleHapRes> singleHap;
-  boost::multi_array<short, 2> genotypes;
+  std::vector<singHapQTLRes> singleHapQTL;
+  boost::multi_array<int, 2> genotypes;
   boost::shared_ptr<int[]> CaseCount;
   boost::shared_ptr<int[]> ControlCount;
+  boost::shared_ptr<int[]> BothCount;
   double FisherP;
   double PearsonP;
   double ChiSquare;
   HapTestResult(int sample, int ploidy)
       : genotypes(boost::extents[sample][ploidy]),
-        FisherP(-1),
-        PearsonP(-1),
-        ChiSquare(-1) {};
+        FisherP(-999),
+        PearsonP(-999),
+        ChiSquare(-999) {};
   ~HapTestResult() { haplotypes.clear(); }
 };
 
@@ -66,11 +77,17 @@ class HaplotypeBase {
   void setFreqThreshold(double t) {
     this->freqthreshold = t;
   };
+  std::string reporthtmltableBinary();
+  std::string reporthtmltableQTL();
   std::string reporthtml();
-  std::string reporthtmltable();
   HapTestResult Results;
 
  protected:
+  void AssociationTestBinary();
+  void AssociationTestQTL();
+  singHapQTLRes SingleHaploAssociationTestQTL(int hapIdx);
+  int getHaploCount(int sample,int hapIdx);
+  bool IsHaploMissing(int sample);
   std::vector<short> mask;
   std::vector<int> SnpIdx;
   bool silent;

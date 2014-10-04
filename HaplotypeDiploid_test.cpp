@@ -56,21 +56,21 @@ boost::shared_ptr<SHEsis::SHEsisData> GenerateHaploData(
       data->mGenotype[i][n][1 - p] = hap[idx2][n];
     }
   }
-  //	std::cout<<"haplotype:\n";
-  //	for(int i=0;i<hap.size();i++){
-  //		for(int j=0;j<snpNum;j++){
-  //			std::cout<<hap[i][j];
-  //		};
-  //		std::cout<<"\t"<<hapcount[i]<<"\n";
-  //	};
+  	std::cout<<"haplotype:\n";
+  	for(int i=0;i<hap.size();i++){
+  		for(int j=0;j<snpNum;j++){
+  			std::cout<<hap[i][j];
+  		};
+  		std::cout<<"\t"<<hapcount[i]<<"\n";
+  	};
   return data;
 }
 
 void testHp() {
-  int sampleNum = 400;
+  int sampleNum = 1000;
   int snpNum = 100;
   int chrSetNum = 2;
-  int HapNum = 3;
+  int HapNum = 4;
   std::vector<boost::shared_ptr<short[]> > haps =
       createHaplotype(HapNum, snpNum);
   std::vector<int> hapcount;

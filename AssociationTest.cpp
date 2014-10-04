@@ -145,7 +145,10 @@ std::string AssociationTest::reporthtmlGenotype() {
 }
 
 void AssociationTest::association() {
-  this->data->statCount(this->data->vLabel);
+	if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()>0)
+		this->data->statCount();
+	else if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()==0)
+		this->data->statCount(this->data->vLabel);
   this->AssociationTestForAllSnpsAllele();
   this->AssociationTestForAllSnpsGenotype();
 }
@@ -185,12 +188,12 @@ void getTheSmallestP(std::vector<LocusAssiciationTestResult> res,
   }
 }
 
-int getRank(double p, std::vector<double> v) {
-  for (int i = 0; i < v.size() - 1; i++) {
-    if (p >= v[i] && p <= v[i + 1]) return i;
-  }
-  return v.size();
-}
+//int getRank(double p, std::vector<double> v) {
+//  for (int i = 0; i < v.size() - 1; i++) {
+//    if (p >= v[i] && p <= v[i + 1]) return i;
+//  }
+//  return v.size();
+//}
 
 void AssociationTest::permutation() {
   this->vPermutateLabel = this->data->vLabel;
@@ -285,7 +288,7 @@ void AssociationTest::SingleSnpTestAllele(int iSnp, double& FisherP,
          &expect, &percnt, &emin, &prt, &pre, &ws);
   FisherP = pre;
   }catch(std::runtime_error&){
-	  FisherP=-1;
+	  FisherP=-999;
   }
 
 
@@ -303,9 +306,9 @@ void AssociationTest::SingleSnpTestAllele(int iSnp, double& FisherP,
     ORLowLimit = oddsRatio * exp(-1.96 * sqrt(v));
     ORUpLimit = oddsRatio * exp(1.96 * sqrt(v));
   } else {
-    oddsRatio = -1;
-    ORLowLimit = -1;
-    ORUpLimit = -1;
+    oddsRatio = -999;
+    ORLowLimit = -999;
+    ORUpLimit = -999;
   }
   delete[] contigency;
   contigency = 0;
@@ -348,7 +351,7 @@ void AssociationTest::SingleSnpTestGenotype(int iSnp, double& FisherP,
     FisherP = pre;
   }
   catch (std::runtime_error&) {
-    FisherP = -1;
+    FisherP = -999;
   }
 
   // Pearson's ChiSquare test

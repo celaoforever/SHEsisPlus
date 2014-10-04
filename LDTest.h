@@ -21,6 +21,7 @@ class LDTest {
   void AllLociLDtest();
   void DrawLDMap();
   void printRes();
+  void setLDType(LD_TYPE t){this->ldtype=t;};
   void setForceSAT(bool b) {
     this->bForceSAT = b;
   };

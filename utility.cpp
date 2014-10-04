@@ -9,6 +9,13 @@
 #include <stdarg.h>
 #include <string>
 #include <algorithm>
+int getRank(double p, std::vector<double> v)
+{
+  for (int i = 0; i < v.size() - 1; i++) {
+    if (p >= v[i] && p <= v[i + 1]) return i;
+  }
+  return v.size();
+}
 
 boost::shared_ptr<int[]> SetSharedPtr(int Num, ...) {
   boost::shared_ptr<int[]> sp(new int[Num + 1]);

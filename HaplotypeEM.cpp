@@ -795,25 +795,36 @@ void HaplotypeEM::getResults() {
   int haploNum = hm.size();
   this->Results.CaseCount.reset(new int[haploNum]);
   this->Results.ControlCount.reset(new int[haploNum]);
+  this->Results.BothCount.reset(new int[haploNum]);
   for (int i = 0; i < this->Results.haplotypes.size(); i++) {
     this->Results.CaseCount[i] = 0;
     this->Results.ControlCount[i] = 0;
+    this->Results.BothCount[i] = 0;
   }
 
 
   for (int sample = 0; sample < this->data->getSampleNum(); sample++) {
     if (this->missing[sample]) continue;
-    if (CASE == this->data->vLabel[sample]) {
-    	for(int ploidy=0;ploidy<this->data->getNumOfChrSet();ploidy++){
-    		int h=this->Results.genotypes[sample][ploidy];
-    		this->Results.CaseCount[h]++;
-    	}
-    } else if (CONTROL == this->data->vLabel[sample]) {
-    	for(int ploidy=0;ploidy<this->data->getNumOfChrSet();ploidy++){
-    		int h=this->Results.genotypes[sample][ploidy];
-    		this->Results.ControlCount[h]++;
-    	}
-    }
+    if(this->data->vQuantitativeTrait.size() == 0){
+		if (CASE == this->data->vLabel[sample]) {
+			for(int ploidy=0;ploidy<this->data->getNumOfChrSet();ploidy++){
+				int h=this->Results.genotypes[sample][ploidy];
+				this->Results.CaseCount[h]++;
+				this->Results.BothCount[h]++;
+			}
+		} else if (CONTROL == this->data->vLabel[sample]) {
+			for(int ploidy=0;ploidy<this->data->getNumOfChrSet();ploidy++){
+				int h=this->Results.genotypes[sample][ploidy];
+				this->Results.ControlCount[h]++;
+				this->Results.BothCount[h]++;
+			}
+		}
+	  }else{
+			for(int ploidy=0;ploidy<this->data->getNumOfChrSet();ploidy++){
+				int h=this->Results.genotypes[sample][ploidy];
+				this->Results.BothCount[h]++;
+			}
+	  }
   };
 
 
@@ -822,7 +833,7 @@ void HaplotypeEM::getResults() {
 //		for(int i=0;i<this->SnpIdx.size();i++){
 //	    	std::cout<<this->Results.haplotypes[k][i];
 //		}
-//		std::cout<<":"<< (this->Results.ControlCount[k]+this->Results.CaseCount[k])<<"\n";
+//		std::cout<<":"<< (this->Results.BothCount[k])<<"\n";
 //	}
 
 }

@@ -152,7 +152,7 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
     CaseFisherP = pre;
   }
   catch (std::runtime_error&) {
-    CaseFisherP = -1;
+    CaseFisherP = -999;
   }
   // Pearson's ChiSquare test
   // PearsonChiSquareTest(contigency,NumOfRow,NumOfCol,CaseChi,CasePearsonP);
@@ -199,7 +199,7 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
     ControlFisherP = pre;
   }
   catch (std::runtime_error&) {
-    ControlFisherP = -1;
+    ControlFisherP = -999;
   }
 
   // Pearson's ChiSquare test
@@ -244,15 +244,16 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
     BothFisherP = pre;
   }
   catch (std::runtime_error&) {
-    BothFisherP = -1;
+    BothFisherP = -999;
   }
   // Pearson's ChiSquare test
   delete[] contigency;
   contigency = 0;
 }
 
-void HWETest::AllSnpHWETest() {
-  this->data->statCount(this->data->vLabel);
+void HWETest::AllSnpHWETestBinary() {
+  if(this->data->vLocusInfo[0].BothAlleleCount.size()==0)
+	  this->data->statCount(this->data->vLabel);
   for (int i = 0; i < this->data->getSnpNum(); i++) {
     this->SingleSnpHWETest(i, this->vHWETestResult[i].CaseChiSquare,
                            this->vHWETestResult[i].CasePearsonP,
@@ -266,17 +267,102 @@ void HWETest::AllSnpHWETest() {
   };
 };
 
-std::string HWETest::reporthtml(double p) {
+void HWETest::AllSnpHWETestQTL() {
+	if(this->data->vLocusInfo[0].BothAlleleCount.size()==0)
+		this->data->statCount();
+//  this->data->printLocusInfo();
+  for (int i = 0; i < this->data->getSnpNum(); i++) {
+    this->SingleSnpHWETestBoth(i,this->vHWETestResult[i].BothChiSquare,
+                           this->vHWETestResult[i].BothPearsonP,
+                           this->vHWETestResult[i].BothFisherP);
+  };
+};
+
+void HWETest::AllSnpHWETest(){
+	if(this->data->vQuantitativeTrait.size()!=0)
+		this->AllSnpHWETestQTL();
+	else
+		this->AllSnpHWETestBinary();
+}
+
+void HWETest::SingleSnpHWETestBoth(int iSnp, double& BothChi, double& BothPearsonP,
+                               double& BothFisherP) {
+
+  boost::unordered_map<short, size_t> AlleleType;
+  boost::unordered_map<short, double>::iterator map_it;
+  for (map_it = this->data->vLocusInfo[iSnp].BothAlleleCount.begin();
+       map_it != this->data->vLocusInfo[iSnp].BothAlleleCount.end(); map_it++) {
+    AlleleType[map_it->first] = 0;
+  };
+
+  boost::unordered_map<std::string, double>::iterator genotype_iter;
+  int NumOfRow =
+      2;  // 1st row is for observed freq, 2nd row is for expected frequency
+  int NumOfCol = this->data->vLocusInfo[iSnp].BothGenotypeCount.size();
+  int totalGenotype = 0;
+  double* contigency = new double[NumOfRow * NumOfCol];
+  int idx = 0;
+  for (genotype_iter = this->data->vLocusInfo[iSnp].BothGenotypeCount.begin();
+       genotype_iter != this->data->vLocusInfo[iSnp].BothGenotypeCount.end();
+       genotype_iter++) {
+    double expectedFreq = GetExpectedGenotypeFreq(
+        genotype_iter->first, this->data->vLocusInfo[iSnp].BothAlleleCount,
+        AlleleType, this->vCoefficient, this->data->getSampleNum(),
+        this->data->getNumOfChrSet());
+    BOOST_ASSERT(idx < NumOfRow * NumOfCol);
+    contigency[idx++] =
+        genotype_iter
+            ->second;  //(this->data->getCaseNum()*this->data->getNumOfChrSet());
+    BOOST_ASSERT(idx < NumOfRow * NumOfCol);
+    contigency[idx++] = expectedFreq;
+    totalGenotype += genotype_iter->second;
+  };
+
+  // Fisher's exact test:
+  BothChi = 0;
+  for (int i = 0; i < NumOfCol * NumOfRow; i = i + 2) {
+    if (contigency[i] < 1) contigency[i] *= totalGenotype;
+    if (contigency[i + 1] < 1) contigency[i + 1] *= totalGenotype;
+    if (contigency[i + 1] != 0)
+    	BothChi += (contigency[i + 1] - contigency[i]) *
+                 (contigency[i + 1] - contigency[i]) / contigency[i + 1];
+  }
+  boost::math::chi_squared dist(NumOfCol);
+  BothPearsonP = boost::math::cdf(boost::math::complement(dist, BothChi));
+
+  double expect = -1.0;
+  double percnt = 100.0;
+  double emin = 0;
+  double pre = 0, prt = 0;
+  int ws = 300000;
+  try {
+    fexact(&NumOfRow, &NumOfCol, contigency, &NumOfRow, &expect, &percnt, &emin,
+           &prt, &pre, &ws);
+    BothFisherP = pre;
+  }
+  catch (std::runtime_error&) {
+    BothFisherP = -999;
+  }
+  // Pearson's ChiSquare test
+  // PearsonChiSquareTest(contigency,NumOfRow,NumOfCol,CaseChi,CasePearsonP);
+  delete[] contigency;
+  contigency = 0;
+}
+
+
+std::string HWETest::reporthtml() {
   boost::shared_ptr<SHEsis::CreatHtmlTable> html(new SHEsis::CreatHtmlTable());
   html->createTable("HWETest");
   std::vector<std::string> data;
   data.push_back("SNP");
-  data.push_back("chi2 in case");
-  data.push_back("pearson's p in case");
-  data.push_back("fisher's p in case");
-  data.push_back("chi2 in ctrl");
-  data.push_back("pearson's p in ctrl");
-  data.push_back("fisher's p in ctrl");
+  if(this->data->vQuantitativeTrait.size()==0){
+	  data.push_back("chi2 in case");
+	  data.push_back("pearson's p in case");
+	  data.push_back("fisher's p in case");
+	  data.push_back("chi2 in ctrl");
+	  data.push_back("pearson's p in ctrl");
+	  data.push_back("fisher's p in ctrl");
+  }
   data.push_back("chi2 in both");
   data.push_back("pearson's p in both");
   data.push_back("fisher's p in both");
@@ -285,12 +371,14 @@ std::string HWETest::reporthtml(double p) {
   for (int i = 0; i < this->vHWETestResult.size(); i++) {
     data.clear();
     data.push_back(this->data->vLocusName[i]);
-    data.push_back(convert2string(this->vHWETestResult[i].CaseChiSquare));
-    data.push_back(convert2string(this->vHWETestResult[i].CasePearsonP));
-    data.push_back(convert2string(this->vHWETestResult[i].CaseFisherP));
-    data.push_back(convert2string(this->vHWETestResult[i].ControlChiSquare));
-    data.push_back(convert2string(this->vHWETestResult[i].ControlPearsonP));
-    data.push_back(convert2string(this->vHWETestResult[i].ControlFisherP));
+    if(this->data->vQuantitativeTrait.size()==0){
+		data.push_back(convert2string(this->vHWETestResult[i].CaseChiSquare));
+		data.push_back(convert2string(this->vHWETestResult[i].CasePearsonP));
+		data.push_back(convert2string(this->vHWETestResult[i].CaseFisherP));
+		data.push_back(convert2string(this->vHWETestResult[i].ControlChiSquare));
+		data.push_back(convert2string(this->vHWETestResult[i].ControlPearsonP));
+		data.push_back(convert2string(this->vHWETestResult[i].ControlFisherP));
+    };
     data.push_back(convert2string(this->vHWETestResult[i].BothChiSquare));
     data.push_back(convert2string(this->vHWETestResult[i].BothPearsonP));
     data.push_back(convert2string(this->vHWETestResult[i].BothFisherP));

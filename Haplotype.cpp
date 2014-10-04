@@ -60,6 +60,7 @@ Haplotype::~Haplotype() {
 };
 
 void Haplotype::startHaplotypeAnalysis() {
+
   for (int i = 1;
        i <= this->data->getNumOfChrSet() * this->data->getSampleNum(); i++) {
     if (!this->silent)
@@ -76,6 +77,11 @@ void Haplotype::startHaplotypeAnalysis() {
 }
 
 void Haplotype::statOccurence() {
+	if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()>0)
+		this->data->statCount();
+	else if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()==0)
+		this->data->statCount(this->data->vLabel);
+
   for (int iSample = 0; iSample < data->getSampleNum(); iSample++) {
     for (int iSnp = 0; iSnp < data->getSnpNum(); iSnp++) {
       this->occurence[iSample][iSnp].resize(
@@ -96,6 +102,10 @@ void Haplotype::statOccurence() {
 }
 
 void Haplotype::statOccurenceMask() {
+	if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()>0)
+		this->data->statCount();
+	else if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()==0)
+		this->data->statCount(this->data->vLabel);
   int subiSnp;
   for (int iSample = 0; iSample < data->getSampleNum(); iSample++) {
     subiSnp = 0;
@@ -155,6 +165,7 @@ void Haplotype::parseSolution(int assumed_haplotypes) {
     int var = boost::lexical_cast<int>(strs[i].c_str());
     BOOST_ASSERT(0 != var);
     int index = variables->enumeration[ABS(var)];
+    std::cout<<"index="<<index<<",parities[0]="<<parities[0]<<"\n";
     BOOST_ASSERT(index <= parities[0]);
     parities[index - 1] = var;
   }
@@ -208,17 +219,25 @@ void Haplotype::parseSolution(int assumed_haplotypes) {
   int haploNum = this->Results.haplotypes.size();
   this->Results.CaseCount.reset(new int[haploNum]);
   this->Results.ControlCount.reset(new int[haploNum]);
+  this->Results.BothCount.reset(new int[haploNum]);
   for (int i = 0; i < this->Results.haplotypes.size(); i++) {
     this->Results.CaseCount[i] = 0;
     this->Results.ControlCount[i] = 0;
+    this->Results.BothCount[i] = 0;
   }
   for (int i = 0; i < this->data->getSampleNum(); i++) {
     for (int k = 0; k < this->data->getNumOfChrSet(); k++) {
       int idx = Results.genotypes[i][k];
-      if (CASE == this->data->vLabel[i]) {
-        this->Results.CaseCount[idx]++;
-      } else if (CONTROL == this->data->vLabel[i]) {
-        this->Results.ControlCount[idx]++;
+      if(this->data->vQuantitativeTrait.size() == 0){
+		  if (CASE == this->data->vLabel[i]) {
+			this->Results.CaseCount[idx]++;
+			this->Results.BothCount[idx]++;
+		  } else if (CONTROL == this->data->vLabel[i]) {
+			this->Results.ControlCount[idx]++;
+			this->Results.BothCount[idx]++;
+		  }
+      }else{
+    	  this->Results.BothCount[idx]++;
       }
     }
   }
