@@ -473,8 +473,8 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
 
   if (0 == vm.count("ploidy"))
     throw std::runtime_error("no ploidy information given.");
-  else if (vm["ploidy"].as<int>() <= 0)
-    throw std::runtime_error("number of ploidy should be higher than 0.");
+  else if (vm["ploidy"].as<int>() <= 1)
+    throw std::runtime_error("number of ploidy should be higher than 1.");
   else
     SHEsisArgs.ploidy = vm["ploidy"].as<int>();
 
