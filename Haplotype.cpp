@@ -165,9 +165,10 @@ void Haplotype::parseSolution(int assumed_haplotypes) {
     int var = boost::lexical_cast<int>(strs[i].c_str());
     BOOST_ASSERT(0 != var);
     int index = variables->enumeration[ABS(var)];
-    std::cout<<"index="<<index<<",parities[0]="<<parities[0]<<"\n";
-    BOOST_ASSERT(index <= parities[0]);
-    parities[index - 1] = var;
+//    std::cout<<"index="<<index<<",parities[0]="<<parities[0]<<"\n";
+//    BOOST_ASSERT(index <= parities[0]);
+    if(index <= parities[0])
+    	parities[index - 1] = var;
   }
   variables->setParities(parities);
 

@@ -185,16 +185,16 @@ int main(int argc, char* argv[]) {
 	    else
 	      std::cout << "***WARNING: lowest frequency threshold for haplotype "
 	                   "analysis is invalid..defaulting to 0.03\n";
-	    std::cout << "Genotype Matrix:\n";
-	    for (int iSample = 0; iSample <data->getSampleNum(); iSample++) {
-	      for (int iSnp = 0; iSnp < data->getSnpNum(); iSnp++) {
-	        for (int iChrset = 0; iChrset < data->getNumOfChrSet(); iChrset++) {
-	          std::cout << data->mGenotype[iSample][iSnp][iChrset] << "/";
-	        }
-	        std::cout << " ";
-	      }
-	      std::cout << "\n";
-	    }
+//	    std::cout << "Genotype Matrix:\n";
+//	    for (int iSample = 0; iSample <data->getSampleNum(); iSample++) {
+//	      for (int iSnp = 0; iSnp < data->getSnpNum(); iSnp++) {
+//	        for (int iChrset = 0; iChrset < data->getNumOfChrSet(); iChrset++) {
+//	          std::cout << data->mGenotype[iSample][iSnp][iChrset] << "/";
+//	        }
+//	        std::cout << " ";
+//	      }
+//	      std::cout << "\n";
+//	    }
 	    HapHandle->setSilent(false);
 	    HapHandle->startHaplotypeAnalysis();
 	    HapHandle->AssociationTest();
