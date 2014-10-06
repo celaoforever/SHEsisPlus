@@ -90,7 +90,7 @@ if(req.body.CheckBoxAnalysisTypeHWE=="on"){
 	args+=" --hwe";
 };
 if(req.body.CheckBoxAnalysisTypeHap=="on"){
-	args+=" --haplo";
+	args+=" --haplo-EM";
 };
 
 if(req.body.CheckBoxAnalysisTypeLD=="on"){
