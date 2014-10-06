@@ -52,6 +52,6 @@ int test_main(int, char * []) {
 //  ld.setLDType(SHEsis::LD_IN_CASE);
   ld.AllLociLDtest();
   ld.printRes();
-  ld.DrawLDMap();
+  ld.DrawLDMapDandR2();
   return boost::exit_success;
 }
