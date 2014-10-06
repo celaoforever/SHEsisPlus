@@ -256,7 +256,7 @@ int main(int argc, char* argv[]) {
 
     std::string ldreport=LDHandle->reporthtml();
     if(SHEsisArgs.webserver){
-		std::string filepath=SHEsisArgs.output + ".bmp";
+		std::string filepath=SHEsisArgs.output;
 		std::string filename=get_file_name_from_full_path(filepath);
 		boost::replace_all(ldreport,filename,"tmp/"+filename);
     };
