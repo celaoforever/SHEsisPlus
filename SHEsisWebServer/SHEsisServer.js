@@ -68,21 +68,32 @@ if(anyerr!=""){
 function setArgs(req,ip,time){
 var casedatafile="public/tmp/"+ip+time+"case.txt";
 var ctrldatafile="public/tmp/"+ip+time+"ctrl.txt";
+var qtldatafile="public/tmp/"+ip+time+"qtl.txt";
 var output="public/tmp/"+ip+time+"output";
 var args="";
-fs.writeFile(casedatafile,req.body.TextareaCasedata,function(err){
-	if(err){
-		console.log(err);
-	};
-});
+var qtl=req.body.SelectPhenotype=="Case/Control"?false:true;
+if(qtl){
+	 fs.writeFile(qtldatafile,req.body.TextareaQTLdata,function(err){
+             if(err){
+                    console.log(err);
+             };
+        });
+	args+=" --qtl --input "+qtldatafile;
+}else{
 
-fs.writeFile(ctrldatafile,req.body.TextareaControldata,function(err){
-        if(err){
-                console.log(err);
-        };
-});
-args+="--input-case "+casedatafile+" --input-ctrl "+ctrldatafile;
+	fs.writeFile(casedatafile,req.body.TextareaCasedata,function(err){
+		if(err){
+			console.log(err);
+		};
+	});
 
+	fs.writeFile(ctrldatafile,req.body.TextareaControldata,function(err){
+        	if(err){
+                	console.log(err);
+        	};
+	});
+	args+="--input-case "+casedatafile+" --input-ctrl "+ctrldatafile;
+};
 if(req.body.CheckBoxAnalysisTypeAssoc=="on"){
 	args+=" --assoc";
 }
@@ -100,6 +111,8 @@ if(req.body.CheckBoxAnalysisTypeLD=="on"){
 		args+=" --ld-in-case";
 	}else if(req.body.SelectLDType=="Just control"){
 		args+=" --ld-in-ctrl";
+	}else if(!req.body.SelectLDType){
+		args+=" --ld";
 	};
 }
 
@@ -127,6 +140,25 @@ function getDateTime() {
     var day  = date.getDate();
     day = (day < 10 ? "0" : "") + day;
     return (year + month + day + hour +  min +  sec);
+
+}
+
+
+function getDateTimeFormated() {
+
+    var date = new Date();
+    var hour = date.getHours();
+    hour = (hour < 10 ? "0" : "") + hour;
+    var min  = date.getMinutes();
+    min = (min < 10 ? "0" : "") + min;
+    var sec  = date.getSeconds();
+    sec = (sec < 10 ? "0" : "") + sec;
+    var year = date.getFullYear();
+    var month = date.getMonth() + 1;
+    month = (month < 10 ? "0" : "") + month;
+    var day  = date.getDate();
+    day = (day < 10 ? "0" : "") + day;
+    return (year+"-" + month +"-"+ day +" "+ hour +":"+  min +":"+  sec);
 
 }
 app.listen(5903);

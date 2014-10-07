@@ -7,6 +7,7 @@
         <script src="javascripts/jquery-ui.js"></script>
         <script src="javascripts/metro.min.js"></script>
 	<script src="javascripts/checkform.js"></script>
+	<script src="javascripts/onchange.js"></script>
     </head>
     <body class="metro">
 <div style="background: url(images/dna5-corp.jpg) top left no-repeat;background-size:cover;height:200px;">
@@ -66,9 +67,9 @@
  </div>
 </div>
 
-<div class="container" style="padding:30px 30px" >
+<div class="container"   style="padding:30px 30px" >
 <font size="4">
-          <form name="SHEsisMain" onsubmit="return validateForm()" action="Results" method="post">
+          <form name="SHEsisMain" autocomplete="off"  onsubmit="return validateForm()" action="Results" method="post">
           <fildset>
 	    <table style="width:90%">
 	    <tr>
@@ -131,7 +132,7 @@
 	     <td>
 	       Selected site for haplotype analysis:
 	     </td>
-	     <td colspan=3>
+	     <td colspan=2>
 	       <div class="input-control text">
 	       <input name="TextMask" style="width:100%" type="text" placeholder="eg. 1,0,1,1 to choose 1st,2nd&4th sites for when there are 4 sites."></input>
 	       </div>
@@ -139,14 +140,13 @@
 	    </tr>
 	    <tr>
 	      <td>
-		Calculate LD in:
+		Phenotype:
               </td>
 	     <td>
 	         <div class="input-control select">
-		 <select name="SelectLDType" style="width:85%; text-align:center">
-		   <option value="Both case and control">Both case and control</option>
-		   <option value="Just case">Just case</option>
-		   <option value="Just control">Just control</option>
+		 <select name="SelectPhenotype" value="Case/Control" style="width:85%; text-align:center"  onchange="selectQTL()">
+		   <option value="Case/Control">Case/Control</option>
+		   <option value="Quantitative Trait">Quantitative Trait</option>
 		  </select>  
 		 </div>
 	     </td>
@@ -160,9 +160,21 @@
 	    </tr>
 	    <tr>
 	      <td>
+		Calculate LD in:
+              </td>
+	     <td>
+	         <div class="input-control select">
+		 <select name="SelectLDType" style="width:85%; text-align:center">
+		   <option value="Both case and control">All samples</option>
+		   <option value="Just case">Just case</option>
+		   <option value="Just control">Just control</option>
+		  </select>  
+		 </div>
+	     </td>
+	      <td>
 		Marker name:
               </td>
-	      <td colspan="4">
+	      <td colspan="2">
 		<div class="input-control text">
 		<input name="TextMarkername" style="width:100%" type="text" placeholder="eg. rs11,rs22,rs33,rs44 when there are 4 sites."
 		</div>
@@ -173,9 +185,9 @@
 	    </tr>
 	    <tr>
 	      <td colspan="5">
-		<table style="width:100%">
+		<table  name="TableInputData" style="width:100%">
 		  <tr>
-		    <td>Input data for cases:</td>
+		    <td>Input data for cases:<button type="button" title="Load sample data" onclick="loadSampleBinary()" class="bg-white"><i class="fg-lightBlue icon-help on-left"></i></button></td>
 		    <td></td>
 		    <td>Input data for controls:</td>
 		  </tr>
@@ -192,14 +204,26 @@
 		      </div>		      
 		    </td>
 		  </tr>
-		</table>		  
+		</table>
+		<table  name="TableInputDataQTL" style="width:100%;display:none">
+		  <tr>
+		    <td>Input data for quantitative trait: <button type="button" title="Load sample data" onclick="loadSampleQTL()"class="bg-white"><i class="fg-lightBlue icon-help on-left"></i></button></td>
+		  </tr>
+		  <tr>
+		    <td>
+		      <div class="input-control textarea">
+			<textarea name="TextareaQTLdata" rows="30" cols="40" wrap="OFF"></textarea>
+		      </div>
+		    </td>
+		  </tr>
+		</table>				  
 	      </td>
 	    </tr>
 	    <tr>
 	      <td colspan="5">
 		<div style="text-align:center">
-		  <input type="submit" class="large info" value="Calculate" ></input>
-		  <input type="reset" class="large" value="  Reset  "></input>
+		  <input type="submit" class="large bg-lightBlue fg-white" value="Calculate" ></input>
+		  <input type="reset" onclick="ResetForm()"  class="large" value="  Reset  "></input>
 		</div>
 	      </td>
 	    </tr>
