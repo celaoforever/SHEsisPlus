@@ -168,7 +168,7 @@ std::string QTL::reporthtml() {
   html->createTable("QTL_Analysis");
   std::vector<std::string> data;
   data.push_back("SNP");
-  data.push_back("Risk allele");
+  data.push_back("Effect allele");
   data.push_back("Nonmissing sample");
   data.push_back("Regression coefficient");
   data.push_back("Standard error");
