@@ -25,11 +25,25 @@ var args=setArgs(req,ip,time);
 //console.log(args);
 var anyerr="";
 console.log("cmd:bin/SHEsis "+args);
-var bin=cp.exec('bin/SHEsis '+args,{timeout:6000000},function(err,stdout,stderr){
+var bin=cp.exec('bin/SHEsis '+args,{timeout:20000},function(err,stdout,stderr){
+//var bin=cp.exec('ping www.baidu.com ',{timeout:3000},function(err,stdout,stderr){
 if(err){
- console.log(err);
+if(err.killed){
+ console.log("timed out");
+ fs.readFile("public/Results.html",'utf8',function(err,data){
+ if(err){
+        return console.log(err);
+ };
+ results=data.replace(/SHOWRESULTSHERE/g,"<br><br><h2>Your request timed out. Please download the standalone version of SHEsis to run it on your local machine.</h2>");
+ res.write(results);
+ res.end();
+})
 }
-//console.log(stdout);
+
+else
+ console.log("err");
+return;
+}
 var arrMatches=stdout.toString().match('ERROR.*');
 if(arrMatches != null){
        if(arrMatches.length>0){
