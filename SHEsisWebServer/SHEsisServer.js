@@ -6,22 +6,41 @@ var fs=require('fs');
 var util=require('util');
 var cp=require('child_process');
 var path=require('path');
+var Db=require('mongodb').Db;
+var Server = require('mongodb').Server;
 app.use(express.compress());
 app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 bodyParser({strict:false});
 
+function insertToDB(cl,content){
+  var db=new Db("test",new Server('localhost',27017,{}),{w:-2,journal:false,fsync:false,safe: false});
+db.open(function(err,db){
+ var collection=db.collection(cl);
+ collection.insert(content);
+ db.close();
+});
+}
+
 app.get('/',function(req,res){
 console.log("request /");
 res.redirect("SHEsis.html");
+var ip=req.connection.remoteAddress;
+var time=getDateTimeFormated();
+insertToDB("get",{ip:ip,time:time});
 });
 
 app.post('/Results',function(req,res){
 console.log("post Results");
 var ip=req.connection.remoteAddress;
 var time=getDateTime();
-var args=setArgs(req,ip,time);
+var JSONARG={};
+JSONARG.IP=ip;
+JSONARG.TIME=getDateTimeFormated();
+var args=setArgs(req,ip,time,JSONARG);
+insertToDB("post",JSONARG);
+
 //console.log(args);
 var anyerr="";
 console.log("cmd:bin/SHEsis "+args);
@@ -79,7 +98,7 @@ if(anyerr!=""){
 });
 });
 
-function setArgs(req,ip,time){
+function setArgs(req,ip,time,jsonarg){
 var casedatafile="public/tmp/"+ip+time+"case.txt";
 var ctrldatafile="public/tmp/"+ip+time+"ctrl.txt";
 var qtldatafile="public/tmp/"+ip+time+"qtl.txt";
@@ -93,8 +112,9 @@ if(qtl){
              };
         });
 	args+=" --qtl --input "+qtldatafile;
+	jsonarg.QTL=1;
 }else{
-
+	jsonarg.QTL=0;
 	fs.writeFile(casedatafile,req.body.TextareaCasedata,function(err){
 		if(err){
 			console.log(err);
@@ -110,23 +130,42 @@ if(qtl){
 };
 if(req.body.CheckBoxAnalysisTypeAssoc=="on"){
 	args+=" --assoc";
-}
+	jsonarg.ASSOC=1;
+}else
+{
+	jsonarg.ASSOC=0;
+};
 if(req.body.CheckBoxAnalysisTypeHWE=="on"){
 	args+=" --hwe";
+	jsonarg.HWE=1;
+}else
+{
+	jsonarg.HWE=0;
 };
 if(req.body.CheckBoxAnalysisTypeHap=="on"){
 	args+=" --haplo-EM";
-};
+	jsonarg.HAP=1;
+}else
+{
+	jsonarg.HAP=0;
+}
 
 if(req.body.CheckBoxAnalysisTypeLD=="on"){
 	if(req.body.SelectLDType=="Both case and control"){
 		args+=" --ld";
+		jsonarg.LD="LD in both";
 	}else if(req.body.SelectLDType=="Just case"){
 		args+=" --ld-in-case";
+		jsonarg.LD="LD in case";
 	}else if(req.body.SelectLDType=="Just control"){
 		args+=" --ld-in-ctrl";
+		jsonarg.LD="LD in ctrl";
 	}else if(!req.body.SelectLDType){
 		args+=" --ld";
+		jsonarg.LD="LD in both";
+	}else
+	{
+		jsonarg.LD=0;
 	};
 }
 
@@ -134,6 +173,10 @@ args+=" --ploidy "+req.body.SelectPloidy;
 args+=" --lft "+req.body.TextLFT;
 args+=" --snpname-line \""+req.body.TextMarkername  + "\"";
 args+=" --mask "+"\""+req.body.TextMask+"\"";
+jsonarg.PLOIDY=req.body.SelectPloidy;
+jsonarg.LFT=req.body.TextLFT;
+jsonarg.SNP=req.body.TextMarkername;
+jsonarg.mask=req.body.TextMask;
 args+=" --output "+output;
 args+=" --webserver";
 return args;
