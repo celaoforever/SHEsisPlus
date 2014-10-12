@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="stylesheets/metro-bootstrap.css">
+	<link rel="stylesheet" href="stylesheets/iconFont.min.css">
+        <script src="javascripts/jquery.min.js"></script>
+        <script src="javascripts/jquery-ui.js"></script>
+        <script src="javascripts/metro.min.js"></script>
+	<script src="javascripts/onchange.js"></script>
+    </head>
+<body class="metro">
+
+<div class="navigation-bar">
+  <div class="navigation-bar-content container">
+    <a class="element" href="http://analysis2.bio-x.cn/SHEsisMain.htm" title="Back to SHEsis main page">
+    <span class="icon-home"></span>
+	SHEsis
+	<sup>2.0</sup>
+     </a>
+    <span class="element-divider"></span>
+    <a class="element">
+      Help
+    </a>
+    <span class="element-divider"></span>
+    <a class="element">
+      Cite Us 
+    </a>   
+    <span class="element-divider"></span>
+    <a class="element">
+      Contact Us 
+    </a> 
+    <span class="element-divider"></span>
+    <a class="element place-right" href="https://github.com/celaoforever/SHEsis" title="Follow us on github">
+      Follow us on github
+      <span class="icon-github-2"> 
+    </a>
+ </div>
+</div>
+<div class="container"  style="padding:20px 50px">
+<h1>
+ <a href="/">
+  <i class="icon-arrow-left-3 fg-darker smaller"></i>
+ </a>
+ Administration
+ <small class="on-right"></small>
+</h1>
+<table style="width:470px">
+<tr>
+<td style="width:150px" ><font size=4>Select database:</font></td>
+<td style="width:120px" > 
+  <select  style="width:100px" id="select_id" onChange="Submit(this.options[this.options.selectedIndex].value)">
+    <option value="Select">Select</option>
+    <option value="get">get</option>
+    <option value="post">post</option>
+  </select>
+</td>
+<td style="width=40px">
+  
+</td>
+<td style="width: 80px">
+  <button  id="buttonPrev" onclick="PrevPage()">Back</button>
+</td>
+<td style="width:80px">
+  <button id="buttonNext" onclick="NextPage()">Next</button>
+</td>
+</tr>
+</table>
+<br>
+<table class="table bordered hovered" id="log"></table>
+</div>
+</body>
+</html>

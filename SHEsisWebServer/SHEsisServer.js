@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded());
 bodyParser({strict:false});
 
 function insertToDB(cl,content){
-  var db=new Db("test",new Server('localhost',27017,{}),{w:-2,journal:false,fsync:false,safe: false});
+  var db=new Db("SHEsisLog",new Server('localhost',27017,{}),{w:-2,journal:false,fsync:false,safe: false});
 db.open(function(err,db){
  var collection=db.collection(cl);
  collection.insert(content);
@@ -28,7 +28,7 @@ console.log("request /");
 res.redirect("SHEsis.html");
 var ip=req.connection.remoteAddress;
 var time=getDateTimeFormated();
-insertToDB("get",{ip:ip,time:time});
+insertToDB("get",{IP:ip,TIME:time});
 });
 
 app.post('/Results',function(req,res){
@@ -181,6 +181,37 @@ args+=" --output "+output;
 args+=" --webserver";
 return args;
 };
+
+app.get('/log', function(req, res) {
+    console.log("request /log");
+    var writeResp = function(err, result) {
+        res.set('Content-Type', 'text/plain');
+        if (err) {
+            console.log("writeResp"+ err);
+        } else {
+            res.send(200, JSON.stringify(result));
+            console.log("sent.");
+        }
+        res.end();
+    };
+    FindDB(req.param('table'), writeResp);
+});
+
+function FindDB(cl,callback){
+  var db=new Db("SHEsisLog",new Server('localhost',27017,{}),{w:-2,journal:false,fsync:false,safe: false});
+db.open(function(err,db){
+if(err){console.log("error connecting to mongodb");}
+console.log("connected to mongodb:"+cl);
+ var collection=db.collection(cl);
+        collection.find({}, {
+            "_id": 0
+        })
+            .toArray(function(err, items) {
+                callback(err, items);
+                return;
+            });
+    }); 
+}
 
 function getDateTime() {
 
