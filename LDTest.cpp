@@ -353,6 +353,14 @@ void LDTest::DrawLDMap(int type) {// 0 for D', 1 for R2
       count++;
     }
   }
+  if(0==type){
+	  BMP_draw_string(this->ldmap,"D'", 30, height-50, RGB_BLACK, 0);
+  }else if(1==type){
+	  BMP_draw_string(this->ldmap,"R", 30, height-50, RGB_BLACK, 0);
+	  BMP_draw_mini_string(this->ldmap,"2", 45, height-55, RGB_BLACK);
+  }else
+	  BOOST_ASSERT(1==0);
+//  BMP_draw_string(this->ldmap,type==0? "D'":"R^2", 10, height-50, RGB_BLACK, 0);
   std::string curPath=this->path+(type==0?"_D.bmp":"_R2.bmp");
   BMP_write(this->ldmap, curPath.c_str());
   BMP_delete(this->ldmap);

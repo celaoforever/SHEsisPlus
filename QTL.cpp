@@ -172,7 +172,7 @@ std::string QTL::reporthtml() {
   data.push_back("Nonmissing sample");
   data.push_back("Regression coefficient");
   data.push_back("Standard error");
-  data.push_back("Regression r-squared");
+  data.push_back("Regression r<sup>2</sup>");
   data.push_back("T statistics");
   data.push_back("p value");
   if(this->NumOfPermutation!=-1){

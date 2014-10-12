@@ -356,16 +356,16 @@ std::string HWETest::reporthtml() {
   std::vector<std::string> data;
   data.push_back("SNP");
   if(this->data->vQuantitativeTrait.size()==0){
-	  data.push_back("chi2 in case");
-	  data.push_back("pearson's p in case");
-	  data.push_back("fisher's p in case");
-	  data.push_back("chi2 in ctrl");
-	  data.push_back("pearson's p in ctrl");
-	  data.push_back("fisher's p in ctrl");
+	  data.push_back("Chi<sup>2</sup> in case");
+	  data.push_back("Pearson's p in case");
+	  data.push_back("Fisher's p in case");
+	  data.push_back("Chi<sup>2</sup> in ctrl");
+	  data.push_back("Pearson's p in ctrl");
+	  data.push_back("Fisher's p in ctrl");
   }
-  data.push_back("chi2 in both");
-  data.push_back("pearson's p in both");
-  data.push_back("fisher's p in both");
+  data.push_back("Chi<sup>2</sup> in both");
+  data.push_back("Pearson's p in both");
+  data.push_back("Fisher's p in both");
 
   html->addHeadRow(data);
   for (int i = 0; i < this->vHWETestResult.size(); i++) {

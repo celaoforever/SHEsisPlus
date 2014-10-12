@@ -37,42 +37,81 @@ std::string AssociationTest::reporthtmlAllele() {
   html->createTable("Allele_Association");
   std::vector<std::string> data;
   data.push_back("SNP");
-  data.push_back("Allele Type");
-  data.push_back("Chi2");
+//  data.push_back("Allele Type");
+  data.push_back("Chi<sup>2</sup>");
   data.push_back("Pearson's p");
   data.push_back("Fisher's p");
   if (this->NumOfPermutation != -1) data.push_back("Permutaion P");
   data.push_back("OR [95% CI]");
-  data.push_back("Detail: allele(case freq/control freq)");
+  data.push_back("Detail");
   html->addHeadRow(data);
   for (int i = 0; i < this->vAssocationTestResult.size(); i++) {
     data.clear();
     data.push_back(this->data->vLocusName[i]);
-    std::string alleletype;
-    std::string detail;
+//    std::string alleletype;
+    std::string detail="<pre>\n\t";
+    int count;
     boost::unordered_map<short, double>::iterator iter;
-    int count = 0;
-    for (iter = this->data->vLocusInfo[i].BothAlleleCount.begin();
-         iter != this->data->vLocusInfo[i].BothAlleleCount.end(); iter++) {
-      alleletype += this->data->getallele(iter->first);  //
-      detail += this->data->getallele(iter->first) + "(" +
-                convert2string(
-                    this->data->vLocusInfo[i].CaseAlleleCount[iter->first] /
-                    (double)this->data->getCaseNum() /
-                    (double)this->data->getNumOfChrSet()) +
-                "/" +
-                convert2string(
-                    this->data->vLocusInfo[i].ControlAlleleCount[iter->first] /
-                    (double)this->data->getControlNum() /
-                    (double)this->data->getNumOfChrSet()) +
-                ")";
-      if (count != this->data->vLocusInfo[i].BothAlleleCount.size() - 1) {
-        alleletype += "/";
-        detail += ", ";
-      };
-      count++;
-    }
-    data.push_back(alleletype);
+    count=0;
+    for(iter = this->data->vLocusInfo[i].BothAlleleCount.begin();
+    	iter!=this->data->vLocusInfo[i].BothAlleleCount.end();iter++){
+    		detail+=this->data->getallele(iter->first);
+    		if(count!=this->data->vLocusInfo[i].BothAlleleCount.size() - 1)
+    			detail+="\t";
+    		count++;
+    	}
+    detail+="\nCase\t";
+    count=0;
+    for(iter = this->data->vLocusInfo[i].BothAlleleCount.begin();
+    	iter!=this->data->vLocusInfo[i].BothAlleleCount.end();iter++){
+    		detail+=convert2string(this->data->vLocusInfo[i].CaseAlleleCount[iter->first])
+    				+"("+convert2string(
+    				  this->data->vLocusInfo[i].CaseAlleleCount[iter->first] /
+    				  (double)this->data->getCaseNum() /
+    				  (double)this->data->getNumOfChrSet())+")";
+    		if(count!=this->data->vLocusInfo[i].BothAlleleCount.size() - 1)
+    			detail+="\t";
+    		count++;
+    	}
+
+    detail+="\nControl\t";
+    count=0;
+    for(iter = this->data->vLocusInfo[i].BothAlleleCount.begin();
+    	iter!=this->data->vLocusInfo[i].BothAlleleCount.end();iter++){
+    		detail+=convert2string(this->data->vLocusInfo[i].ControlAlleleCount[iter->first])
+    				+"("+convert2string(
+    				  this->data->vLocusInfo[i].ControlAlleleCount[iter->first] /
+    				  (double)this->data->getControlNum() /
+    				  (double)this->data->getNumOfChrSet())+")";
+    		if(count!=this->data->vLocusInfo[i].BothAlleleCount.size() - 1)
+    			detail+="\t";
+    		count++;
+    	}
+    detail+="\n</pre>";
+
+//    int count = 0;
+//    for (iter = this->data->vLocusInfo[i].BothAlleleCount.begin();
+//         iter != this->data->vLocusInfo[i].BothAlleleCount.end(); iter++) {
+////      alleletype += this->data->getallele(iter->first);  //
+//
+//      detail += this->data->getallele(iter->first) + "(" +
+//                convert2string(
+//                    this->data->vLocusInfo[i].CaseAlleleCount[iter->first] /
+//                    (double)this->data->getCaseNum() /
+//                    (double)this->data->getNumOfChrSet()) +
+//                "/" +
+//                convert2string(
+//                    this->data->vLocusInfo[i].ControlAlleleCount[iter->first] /
+//                    (double)this->data->getControlNum() /
+//                    (double)this->data->getNumOfChrSet()) +
+//                ")";
+//      if (count != this->data->vLocusInfo[i].BothAlleleCount.size() - 1) {
+////        alleletype += "/";
+//        detail += ", ";
+//      };
+//      count++;
+//    }
+//    data.push_back(alleletype);
     data.push_back(
         convert2string(this->vAssocationTestResult[i].AlleleChiSquare));
     data.push_back(
@@ -85,7 +124,7 @@ std::string AssociationTest::reporthtmlAllele() {
     std::string OR =
         convert2string(this->vAssocationTestResult[i].AlleleOddsRatio) + " [" +
         convert2string(this->vAssocationTestResult[i].AlleleOddsRatioLowLimit) +
-        "," +
+        "~" +
         convert2string(this->vAssocationTestResult[i].AlleleOddsRatioUpLimit) +
         "]";
     data.push_back(OR);
@@ -100,11 +139,11 @@ std::string AssociationTest::reporthtmlGenotype() {
   html->createTable("Genotype_Association");
   std::vector<std::string> data;
   data.push_back("SNP");
-  data.push_back("Chi2");
+  data.push_back("Chi<sup>2</sup>");
   data.push_back("Pearson's p");
   data.push_back("Fisher's p");
   if (this->NumOfPermutation != -1) data.push_back("Permutaion P");
-  data.push_back("Detail: genotype(case freq/control freq)");
+  data.push_back("Detail");
   html->addHeadRow(data);
   for (int i = 0; i < this->vAssocationTestResult.size(); i++) {
     data.clear();
@@ -118,26 +157,61 @@ std::string AssociationTest::reporthtmlGenotype() {
     if (this->NumOfPermutation != -1)
       data.push_back(
           convert2string(this->vAssocationTestResult[i].GenotypePermutationP));
-    std::string detail;
+    std::string detail="<pre>\n\t";
     boost::unordered_map<std::string, double>::iterator iter;
     int count = 0;
-    for (iter = this->data->vLocusInfo[i].BothGenotypeCount.begin();
-         iter != this->data->vLocusInfo[i].BothGenotypeCount.end(); iter++) {
-      detail +=
-          this->data->getOriginGenotype(iter->first) + "(" +
-          convert2string(
-              this->data->vLocusInfo[i].CaseGenotypeCount[iter->first] /
-              (double)this->data->getCaseNum()) +
-          "/" +
-          convert2string(
-              this->data->vLocusInfo[i].ControlGenotypeCount[iter->first] /
-              (double)this->data->getControlNum()) +
-          ")";
-      if (count != this->data->vLocusInfo[i].BothGenotypeCount.size() - 1) {
-        detail += ", ";
-      };
-      count++;
-    }
+    for(iter = this->data->vLocusInfo[i].BothGenotypeCount.begin();
+    	iter!=this->data->vLocusInfo[i].BothGenotypeCount.end();iter++){
+    		detail+=this->data->getOriginGenotype(iter->first);
+    		if(count!=this->data->vLocusInfo[i].BothGenotypeCount.size() - 1)
+    			detail+="\t";
+    		count++;
+    	}
+    detail+="\nCase\t";
+    count=0;
+    for(iter = this->data->vLocusInfo[i].BothGenotypeCount.begin();
+    	iter!=this->data->vLocusInfo[i].BothGenotypeCount.end();iter++){
+    		detail+=convert2string(this->data->vLocusInfo[i].CaseGenotypeCount[iter->first])
+    				+"("+convert2string(
+    				  this->data->vLocusInfo[i].CaseGenotypeCount[iter->first] /
+    				  (double)this->data->getCaseNum() /
+    				  (double)this->data->getNumOfChrSet())+")";
+    		if(count!=this->data->vLocusInfo[i].BothGenotypeCount.size() - 1)
+    			detail+="\t";
+    		count++;
+    	}
+
+    detail+="\nControl\t";
+    count=0;
+    for(iter = this->data->vLocusInfo[i].BothGenotypeCount.begin();
+    	iter!=this->data->vLocusInfo[i].BothGenotypeCount.end();iter++){
+    		detail+=convert2string(this->data->vLocusInfo[i].ControlGenotypeCount[iter->first])
+    				+"("+convert2string(
+    				  this->data->vLocusInfo[i].ControlGenotypeCount[iter->first] /
+    				  (double)this->data->getControlNum() /
+    				  (double)this->data->getNumOfChrSet())+")";
+    		if(count!=this->data->vLocusInfo[i].BothGenotypeCount.size() - 1)
+    			detail+="\t";
+    		count++;
+    	}
+    detail+="\n</pre>";
+//    for (iter = this->data->vLocusInfo[i].BothGenotypeCount.begin();
+//         iter != this->data->vLocusInfo[i].BothGenotypeCount.end(); iter++) {
+//      detail +=
+//          this->data->getOriginGenotype(iter->first) + "(" +
+//          convert2string(
+//              this->data->vLocusInfo[i].CaseGenotypeCount[iter->first] /
+//              (double)this->data->getCaseNum()) +
+//          "/" +
+//          convert2string(
+//              this->data->vLocusInfo[i].ControlGenotypeCount[iter->first] /
+//              (double)this->data->getControlNum()) +
+//          ")";
+//      if (count != this->data->vLocusInfo[i].BothGenotypeCount.size() - 1) {
+//        detail += ", ";
+//      };
+//      count++;
+//    }
     data.push_back(detail);
     html->addDataRow(data);
   };
