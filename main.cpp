@@ -23,10 +23,6 @@
 
 namespace po = boost::program_options;
 std::stringstream report;
-typedef enum HaploMethod{
-	EM,
-	SAT
-}HapMethod;
 
 struct arguments {
   arguments()
@@ -75,9 +71,21 @@ boost::shared_ptr<SHEsis::SHEsisData> parseDataNoPhenotype(
 boost::shared_ptr<SHEsis::SHEsisData> parseInput();
 void getSnpNamefile(std::string& path, std::vector<std::string>& snp);
 void getSnpNameline(std::string& names, std::vector<std::string>& snp);
-void writeHtmlHeader();
+void reportHtml(std::stringstream& report,
+		boost::shared_ptr<SHEsis::AssociationTest> AssocHandle,
+		boost::shared_ptr<SHEsis::QTL> QTLHandle,
+		boost::shared_ptr<SHEsis::HWETest> HWEHandle,
+		boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
+		boost::shared_ptr<SHEsis::LDTest> LDHandle);
+void reporttxt(std::stringstream& report,
+		boost::shared_ptr<SHEsis::AssociationTest> AssocHandle,
+		boost::shared_ptr<SHEsis::QTL> QTLHandle,
+		boost::shared_ptr<SHEsis::HWETest> HWEHandle,
+		boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
+		boost::shared_ptr<SHEsis::LDTest> LDHandle);
 
 int main(int argc, char* argv[]) {
+
   po::options_description desc("Allowed options");
   po::variables_map vm;
   boost::shared_ptr<SHEsis::SHEsisData> data;
@@ -91,18 +99,6 @@ int main(int argc, char* argv[]) {
     std::cout << desc << "\n";
     exit(-1);
   };
-  if ((SHEsisArgs.snpnames.size() != 0) &&
-      (data->getSnpNum() != SHEsisArgs.snpnames.size())) {
-    std::cout << "***WARNING: given number of snp names is not the same at "
-                 "that in data. Ignoring snp names...\n";
-    SHEsisArgs.snpnames.clear();
-  };
-  for (int i = 0; i < SHEsisArgs.snpnames.size(); i++) {
-    data->setLocusName(i, SHEsisArgs.snpnames[i]);
-  }
-  if (SHEsisArgs.html&&!SHEsisArgs.webserver) {
-    writeHtmlHeader();
-  }
 
   std::ofstream ofile;
   std::string filename =
@@ -113,13 +109,21 @@ int main(int argc, char* argv[]) {
     exit(-1);
   }
 
+  if ((SHEsisArgs.snpnames.size() != 0) &&
+      (data->getSnpNum() != SHEsisArgs.snpnames.size())) {
+    std::cout << "***WARNING: given number of snp names is not the same at "
+                 "that in data. Ignoring snp names...\n";
+    SHEsisArgs.snpnames.clear();
+  };
+  for (int i = 0; i < SHEsisArgs.snpnames.size(); i++) {
+    data->setLocusName(i, SHEsisArgs.snpnames[i]);
+  }
+
   boost::shared_ptr<SHEsis::AssociationTest> AssocHandle;
   boost::shared_ptr<SHEsis::QTL> QTLHandle;
   boost::shared_ptr<SHEsis::HWETest> HWEHandle;
   boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle;
   boost::shared_ptr<SHEsis::LDTest> LDHandle;
-  if(!SHEsisArgs.webserver)
-	  report << "<h1>SHEsis </h1>\n";
 
   if (SHEsisArgs.assocAnalysis) {
     std::cout << "Starting association test...\n";
@@ -131,8 +135,6 @@ int main(int argc, char* argv[]) {
 		} else {
 		  AssocHandle->association();
 		}
-		report << "\n<h2> Single Locus Association Test (Binary phenotype): </h2>\n";
-		report << AssocHandle->reporthtml();
 		std::cout << "done\n";
     }else{
     	QTLHandle.reset(new SHEsis::QTL(data));
@@ -142,8 +144,6 @@ int main(int argc, char* argv[]) {
     	}else{
     		QTLHandle->QTLTest();
     	}
-		report << "\n<h2> Single Locus Association Test (QTL): </h2>\n";
-		report << QTLHandle->reporthtml();
 		std::cout << "done\n";
     }
   };
@@ -152,8 +152,6 @@ int main(int argc, char* argv[]) {
     std::cout << "Starting Hardy-Weinberg equilibrium test...\n";
     HWEHandle.reset(new SHEsis::HWETest(data));
     HWEHandle->AllSnpHWETest();
-    report << "\n<h2> Hardy-Weinberg Equilibrium Test: </h2>\n";
-    report << HWEHandle->reporthtml();
     std::cout << "done\n";
   }
 
@@ -185,66 +183,11 @@ int main(int argc, char* argv[]) {
 	    else
 	      std::cout << "***WARNING: lowest frequency threshold for haplotype "
 	                   "analysis is invalid..defaulting to 0.03\n";
-//	    std::cout << "Genotype Matrix:\n";
-//	    for (int iSample = 0; iSample <data->getSampleNum(); iSample++) {
-//	      for (int iSnp = 0; iSnp < data->getSnpNum(); iSnp++) {
-//	        for (int iChrset = 0; iChrset < data->getNumOfChrSet(); iChrset++) {
-//	          std::cout << data->mGenotype[iSample][iSnp][iChrset] << "/";
-//	        }
-//	        std::cout << " ";
-//	      }
-//	      std::cout << "\n";
-//	    }
 	    HapHandle->setSilent(false);
 	    HapHandle->startHaplotypeAnalysis();
 	    HapHandle->AssociationTest();
-	    report << "\n<h2> Haplotype Analysis: </h2>\n";
-	    report << HapHandle->reporthtml();
 	    std::cout << "done\n";
   }
-
-//  if (SHEsisArgs.haploAnalysis) {
-//    std::cout << "Starting haplotype analysis...\n";
-//    if (data->getNumOfChrSet() <= 2) {
-//      if (SHEsisArgs.mask.size() != data->getSnpNum()) {
-//        if (SHEsisArgs.mask.size() != 0)
-//          std::cout << "***WARNING: length of given mask is wrong. Ignoring "
-//                       "mask...\n";
-//        HapHandle.reset(new SHEsis::HaplotypeDiploid(data));
-//      } else {
-//        int snpnum = 0;
-//        for (int i = 0; i < SHEsisArgs.mask.size(); i++) {
-//          snpnum += SHEsisArgs.mask[i];
-//        }
-//        HapHandle.reset(
-//            new SHEsis::HaplotypeDiploid(data, snpnum, SHEsisArgs.mask));
-//      }
-//    } else {
-//      if (SHEsisArgs.mask.size() != data->getSnpNum()) {
-//        if (SHEsisArgs.mask.size() != 0)
-//          std::cout << "***WARNING: length of given mask is wrong. Ignoring "
-//                       "mask...\n";
-//        HapHandle.reset(new SHEsis::Haplotype(data));
-//      } else {
-//        int snpnum = 0;
-//        for (int i = 0; i < SHEsisArgs.mask.size(); i++) {
-//          snpnum += SHEsisArgs.mask[i];
-//        }
-//        HapHandle.reset(new SHEsis::Haplotype(data, snpnum, SHEsisArgs.mask));
-//      }
-//    }
-//    if (SHEsisArgs.lft > 0 && SHEsisArgs.lft < 1)
-//      HapHandle->setFreqThreshold(SHEsisArgs.lft);
-//    else
-//      std::cout << "***WARNING: lowest frequency threshold for haplotype "
-//                   "analysis is invalid..defaulting to 0.03\n";
-//    HapHandle->setSilent(false);
-//    HapHandle->startHaplotypeAnalysis();
-//    HapHandle->AssociationTest();
-//    report << "\n<h2> Haplotype Analysis: </h2>\n";
-//    report << HapHandle->reporthtml();
-//    std::cout << "done\n";
-//  };
 
   if (SHEsisArgs.ldAnalysis) {
     std::cout << "Starting linkage disequilibrium analysis...\n";
@@ -252,33 +195,85 @@ int main(int argc, char* argv[]) {
     LDHandle->setLDType(SHEsisArgs.ldtype);
     LDHandle->AllLociLDtest();
     LDHandle->DrawLDMapDandR2();
-    report << "\n<h2> Linkage Disequilibrium Analysis: </h2>\n";
-
-    std::string ldreport=LDHandle->reporthtml();
-    if(SHEsisArgs.webserver){
-		std::string filepath=SHEsisArgs.output;
-		std::string filename=get_file_name_from_full_path(filepath);
-		boost::replace_all(ldreport,filename,"tmp/"+filename);
-    };
-    report <<ldreport;
     std::cout << "done\n";
   };
-  if (SHEsisArgs.html) {
-    report << "</body>\n</html>\n";
-  };
+
+  if(SHEsisArgs.html)
+	  reportHtml(report,AssocHandle,QTLHandle,HWEHandle,HapHandle,LDHandle);
+  else
+	  reporttxt(report,AssocHandle,QTLHandle,HWEHandle,HapHandle,LDHandle);
 
   ofile << report.str();
   ofile.close();
-  if(!SHEsisArgs.webserver){
-  std::string cmd = "firefox " + SHEsisArgs.output + ".html";
-#ifdef _WIN32
-  ShellExecute(NULL, "open", SHEsisArgs.output + ".html", NULL, NULL,
-               SW_SHOWNORMAL);
-#else
-  system(cmd.c_str());
-#endif
-  };
+  std::cout<<"Results saved to "<<filename<<".\n";
+//  if(!SHEsisArgs.webserver){
+//  std::string cmd = "firefox " + SHEsisArgs.output + ".html";
+//#ifdef _WIN32
+//  ShellExecute(NULL, "open", SHEsisArgs.output + ".html", NULL, NULL,
+//               SW_SHOWNORMAL);
+//#else
+//  system(cmd.c_str());
+//#endif
+//  };
   return 0;
+}
+
+void reporttxt(std::stringstream& report,
+		boost::shared_ptr<SHEsis::AssociationTest> AssocHandle,
+		boost::shared_ptr<SHEsis::QTL> QTLHandle,
+		boost::shared_ptr<SHEsis::HWETest> HWEHandle,
+		boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
+		boost::shared_ptr<SHEsis::LDTest> LDHandle){
+	  if(AssocHandle){
+		  report<<AssocHandle->reporttxt();
+	  }
+	  if(QTLHandle){
+		  report<<QTLHandle->reporttxt();
+	  }
+	  if(HWEHandle){
+		  report<<HWEHandle->reporttxt();
+	  }
+	  if(HapHandle){
+		  report<<HapHandle->reporttxt();
+	  }
+	  if(LDHandle){
+		  report<<LDHandle->reporttxt();
+	  }
+}
+
+void reportHtml(std::stringstream& report,
+		boost::shared_ptr<SHEsis::AssociationTest> AssocHandle,
+		boost::shared_ptr<SHEsis::QTL> QTLHandle,
+		boost::shared_ptr<SHEsis::HWETest> HWEHandle,
+		boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
+		boost::shared_ptr<SHEsis::LDTest> LDHandle){
+	  if (!SHEsisArgs.webserver) {
+	    report<<HtmlHeader;
+	    report << "<h1>SHEsis </h1>\n";
+	  }
+	  if(AssocHandle){
+		  report<<AssocHandle->reporthtml();
+	  }
+	  if(QTLHandle){
+		  report<<QTLHandle->reporthtml();
+	  }
+	  if(HWEHandle){
+		  report<<HWEHandle->reporthtml();
+	  }
+	  if(HapHandle){
+		  report<<HapHandle->reporthtml();
+	  }
+	  if(LDHandle){
+		  std::string ldreport=LDHandle->reporthtml();
+		  if(SHEsisArgs.webserver){
+			  std::string filepath=SHEsisArgs.output;
+			  std::string filename=get_file_name_from_full_path(filepath);
+			  boost::replace_all(ldreport,filename,"tmp/"+filename);
+		    };
+		  report<<ldreport;
+	  }
+	  if(!SHEsisArgs.webserver)
+		  report << "</body>\n</html>\n";
 }
 
 boost::shared_ptr<SHEsis::SHEsisData> parseInput() {
@@ -375,6 +370,7 @@ void addOptions(int argc, char* argv[], po::options_description& desc,
       "path for file that contains names of snps")(
       "snpname-line", po::value<std::string>(), "snp names are as arguments")(
       "output", po::value<std::string>(), "prefix of output files")(
+      "report-txt","report results in plain-text format. By default, results will be reported in html.")(
       "ploidy", po::value<int>(), "number of ploidy")(
       "hwe", "perform Hardy-Weinberg disequilibrium test")(
       "assoc", "perform association test, case/control analysis by default. To perform quantitative trait loci analysis, please specified together with --qtl.")(
@@ -543,6 +539,9 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
   if(vm.count("webserver")){
 	  SHEsisArgs.webserver=true;
   }
+  if(vm.count("report-txt"))
+	  SHEsisArgs.html=false;
+
   if (!SHEsisArgs.hweAnalysis && !SHEsisArgs.haploAnalysis &&
       !SHEsisArgs.assocAnalysis && !SHEsisArgs.ldAnalysis)
     throw std::runtime_error(
@@ -607,37 +606,3 @@ int ReadInput(int ploidy, bool containsPhenotype, std::string filepath,
   return snpnum;
 }
 
-void writeHtmlHeader() {
-  report << "<!DOCTYPE html> \n\
-	<html> \n\
-	<head> \n\
-	<style> \n\
-	table { \n\
-	    width:auto; \n\
-	} \n\
-	table, th, td { \n\
-	    border: 1px solid black; \n\
-	    border-collapse: collapse; \n\
-	} \n\
-	th, td { \n\
-	    padding: 5px; \n\
-	    text-align: left; \n\
-	} \n\
-	table tr:nth-child(even) { \n\
-	    background-color: #eee;\n\
-	}\n\
-	table tr:nth-child(odd) {\n\
-	   background-color:#fff;\n\
-	}\n\
-	table th    {\n\
-	    background-color: #AAA;\n\
-	    color: white;\n\
-	}\n\
-	</style>\n\
-	</head>\n\
-\n\
-	<body>\n";
-}
-
-void writeHtmlHeaderWeb(){
-}
