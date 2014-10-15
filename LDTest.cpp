@@ -45,8 +45,49 @@ void LDTest::printRes() {
     }
     std::cout << "\n";
   }
-
 }
+
+std::string LDTest::reporttxt(){
+	std::stringstream res;
+	res.precision(3);
+	res<<"\n-------------------------------------------------------\n";
+	res<<"Linkage Disequilibrium Analysis\n";
+	res<<"-------------------------------------------------------\n";
+	res<<"D'\t";
+	for(int i=0;i<this->data->vLocusName.size();i++){
+		res<<this->data->vLocusName[i]<<"\t";
+	}
+	res<<"\n";
+	  for (int i = 0; i < this->resD.shape()[0]; i++) {
+		res<<this->data->vLocusName[i]<<"\t";
+	    for (int j = 0; j < this->resD.shape()[1]; j++) {
+	    	if(i<j)
+	    		res<< this->resD[i][j] << "\t";
+	    	else
+	    		res<<"-"<<"\t";
+	    }
+	    res << "\n";
+	  }
+	res<<"-------------------------------------------------------\n";
+	res<<"R2\t";
+	for(int i=0;i<this->data->vLocusName.size();i++){
+		res<<this->data->vLocusName[i]<<"\t";
+	}
+	res<<"\n";
+	  for (int i = 0; i < this->resR2.shape()[0]; i++) {
+		res<<this->data->vLocusName[i]<<"\t";
+	    for (int j = 0; j < this->resR2.shape()[1]; j++) {
+	    	if(i<j)
+	    		res<< this->resR2[i][j] << "\t";
+	    	else
+	    		res<<"-"<<"\t";
+	    }
+	    res << "\n";
+	  }
+	  res<<"-------------------------------------------------------\n";
+	  return res.str();
+}
+
 int getHapIdx(std::vector<boost::shared_ptr<short[]> >& v, int a1, int a2) {
   for (int i = 0; i < v.size(); i++) {
     if (a1 == v[i][0] && a2 == v[i][1]) return i;
@@ -353,6 +394,14 @@ void LDTest::DrawLDMap(int type) {// 0 for D', 1 for R2
       count++;
     }
   }
+  if(0==type){
+	  BMP_draw_string(this->ldmap,"D'", 30, height-50, RGB_BLACK, 0);
+  }else if(1==type){
+	  BMP_draw_string(this->ldmap,"R", 30, height-50, RGB_BLACK, 0);
+	  BMP_draw_mini_string(this->ldmap,"2", 45, height-55, RGB_BLACK);
+  }else
+	  BOOST_ASSERT(1==0);
+//  BMP_draw_string(this->ldmap,type==0? "D'":"R^2", 10, height-50, RGB_BLACK, 0);
   std::string curPath=this->path+(type==0?"_D.bmp":"_R2.bmp");
   BMP_write(this->ldmap, curPath.c_str());
   BMP_delete(this->ldmap);
@@ -371,6 +420,7 @@ void LDTest::DrawLDMapDandR2() {
 std::string LDTest::reporthtml() {
   std::string res;
   std::string filename=get_file_name_from_full_path(this->path);
+  res+="\n<h2> Linkage Disequilibrium Analysis: </h2>\n";
   res+="<h3>D'</h3>\n";
   res+="<img src=\"" + filename + "_D.bmp"+"\"" + " alt=\"LD (D') map\">\n";
   res+="<h3>R<sup>2</sup></h3>\n";

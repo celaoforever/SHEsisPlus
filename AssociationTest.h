@@ -39,6 +39,7 @@ class AssociationTest {
   void permutation();
   void association();
   std::string reporthtml();
+  std::string reporttxt();
 
  private:
   int NumOfPermutation;

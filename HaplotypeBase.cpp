@@ -171,6 +171,7 @@ void HaplotypeBase::AssociationTestBinary() {
 
 std::string HaplotypeBase::reporthtml() {
   std::stringstream ss;
+  ss<< "\n<h2> Haplotype Analysis: </h2>\n" ;
   ss << "<p>Haplotypes with frequency <" << this->freqthreshold
      << " are ignored.<br>";
   ss << "Loci chosen for haplotype analysis: ";
@@ -183,7 +184,7 @@ std::string HaplotypeBase::reporthtml() {
 	  ss << "<p><b>Global result:</b><br>Total control="
 		 << this->data->getControlNum()
 		 << ", total case=" << this->data->getCaseNum() << ".<br>";
-	  ss << "Global chi2 is " << convert2string(this->Results.ChiSquare) << ", ";
+	  ss << "Global Chi<sup>2</sup> is " << convert2string(this->Results.ChiSquare) << ", ";
 	  ss << "Fisher's p is " << convert2string(this->Results.FisherP) << ", ";
 	  ss << "Pearson's p is " << convert2string(this->Results.PearsonP)
 		 << ".</p>\n";
@@ -193,6 +194,66 @@ std::string HaplotypeBase::reporthtml() {
   return ss.str();
 }
 
+std::string HaplotypeBase::reporttxt(){
+	std::stringstream res;
+	res.precision(3);
+	res<<"\n-------------------------------------------------------\n";
+	res<<"Haplotype Analysis\n";
+	res<<"-------------------------------------------------------\n";
+	res << "Haplotypes with frequency <" << this->freqthreshold
+	    << " are ignored.\n";
+	res << "Loci chosen for haplotype analysis: ";
+	  for (int i = 0; i < this->SnpIdx.size() - 1; i++) {
+	    res << this->data->vLocusName[SnpIdx[i]] << ", ";
+	  };
+	res << this->data->vLocusName[SnpIdx[this->SnpIdx.size() - 1]]<<"\n";
+	res <<"-------------\n";
+	  if(this->data->vQuantitativeTrait.size()==0){
+		  res << this->reporttxttableBinary();
+		  res <<"-------------\n";
+		  res << "Global result:\nTotal control="
+			 << this->data->getControlNum()
+			 << ", total case=" << this->data->getCaseNum() << ".\n";
+		  res << "Global Chi2 is " << convert2string(this->Results.ChiSquare) << ", ";
+		  res << "Fisher's p is " << convert2string(this->Results.FisherP) << ", ";
+		  res << "Pearson's p is " << convert2string(this->Results.PearsonP)
+			 << ".\n";
+	  }else{
+		  res<<this->reporttxttableQTL();
+	  }
+	  res<<"-------------------------------------------------------\n";
+	  return res.str();
+}
+
+std::string HaplotypeBase::reporttxttableBinary(){
+	std::stringstream res;
+	res.precision(3);
+	res<<"Haplotype\tCase(freq)\tControl(freq)\tChi2\t\tFisher's p\tPearson's p\tOR [95% CI]\n";
+	for (int i = 0; i < this->Results.singleHap.size(); i++) {
+	    if (-999 == this->Results.singleHap[i].pearsonp) continue;
+	    for (int j = 0; j < this->SnpIdx.size(); j++) {
+	      res << this->data->getallele(this->Results.haplotypes[i][j]);
+	    }
+	    res<<"\t\t";
+	    double freq=(double)this->Results.CaseCount[i] /
+                ((double)this->data->getCaseNum() *
+                 (double)this->data->getNumOfChrSet());
+	    res<<this->Results.CaseCount[i]<<"("<<freq<<")\t\t";
+	    freq=(double)this->Results.ControlCount[i] /
+                ((double)this->data->getControlNum() *
+                 (double)this->data->getNumOfChrSet());
+	    res<<this->Results.ControlCount[i]<<"("<<freq<<")\t\t";
+	    res<<this->Results.singleHap[i].chisquare<<"\t\t";
+	    res<<this->Results.singleHap[i].pearsonp<<"\t\t";
+	    res<<convert2string(this->Results.singleHap[i].fisherp)<<"\t\t";
+	    res<<convert2string(this->Results.singleHap[i].OR)<<"["<<
+	    		convert2string(this->Results.singleHap[i].orlow)
+	    		<<"~"<<convert2string(this->Results.singleHap[i].orUp)<<"]\n";
+	};
+	return res.str();
+
+}
+
 std::string HaplotypeBase::reporthtmltableBinary() {
   boost::shared_ptr<SHEsis::CreatHtmlTable> html(new SHEsis::CreatHtmlTable());
   html->createTable("Haplotype_Analysis");
@@ -200,7 +261,7 @@ std::string HaplotypeBase::reporthtmltableBinary() {
   data.push_back("Haplotype");
   data.push_back("Case(freq)");
   data.push_back("Control(freq)");
-  data.push_back("Chi2");
+  data.push_back("Chi<sup>2</sup>");
   data.push_back("Fisher's p");
   data.push_back("Pearson's p");
   data.push_back("OR [95% CI]");
@@ -231,12 +292,32 @@ std::string HaplotypeBase::reporthtmltableBinary() {
     data.push_back(convert2string(this->Results.singleHap[i].fisherp));
     std::string OR;
     OR += convert2string(this->Results.singleHap[i].OR) + " [" +
-          convert2string(this->Results.singleHap[i].orlow) + "," +
+          convert2string(this->Results.singleHap[i].orlow) + "~" +
           convert2string(this->Results.singleHap[i].orUp) + "]";
     data.push_back(OR);
     html->addDataRow(data);
   }
   return html->getTable();
+}
+
+std::string HaplotypeBase::reporttxttableQTL(){
+	std::stringstream res;
+	res.precision(3);
+	res<<"Haplotype\tTotal count\tRegression coefficient\tStandard error\t Regression r2\t T statistics\tP value\n";
+	  for (int i = 0; i < this->Results.singleHapQTL.size(); i++) {
+	    if (0 == this->Results.singleHapQTL[i].ValidSampleNum) continue;
+	    for (int j = 0; j < this->SnpIdx.size(); j++) {
+	      res << this->data->getallele(this->Results.haplotypes[i][j]);
+	    }
+	    res<<"\t\t";
+	    res<<this->Results.BothCount[i]<<"\t\t";
+	    res<<this->Results.singleHapQTL[i].beta<<"\t\t\t";
+	    res<<this->Results.singleHapQTL[i].se<<"\t\t";
+	    res<<this->Results.singleHapQTL[i].R2<<"\t\t";
+	    res<<this->Results.singleHapQTL[i].T<<"\t\t";
+	    res<<this->Results.singleHapQTL[i].p<<"\n";
+	  };
+	 return res.str();
 }
 
 std::string HaplotypeBase::reporthtmltableQTL() {
@@ -247,7 +328,7 @@ std::string HaplotypeBase::reporthtmltableQTL() {
   data.push_back("Total count");
   data.push_back("Regression coefficient");
   data.push_back("Standard error");
-  data.push_back("Regression r-squared");
+  data.push_back("Regression r<sup>2</sup>");
   data.push_back("T statistics");
   data.push_back("p value");
   html->addHeadRow(data);

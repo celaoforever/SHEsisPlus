@@ -77,9 +77,9 @@ class HaplotypeBase {
   void setFreqThreshold(double t) {
     this->freqthreshold = t;
   };
-  std::string reporthtmltableBinary();
-  std::string reporthtmltableQTL();
+
   std::string reporthtml();
+  std::string reporttxt();
   HapTestResult Results;
 
  protected:
@@ -90,6 +90,10 @@ class HaplotypeBase {
   bool IsHaploMissing(int sample);
   std::vector<short> mask;
   std::vector<int> SnpIdx;
+  std::string reporthtmltableBinary();
+  std::string reporthtmltableQTL();
+  std::string reporttxttableBinary();
+  std::string reporttxttableQTL();
   bool silent;
   double freqthreshold;
 };

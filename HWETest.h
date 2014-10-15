@@ -32,6 +32,7 @@ class HWETest {
   void AllSnpHWETest();
   void printHWETestResults();
   std::string reporthtml();
+  std::string reporttxt();
 
  private:
   void SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,

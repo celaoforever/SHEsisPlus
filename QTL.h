@@ -46,6 +46,7 @@ public:
 	void setPermutation(int p){this->NumOfPermutation=p;};
 	void QTLPermutation();
 	std::string reporthtml();
+	std::string reporttxt();
 private:
 	int NumOfPermutation;
 	std::vector<double> vPermutatedQT;

@@ -6,28 +6,8 @@
         <script src="javascripts/jquery.min.js"></script>
         <script src="javascripts/jquery-ui.js"></script>
         <script src="javascripts/metro.min.js"></script>
+	<script src="javascripts/onchange.js"></script>
     </head>
-    <style>
-	pre{
-	height:auto;
-	max-height:200px;
-	overflow:auto;
-	word-break:normal !important;
-	word-wrap:normal !important;
-	white-space:pre !important;
-	font-family: Arial;
-	padding:0;
-	margin:0;
-	-moz-tab-size:24;
-	-o-tab-size:24;
-	-webkit-tab-size:24;
-	-ms-tab-size:24;
-	tab-size:24;
-	}
-	td{
-	vertical-align:middle !important;
-	}
-	</style>
 <body class="metro">
 
 <div class="navigation-bar">
@@ -61,12 +41,32 @@
  <a href="/">
   <i class="icon-arrow-left-3 fg-darker smaller"></i>
  </a>
-  Results
+ Administration
  <small class="on-right"></small>
 </h1>
-
-SHOWRESULTSHERE
-
+<table style="width:470px">
+<tr>
+<td style="width:150px" ><font size=4>Select database:</font></td>
+<td style="width:120px" > 
+  <select  style="width:100px" id="select_id" onChange="Submit(this.options[this.options.selectedIndex].value)">
+    <option value="Select">Select</option>
+    <option value="get">get</option>
+    <option value="post">post</option>
+  </select>
+</td>
+<td style="width=40px">
+  
+</td>
+<td style="width: 80px">
+  <button  id="buttonPrev" onclick="PrevPage()">Back</button>
+</td>
+<td style="width:80px">
+  <button id="buttonNext" onclick="NextPage()">Next</button>
+</td>
+</tr>
+</table>
+<br>
+<table class="table bordered hovered" id="log"></table>
 </div>
 </body>
 </html>

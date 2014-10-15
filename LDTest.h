@@ -26,6 +26,7 @@ class LDTest {
     this->bForceSAT = b;
   };
   std::string reporthtml();
+  std::string reporttxt();
 
  private:
   void TwoLociLDTest(int snp1, int snp2, LD_TYPE type,double& R2 ,double& D);

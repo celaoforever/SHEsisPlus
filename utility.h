@@ -14,6 +14,44 @@
 #include <boost/math/distributions/chi_squared.hpp>
 #define SHEsisABS(x) x < 0 ? (-1) * x : x
 
+
+typedef enum HaploMethod{
+	EM,
+	SAT
+}HapMethod;
+
+static std::string HtmlHeader=
+   "<!DOCTYPE html> \n\
+	<html> \n\
+	<head> \n\
+	<style> \n\
+	table { \n\
+	    width:auto; \n\
+	} \n\
+	table, th, td { \n\
+	    border: 1px solid black; \n\
+	    border-collapse: collapse; \n\
+	} \n\
+	th, td { \n\
+	    padding: 5px; \n\
+	    text-align: left; \n\
+	} \n\
+	table tr:nth-child(even) { \n\
+	    background-color: #eee;\n\
+	}\n\
+	table tr:nth-child(odd) {\n\
+	   background-color:#fff;\n\
+	}\n\
+	table th    {\n\
+	    background-color: #AAA;\n\
+	    color: white;\n\
+	}\n\
+	</style>\n\
+	</head>\n\
+\n\
+	<body>\n";
+
+
 template <class BidIt>
 
 inline bool next_combination(BidIt n_begin, BidIt n_end,

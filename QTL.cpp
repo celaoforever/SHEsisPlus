@@ -92,6 +92,10 @@ QTLResults QTL::OneLocusQTLAnalysis(int snp,short allele,std::vector<double> qt)
 	res.beta=qt_g_covar/g_var;
 	res.se=sqrt((qt_var/g_var-(qt_g_covar*qt_g_covar)/(g_var*g_var))/((double)ValidSampleNum-2));
 	res.T=res.beta/res.se;
+	if(res.T<0.0000001)
+		res.T=0;
+	if(res.T>99999)
+		res.T=99999;
 	boost::math::students_t dist(ValidSampleNum-2);
 	res.p=2*boost::math::cdf(boost::math::complement(dist,fabs(res.T)));
 	res.R2=(qt_g_covar*qt_g_covar)/(qt_var*g_var);
@@ -163,7 +167,38 @@ void QTL::QTLTest(std::vector<double> qt){
 	}
 }
 
+std::string QTL::reporttxt(){
+	std::stringstream res;
+	res.precision(3);
+	res<<"\n-------------------------------------------------------\n";
+	res<<"Single Locus Association Test (QTL)\n";
+	res<<"-------------------------------------------------------\n";
+	res<<"SNP\tEffect allele\tNonmissing\t Regression coefficient\tStandard error\tRegression r2\tT statistics\tP value";
+	if(this->NumOfPermutation!=-1){
+		  res<<"\tpermutation p value";
+	};
+	res<<"\n";
+	for (int i = 0; i < this->vResults.size(); i++) {
+		res<<this->data->vLocusName[i]<<"\t";
+		res<<this->data->getallele(this->vResults[i].allele)<<"\t\t";
+		res<<this->vResults[i].ValidSampleNum<<"\t\t";
+		res<<this->vResults[i].beta<<"\t\t\t";
+		res<<this->vResults[i].se<<"\t\t";
+		res<<this->vResults[i].R2<<"\t\t";
+		res<<this->vResults[i].T<<"\t\t";
+		res<<this->vResults[i].p<<"\t\t";
+	    if(this->NumOfPermutation!=-1){
+	  	  res<<this->vResults[i].permutatedp;
+	    }
+	    res<<"\n";
+	}
+	res<<"-------------------------------------------------------\n";
+	return res.str();
+
+}
+
 std::string QTL::reporthtml() {
+  std::string res="\n<h2> Single Locus Association Test (QTL): </h2>\n";
   boost::shared_ptr<SHEsis::CreatHtmlTable> html(new SHEsis::CreatHtmlTable());
   html->createTable("QTL_Analysis");
   std::vector<std::string> data;
@@ -172,7 +207,7 @@ std::string QTL::reporthtml() {
   data.push_back("Nonmissing sample");
   data.push_back("Regression coefficient");
   data.push_back("Standard error");
-  data.push_back("Regression r-squared");
+  data.push_back("Regression r<sup>2</sup>");
   data.push_back("T statistics");
   data.push_back("p value");
   if(this->NumOfPermutation!=-1){
@@ -194,7 +229,8 @@ std::string QTL::reporthtml() {
     }
     html->addDataRow(data);
   }
-  return html->getTable();
+  res+=html->getTable();
+  return res;
 }
 
 void QTL::printRes(){
