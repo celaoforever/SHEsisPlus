@@ -250,6 +250,8 @@ void reportHtml(std::stringstream& report,
 	  if (!SHEsisArgs.webserver) {
 	    report<<HtmlHeader;
 	    report << "<h1>SHEsis </h1>\n";
+	  }else{
+		  report<<HtmlHeaderServer;
 	  }
 	  if(AssocHandle){
 		  report<<AssocHandle->reporthtml();
@@ -264,16 +266,19 @@ void reportHtml(std::stringstream& report,
 		  report<<HapHandle->reporthtml();
 	  }
 	  if(LDHandle){
-		  std::string ldreport=LDHandle->reporthtml();
-		  if(SHEsisArgs.webserver){
-			  std::string filepath=SHEsisArgs.output;
-			  std::string filename=get_file_name_from_full_path(filepath);
-			  boost::replace_all(ldreport,filename,"tmp/"+filename);
-		    };
-		  report<<ldreport;
+//		  std::string ldreport=LDHandle->reporthtml();
+//		  if(SHEsisArgs.webserver){
+//			  std::string filepath=SHEsisArgs.output;
+//			  std::string filename=get_file_name_from_full_path(filepath);
+//			  boost::replace_all(ldreport,filename,"tmp/"+filename);
+//		    };
+//		  report<<ldreport;
+		  report<<LDHandle->reporthtml();
 	  }
 	  if(!SHEsisArgs.webserver)
 		  report << "</body>\n</html>\n";
+	  else
+		  report<<"</div></body>\n</html>\n";
 }
 
 boost::shared_ptr<SHEsis::SHEsisData> parseInput() {

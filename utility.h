@@ -51,6 +51,76 @@ static std::string HtmlHeader=
 \n\
 	<body>\n";
 
+static std::string HtmlHeaderServer=
+		"<!DOCTYPE html>\n\
+		<html>\n\
+		    <head>\n\
+		        <link rel=\"stylesheet\" href=\"../stylesheets/metro-bootstrap.css\">\n\
+			<link rel=\"stylesheet\" href=\"../stylesheets/iconFont.min.css\">\n\
+		        <script src=\"../javascripts/jquery.min.js\"></script>\n\
+		        <script src=\"../javascripts/jquery-ui.js\"></script>\n\
+		        <script src=\"../javascripts/metro.min.js\"></script>\n\
+		    </head>\n\
+		    <style>\n\
+			pre{\n\
+			height:auto;\n\
+			max-height:200px;\n\
+			overflow:auto;\n\
+			word-break:normal !important;\n\
+			word-wrap:normal !important;\n\
+			white-space:pre !important;\n\
+			font-family: Arial;\n\
+			padding:0;\n\
+			margin:0;\n\
+			-moz-tab-size:24;\n\
+			-o-tab-size:24;\n\
+			-webkit-tab-size:24;\n\
+			-ms-tab-size:24;\n\
+			tab-size:24;\n\
+			}\n\
+			td{\n\
+			vertical-align:middle !important;\n\
+			}\n\
+			</style>\n\
+		<body class=\"metro\">\n\
+		<div class=\"navigation-bar\">\n\
+		  <div class=\"navigation-bar-content container\">\n\
+		    <a class=\"element\" href=\"http://analysis2.bio-x.cn/SHEsisMain.htm\" title=\"Back to SHEsis main page\">\n\
+		    <span class=\"icon-home\"></span>\n\
+			SHEsis\n\
+			<sup>2.0</sup>\n\
+		     </a>\n\
+		    <span class=\"element-divider\"></span>\n\
+		    <a class=\"element\">\n\
+		      Help\n\
+		    </a>\n\
+		    <span class=\"element-divider\"></span>\n\
+		    <a class=\"element\">\n\
+		      Cite Us \n\
+		    </a>   \n\
+		    <span class=\"element-divider\"></span>\n\
+		    <a class=\"element\">\n\
+		      Contact Us \n\
+		    </a> \n\
+		    <span class=\"element-divider\"></span>\n\
+		    <a class=\"element place-right\" href=\"https://github.com/celaoforever/SHEsis\" title=\"Follow us on github\">\n\
+		      Follow us on github\n\
+		      <span class=\"icon-github-2\"> \n\
+		    </a>\n\
+		 </div>\n\
+		</div>\n\
+		<div class=\"container\"  style=\"padding:20px 50px\">\n\
+		<h1>\n\
+		 <a href=\"/\">\n\
+		  <i class=\"icon-arrow-left-3 fg-darker smaller\"></i>\n\
+		 </a>\n\
+		  Results\n\
+		 <small class=\"on-right\"></small>\n\
+		</h1>\n\
+";
+
+
+
 
 template <class BidIt>
 
