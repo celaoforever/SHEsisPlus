@@ -8,20 +8,15 @@ var cp=require('child_process');
 var path=require('path');
 var Db=require('mongodb').Db;
 var Server = require('mongodb').Server;
+var kue = require('kue')
+  , jobs = kue.createQueue()
+  ;
+
 app.use(express.compress());
 app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 bodyParser({strict:false});
-
-function insertToDB(cl,content){
-  var db=new Db("SHEsisLog",new Server('localhost',27017,{}),{w:-2,journal:false,fsync:false,safe: false});
-db.open(function(err,db){
- var collection=db.collection(cl);
- collection.insert(content);
- db.close();
-});
-}
 
 app.get('/',function(req,res){
 console.log("request /");
@@ -40,63 +35,22 @@ JSONARG.IP=ip;
 JSONARG.TIME=getDateTimeFormated();
 var args=setArgs(req,ip,time,JSONARG);
 insertToDB("post",JSONARG);
-
-//console.log(args);
-var anyerr="";
 console.log("cmd:bin/SHEsis "+args);
-var bin=cp.exec('bin/SHEsis '+args,{timeout:20000},function(err,stdout,stderr){
-//var bin=cp.exec('ping www.baidu.com ',{timeout:3000},function(err,stdout,stderr){
-if(err){
-if(err.killed){
- console.log("timed out");
- fs.readFile("public/Results.html",'utf8',function(err,data){
- if(err){
-        return console.log(err);
- };
- results=data.replace(/SHOWRESULTSHERE/g,"<br><br><h2>Your request timed out. Please download the standalone version of SHEsis to run it on your local machine.</h2>");
- res.write(results);
- res.end();
-})
-}
+RunSHEsis(args,ip,time,res);
+});
 
-else
- console.log("err");
-return;
-}
-var arrMatches=stdout.toString().match('ERROR.*');
-if(arrMatches != null){
-       if(arrMatches.length>0){
-               anyerr=arrMatches[0];
-               console.log(anyerr);
-        };
-};
+app.listen(5903);
+console.log("SHEsis web server has started.");
 
-var results="";
-fs.readFile("public/Results.html",'utf8',function(err,data){
- if(err){
-	return console.log(err);
- }; 
-if(anyerr!=""){
- results=data.replace(/SHOWRESULTSHERE/g,anyerr);
- res.write(results);
- res.end();
-}else
- {
- var filepath=ip+time+"output.html";
- 
-  fs.readFile(path.join("public/tmp/",filepath),'utf8',function(err,html){
- 	if(err){
-		return console.log(err);
-	};
-//})
- results=data.replace(/SHOWRESULTSHERE/g,html); 
-  res.write(results);
- res.end();
+
+function insertToDB(cl,content){
+  var db=new Db("SHEsisLog",new Server('localhost',27017,{}),{w:-2,journal:false,fsync:false,safe: false});
+db.open(function(err,db){
+ var collection=db.collection(cl);
+ collection.insert(content);
+ db.close();
 });
- }
-});
-});
-});
+}
 
 function setArgs(req,ip,time,jsonarg){
 var casedatafile="public/tmp/"+ip+time+"case.txt";
@@ -249,6 +203,61 @@ function getDateTimeFormated() {
     return (year+"-" + month +"-"+ day +" "+ hour +":"+  min +":"+  sec);
 
 }
-app.listen(5903);
-console.log("SHEsis web server has started.");
+
+
+function RunSHEsis(args,ip,time,res){
+var anyerr="";
+ var bin=cp.exec('bin/SHEsis '+args,{timeout:3600000},function(err,stdout,stderr){
+if(err){
+if(err.killed){
+ console.log("timed out");
+ fs.readFile("public/Results.html",'utf8',function(err,data){
+ if(err){
+        return console.log(err);
+ };
+ results=data.replace(/SHOWRESULTSHERE/g,"<br><br><h2>Your request timed out. Please download the standalone version of SHEsis to run it on your local machine.</h2>");
+ res.write(results);
+ res.end();
+})
+}
+
+else
+ console.log("err");
+return;
+}
+var arrMatches=stdout.toString().match('ERROR.*');
+if(arrMatches != null){
+       if(arrMatches.length>0){
+               anyerr=arrMatches[0];
+               console.log(anyerr);
+        };
+};
+
+var results="";
+fs.readFile("public/Results.html",'utf8',function(err,data){
+ if(err){
+	return console.log(err);
+ }; 
+if(anyerr!=""){
+ results=data.replace(/SHOWRESULTSHERE/g,anyerr);
+ res.write(results);
+ res.end();
+}else
+ {
+ var filepath=ip+time+"output.html";
+ 
+  fs.readFile(path.join("public/tmp/",filepath),'utf8',function(err,html){
+ 	if(err){
+		return console.log(err);
+	};
+//})
+ results=data.replace(/SHOWRESULTSHERE/g,html); 
+  res.write(results);
+ res.end();
+});
+ }
+});
+})
+}
+
 
