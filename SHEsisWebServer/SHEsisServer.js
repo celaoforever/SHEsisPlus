@@ -28,19 +28,35 @@ insertToDB("get",{IP:ip,TIME:time});
 
 app.post('/Results',function(req,res){
 console.log("post Results");
-var ip=req.connection.remoteAddress;
-var time=getDateTime();
+Enqueue(req,res);
+});
+
+jobs.process('Run',12,function(job,done){
 var JSONARG={};
-JSONARG.IP=ip;
+JSONARG.IP=req.connection.remoteAddress;
 JSONARG.TIME=getDateTimeFormated();
-var args=setArgs(req,ip,time,JSONARG);
+var args=setArgs(job.data.req,job.id,JSONARG);
 insertToDB("post",JSONARG);
 console.log("cmd:bin/SHEsis "+args);
-RunSHEsis(args,ip,time,res);
+RunSHEsis(args,job.data.res,job.id);
+done && done();
 });
 
 app.listen(5903);
 console.log("SHEsis web server has started.");
+
+function Enqueue(req,res){
+ var job=jobs.create('Run', {
+	 req:req,res:res}
+     );
+   job.on('complete',function(){
+	console.log('Job',job.id,'is done');
+   })
+      .on('failed',function(){
+	console.log('Job',job.id,'has failed');
+	})
+   job.save();
+}
 
 
 function insertToDB(cl,content){
@@ -52,11 +68,11 @@ db.open(function(err,db){
 });
 }
 
-function setArgs(req,ip,time,jsonarg){
-var casedatafile="public/tmp/"+ip+time+"case.txt";
-var ctrldatafile="public/tmp/"+ip+time+"ctrl.txt";
-var qtldatafile="public/tmp/"+ip+time+"qtl.txt";
-var output="public/tmp/"+ip+time+"output";
+function setArgs(req,jobid,jsonarg){
+var casedatafile="public/tmp/"+jobid+_"case.txt";
+var ctrldatafile="public/tmp/"+jobid+"_ctrl.txt";
+var qtldatafile="public/tmp/"+jobid+"_qtl.txt";
+var output="public/tmp/"+jobid+"_output";
 var args="";
 var qtl=req.body.SelectPhenotype=="Case/Control"?false:true;
 if(qtl){
@@ -205,7 +221,7 @@ function getDateTimeFormated() {
 }
 
 
-function RunSHEsis(args,ip,time,res){
+function RunSHEsis(args,res,jobid){
 var anyerr="";
  var bin=cp.exec('bin/SHEsis '+args,{timeout:3600000},function(err,stdout,stderr){
 if(err){
