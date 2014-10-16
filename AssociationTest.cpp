@@ -75,6 +75,7 @@ std::string AssociationTest::reporttxt(){
 	    			<<this->vAssocationTestResult[i].AlleleOddsRatioLowLimit<<"~"<<
 	    			this->vAssocationTestResult[i].AlleleOddsRatioUpLimit<<"]\n";
 	    }
+	    res<<"Call rate is "<<this->data->vLocusInfo[i].AlleleCallrate<<"\n";
 	    res<<"Chi2 is "<<this->vAssocationTestResult[i].AlleleChiSquare<<"\n";
 	    res<<"Fisher's p value is "<<this->vAssocationTestResult[i].AlleleFisherP<<"\n";
 	    res<<"Pearson's p value is "<<this->vAssocationTestResult[i].AllelePearsonP<<"\n";
@@ -100,8 +101,7 @@ std::string AssociationTest::reporttxt(){
 		    		detail+=convert2string(this->data->vLocusInfo[i].CaseGenotypeCount[iter2->first])
 		    				+"("+convert2string(
 		    				  this->data->vLocusInfo[i].CaseGenotypeCount[iter2->first] /
-		    				  (double)this->data->getCaseNum() /
-		    				  (double)this->data->getNumOfChrSet())+")";
+		    				  (double)this->data->getCaseNum())+")";
 		    		if(count!=this->data->vLocusInfo[i].BothGenotypeCount.size() - 1)
 		    			detail+="\t";
 		    		count++;
@@ -114,8 +114,7 @@ std::string AssociationTest::reporttxt(){
 		    		detail+=convert2string(this->data->vLocusInfo[i].ControlGenotypeCount[iter2->first])
 		    				+"("+convert2string(
 		    				  this->data->vLocusInfo[i].ControlGenotypeCount[iter2->first] /
-		    				  (double)this->data->getControlNum() /
-		    				  (double)this->data->getNumOfChrSet())+")";
+		    				  (double)this->data->getControlNum())+")";
 		    		if(count!=this->data->vLocusInfo[i].BothGenotypeCount.size() - 1)
 		    			detail+="\t";
 		    		count++;
