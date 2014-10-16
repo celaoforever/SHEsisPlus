@@ -146,6 +146,7 @@ std::string AssociationTest::reporthtmlAllele() {
   html->createTable("Allele_Association");
   std::vector<std::string> data;
   data.push_back("SNP");
+  data.push_back("Call rate");
 //  data.push_back("Allele Type");
   data.push_back("Chi<sup>2</sup>");
   data.push_back("Pearson's p");
@@ -157,6 +158,7 @@ std::string AssociationTest::reporthtmlAllele() {
   for (int i = 0; i < this->vAssocationTestResult.size(); i++) {
     data.clear();
     data.push_back(this->data->vLocusName[i]);
+    data.push_back(convert2string(this->data->vLocusInfo[i].AlleleCallrate));
 //    std::string alleletype;
     std::string detail="<pre>\n\t";
     int count;
@@ -248,7 +250,7 @@ std::string AssociationTest::reporthtmlGenotype() {
   html->createTable("Genotype_Association");
   std::vector<std::string> data;
   data.push_back("SNP");
-  data.push_back("Call rate");
+//  data.push_back("Call rate");
   data.push_back("Chi<sup>2</sup>");
   data.push_back("Pearson's p");
   data.push_back("Fisher's p");
@@ -258,7 +260,6 @@ std::string AssociationTest::reporthtmlGenotype() {
   for (int i = 0; i < this->vAssocationTestResult.size(); i++) {
     data.clear();
     data.push_back(this->data->vLocusName[i]);
-    data.push_back(convert2string(this->data->vLocusInfo[i].AlleleCallrate));
     data.push_back(
         convert2string(this->vAssocationTestResult[i].GenotypeChiSquare));
     data.push_back(
