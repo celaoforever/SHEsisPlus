@@ -483,6 +483,10 @@ void AssociationTest::SingleSnpTestAllele(int iSnp, double& FisherP,
                                  0 != contigency[1] && 0 != contigency[2])) {
     oddsRatio =
         (contigency[1] * contigency[2] / (contigency[0] * contigency[3]));
+    //output by maf
+    map_it=this->data->vLocusInfo[iSnp].ControlAlleleCount.begin();
+    double ctrlfreq=map_it->second/(double)this->data->getControlNum()/(double)this->data->getNumOfChrSet();
+    oddsRatio= ctrlfreq>0.5?1/oddsRatio:oddsRatio;
     double v = 1 / contigency[1] + 1 / contigency[2] + 1 / contigency[3] +
                1 / contigency[0];
 
