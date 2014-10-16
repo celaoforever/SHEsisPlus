@@ -284,8 +284,7 @@ std::string AssociationTest::reporthtmlGenotype() {
     		detail+=convert2string(this->data->vLocusInfo[i].CaseGenotypeCount[iter->first])
     				+"("+convert2string(
     				  this->data->vLocusInfo[i].CaseGenotypeCount[iter->first] /
-    				  (double)this->data->getCaseNum() /
-    				  (double)this->data->getNumOfChrSet())+")";
+    				  (double)this->data->getCaseNum())+")";
     		if(count!=this->data->vLocusInfo[i].BothGenotypeCount.size() - 1)
     			detail+="\t";
     		count++;
@@ -298,8 +297,7 @@ std::string AssociationTest::reporthtmlGenotype() {
     		detail+=convert2string(this->data->vLocusInfo[i].ControlGenotypeCount[iter->first])
     				+"("+convert2string(
     				  this->data->vLocusInfo[i].ControlGenotypeCount[iter->first] /
-    				  (double)this->data->getControlNum() /
-    				  (double)this->data->getNumOfChrSet())+")";
+    				  (double)this->data->getControlNum())+")";
     		if(count!=this->data->vLocusInfo[i].BothGenotypeCount.size() - 1)
     			detail+="\t";
     		count++;
@@ -487,6 +485,7 @@ void AssociationTest::SingleSnpTestAllele(int iSnp, double& FisherP,
         (contigency[1] * contigency[2] / (contigency[0] * contigency[3]));
     double v = 1 / contigency[1] + 1 / contigency[2] + 1 / contigency[3] +
                1 / contigency[0];
+
     ORLowLimit = oddsRatio * exp(-1.96 * sqrt(v));
     ORUpLimit = oddsRatio * exp(1.96 * sqrt(v));
   } else {
