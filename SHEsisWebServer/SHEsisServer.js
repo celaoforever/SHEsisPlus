@@ -28,17 +28,14 @@ insertToDB("get",{IP:ip,TIME:time});
 
 app.post('/Results',function(req,res){
 console.log("post Results");
+
 Enqueue(req,res);
 });
 
 jobs.process('Run',12,function(job,done){
-var JSONARG={};
-JSONARG.IP=req.connection.remoteAddress;
-JSONARG.TIME=getDateTimeFormated();
-var args=setArgs(job.data.req,job.id,JSONARG);
-insertToDB("post",JSONARG);
-console.log("cmd:bin/SHEsis "+args);
-RunSHEsis(args,job.data.res,job.id);
+console.log("processing job",job.id);
+var finalarg=job.data.arg.replace(/DuMmY1234_output/g,job.id);
+RunSHEsis(finalarg,job.id);
 done && done();
 });
 
@@ -46,11 +43,19 @@ app.listen(5903);
 console.log("SHEsis web server has started.");
 
 function Enqueue(req,res){
- var job=jobs.create('Run', {
-	 req:req,res:res}
-     );
+var JSONARG={};
+JSONARG.IP=req.connection.remoteAddress;
+JSONARG.TIME=getDateTimeFormated();
+var id=JSONARG.IP+"_"+getDateTime();
+var args=setArgs(req,id,JSONARG);
+insertToDB("post",JSONARG);
+console.log("cmd:bin/SHEsis "+args);
+   var job=jobs.create('Run',{arg:args});
    job.on('complete',function(){
-	console.log('Job',job.id,'is done');
+        var page="tmp/"+job.id+".html";
+        setTimeout(function(){res.redirect(page);res.end();}, 1000);
+        console.log('Job',job.id,'is done');
+       
    })
       .on('failed',function(){
 	console.log('Job',job.id,'has failed');
@@ -69,10 +74,10 @@ db.open(function(err,db){
 }
 
 function setArgs(req,jobid,jsonarg){
-var casedatafile="public/tmp/"+jobid+_"case.txt";
+var casedatafile="public/tmp/"+jobid+"_case.txt";
 var ctrldatafile="public/tmp/"+jobid+"_ctrl.txt";
 var qtldatafile="public/tmp/"+jobid+"_qtl.txt";
-var output="public/tmp/"+jobid+"_output";
+var output="public/tmp/DuMmY1234_output";
 var args="";
 var qtl=req.body.SelectPhenotype=="Case/Control"?false:true;
 if(qtl){
@@ -221,59 +226,20 @@ function getDateTimeFormated() {
 }
 
 
-function RunSHEsis(args,res,jobid){
-var anyerr="";
- var bin=cp.exec('bin/SHEsis '+args,{timeout:3600000},function(err,stdout,stderr){
-if(err){
-if(err.killed){
+function RunSHEsis(args,jobid){
+console.log('bin/SHEsis ',args);
+var bin=cp.exec('bin/SHEsis '+args,{timeout:36000000},function(err,stdout,stderr){
+if(err&&err.killed){
  console.log("timed out");
- fs.readFile("public/Results.html",'utf8',function(err,data){
- if(err){
-        return console.log(err);
- };
- results=data.replace(/SHOWRESULTSHERE/g,"<br><br><h2>Your request timed out. Please download the standalone version of SHEsis to run it on your local machine.</h2>");
- res.write(results);
- res.end();
-})
-}
-
-else
- console.log("err");
-return;
 }
 var arrMatches=stdout.toString().match('ERROR.*');
 if(arrMatches != null){
        if(arrMatches.length>0){
-               anyerr=arrMatches[0];
-               console.log(anyerr);
+               console.log(arrMatches[0]);
         };
 };
-
-var results="";
-fs.readFile("public/Results.html",'utf8',function(err,data){
- if(err){
-	return console.log(err);
- }; 
-if(anyerr!=""){
- results=data.replace(/SHOWRESULTSHERE/g,anyerr);
- res.write(results);
- res.end();
-}else
- {
- var filepath=ip+time+"output.html";
- 
-  fs.readFile(path.join("public/tmp/",filepath),'utf8',function(err,html){
- 	if(err){
-		return console.log(err);
-	};
-//})
- results=data.replace(/SHOWRESULTSHERE/g,html); 
-  res.write(results);
- res.end();
-});
- }
-});
 })
+console.log("finished");
 }
 
 
