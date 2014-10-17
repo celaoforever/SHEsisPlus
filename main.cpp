@@ -83,6 +83,7 @@ void reporttxt(std::stringstream& report,
 		boost::shared_ptr<SHEsis::HWETest> HWEHandle,
 		boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
 		boost::shared_ptr<SHEsis::LDTest> LDHandle);
+void writePendingPage(std::ofstream& report);
 
 int main(int argc, char* argv[]) {
 
@@ -108,6 +109,11 @@ int main(int argc, char* argv[]) {
     std::cout << "***ERROR: cannot open output file " << filename << "\n";
     exit(-1);
   }
+  if(SHEsisArgs.webserver){
+	  writePendingPage(ofile);
+  }
+  ofile.close();
+
 
   if ((SHEsisArgs.snpnames.size() != 0) &&
       (data->getSnpNum() != SHEsisArgs.snpnames.size())) {
@@ -202,7 +208,7 @@ int main(int argc, char* argv[]) {
 	  reportHtml(report,AssocHandle,QTLHandle,HWEHandle,HapHandle,LDHandle);
   else
 	  reporttxt(report,AssocHandle,QTLHandle,HWEHandle,HapHandle,LDHandle);
-
+  ofile.open(filename.c_str());
   ofile << report.str();
   ofile.close();
   std::cout<<"Results saved to "<<filename<<".\n";
@@ -216,6 +222,18 @@ int main(int argc, char* argv[]) {
 //#endif
 //  };
   return 0;
+}
+
+void writePendingPage(std::ofstream& report){
+	report<<HtmlHeaderServer;
+	report<<"<head><meta http-equiv=\"refresh\" content=\"3\"></head>";
+	report<<"<div class=\"container\" style=\"padding:100px 100px 100px 100px\">\n";
+	report<<"<div style=\"line-height:40px\">\n";
+	report<<"<font size=\"5\">\n";
+	report<<"<p>We have received your request. This page will auto-fresh until the results are ready.</p>";
+	report<<"<p>The notification of completed result will also be sent to the E-mail address you provided.</p>";
+	report<<"<p>The results will be available for 72 hours in web, after which they will be deleted.</p>";
+	report<<"</font></div></div></div></body></html>\n";
 }
 
 void reporttxt(std::stringstream& report,
