@@ -43,17 +43,171 @@
   Help
  <small class="on-right"></small>
 </h1>
+<div class="container" style="padding:50px 100px 100px 100px">
+<div style="line-height:30px">
 <h2>Introduction</h2>
-<p>
-  SHEsis is a web-based platform for analysis of genetic association, Hardy-weinberg equilibrium, linkage disequilibrium and haplotype construction at multiallelic polymorphism loci, compatitable for both diploid and polyploid species.
-</p>
-<h2> Input</h2>
-<p>
+<br>
+<font size="4">
+<div style="text-indent:2em;padding:0px 0px 0px 0px">
+SHEsis is a web-based platform for analysis of genetic association, Hardy-weinberg equilibrium, linkage disequilibrium and haplotype construction at multiallelic polymorphism loci, compatitable for both diploid and polyploid species. The web-based version provides most of the functions. The stand-alone version is also available. You can download it from <a href=#>here</a>.
+</div>
+<br>
+<h2>Browser Support</h2>
 
-</p>
+<img src="http://www.w3schools.com/images/compatible_chrome.gif" style="padding:10px 20px 10px 40px" title="Chrome">
+<img src="http://www.w3schools.com/images/compatible_firefox.gif" style="padding:10px 20px 10px 10px" title="Firefox">
+<img src="http://www.w3schools.com/images/compatible_safari.gif" style="padding:10px 20px 10px 10px" title="Safari">
+<img src="http://www.w3schools.com/images/compatible_opera.gif" style="padding:10px 20px 10px 10px" title="Opera">
+<div style="text-indent:2em"> 
+SHEsis supports most of the modern browers, including Chrome, Firefox, Safari and Opera. SHEsis does not support IE.
+</div>
 
+<br>
+<h2> Input format</h2>
+<br>
+<h3>1. Case/control data</h3>
+<div class="grid fluid">
+<div class="row">
+<div class="span6" style="padding:10px 0px 0px 50px">
+<div class="panel">
+  <div class="panel-header">
+    sample data for diploidy species
+  </div>
+  <div class="content" style="padding:0px 0px 0px 0px">
+    <pre>
+    id1  G A  C C  1 1  A1 A2
+    id2  A A  T C  1 1  A2 A2
+    id3  A A  T T  2 2  A3 A4
+    id4  0 0  T T  3 3  A5 A3
+    id5  G G  A A  2 3  A1 A2
+    id6  A A  C A  0 0  A6 A7
+   </pre>
+  </div>
+</div>
+</div>
 
+<div class="span6" style="padding:10px 0px 0px 50px">
+<div class="panel">
+  <div class="panel-header">
+    sample data for triploidy species
+  </div>
+  <div class="content" style="padding:0px 0px 0px 0px">
+    <pre>
+    id1  A G A  T C C  1 1 1  AA T  TT
+    id2  A A A  C T C  2 1 1  A  T  AA
+    id3  G A A  C T T  3 2 2  TT A  T
+    id4  0 0 0  A T T  3 3 3  AA T  AT
+    id5  G G G  T A A  1 2 3  TA TT T
+    id6  G A A  C C A  0 0 0  AA A  A
+   </pre>
+  </div>
+</div>
+</div>
+</div>
+</div>
 
+<br>
+<div style="text-indent:2em">
+The first column is sample id. The following columns are genotypes. They should be deliminated by space, comma or tab. Adjacent tokens will be compressed and will be treated as a single token. Genotypes can be any string (e.g. 1,2,3,4, or A,T,G,C , or A1,A2,A3,A4, or anything else) except 0, which is the coding for missing genotypes. 
+</div>
+<br>
+<div style="text-indent:2em">
+The above shown is sample data for diploid and tripolid species. For diploid species, the columns correspond to: sample id, site1-allele1, site1-allele2, site2-allele1, site2-allele2, .... For triploid species, the columns should be: sample id, site1-allele1, site1-allele2, site1-allele3, site2-allele1, site2-allele2, site2-allele3, ...
+</div>
+<br>
+<h3>2. Quantitative trait data</h3>
+<div class="grid fluid">
+<div class="row">
+<div class="span6" style="padding:10px 0px 0px 50px">
+<div class="panel">
+  <div class="panel-header">
+    sample data for diploidy species
+  </div>
+  <div class="content" style="padding:0px 0px 0px 0px">
+    <pre>
+    id1  20.6  G A  C C  1 1  A1 A2
+    id2  25.4  A A  T C  1 1  A2 A2
+    id3  23.1  A A  T T  2 2  A3 A4
+    id4  42.4  0 0  T T  3 3  A5 A3
+    id5  11.0  G G  A A  2 3  A1 A2
+    id6  5.5   A A  C A  0 0  A6 A7
+   </pre>
+  </div>
+</div>
+</div>
+
+<div class="span6" style="padding:10px 0px 0px 50px">
+<div class="panel">
+  <div class="panel-header">
+    sample data for triploidy species
+  </div>
+  <div class="content" style="padding:0px 0px 0px 0px">
+    <pre>
+    id1  1.1  A G A  T C C  1 1 1  AA T  TT
+    id2  3.2  A A A  C T C  2 1 1  A  T  AA
+    id3  14   G A A  C T T  3 2 2  TT A  T
+    id4  4.3  0 0 0  A T T  3 3 3  AA T  AT
+    id5  24   G G G  T A A  1 2 3  TA TT T
+    id6  4.49 G A A  C C A  0 0 0  AA A  A
+   </pre>
+  </div>
+</div>
+</div>
+</div>
+</div>
+<br>
+<div style="text-indent:2em">
+The format for quantitative trait data is similar to that for case/control data except that the second column is the quantitative trait. The quantitative trait should be numeric.
+</div>
+<br>
+<h2>Arguments </h2>
+<br>
+<h3>1. Choose analysis </h3>
+<div style="text-indent:2em">
+There are 4 type of analysis available: <i>association test, Hardy-Weinberg Equilibrum analysis, haplotype analysis and linkage disequilibrium analysis</i>. You need to choose the kind of tests you'd like to perform by clicking the checkbox in front of the analysis name. You should choose at least one kind of analysis, and you can also choose all the four analysis at the same time.
+</div>
+<br>
+<h3>2. Specify the dataset </h3>
+<div style="text-indent:2em">
+SHEsis supports analysis of polyploid species. You should specify <i>ploidy</i> of your dataset. Currently, web-based SHEsis supports up to dodecaploid (12 sets). If the ploidy of your data is higher than 12, please download the stand-alone version.  
+</div>
+<br>
+<div style="text-indent:2em">
+<i>Phenotype</i> should also be specified. If the phenotype of your data is binary (case/control), please select "Case/Control" for phenotype. Then you should input data for both cases and controls in the below textarea. If your data is with quantitative trait, please select "Quantitative Trait" instead. Then in your data, every individual should have a quantitave trait and the quantitative trait should be numeric. 
+</div>
+<br>
+<div style="text-indent:2em">
+You could enter your maker names into the <i>Marker name</i> textfiled. Please use space, tab or comma to deliminate it. For example, "rs11,rs22,rs33,rs44" when there are 4 sites in all. This is opntional. If it is left blank, or invalid input is given, marker names will default to site1, site2, site3, ... 
+</div>
+<br>
+
+<h3>3. Extra options for Haplotype analysis</h3>
+<div style="text-indent:2em">
+If <i>Haplotype analysis</i> is choosen, you could define the <i>lowest frequency threshold (LFT)</i> of analysis. The default value of LFT is 0.03, all single haplotypes with a frequency less than this value will be discarded in the association analysis. The range of LFT is [0,1). This step is optional. Invalid input will default the value to 0.03.
+</div>
+<br>
+<div style="text-indent:2em">
+Moreover, you can also use a subset of the markers to perform haplotype. To do this, enter selected sites in <i>Mask for hap-analysis</i> textfiled. It should be deliminated by space, tab or comma. For example, "1,1,0,1" to choose 1st, 2nd and 4th sites for haplotype analysis when there are 4 site in all. If no mask is given, all the sites will be used.
+</div>
+<br>
+<h3>4. Extra options for Linkage disequilibrium</h3>
+<div style="text-indent:2em">
+For case/control data, linkage disequilibrium analysis can be carried out either in cases, in controls or in both cases and controls. You can select it after the label <i>Calculate LD in</i>. For quantitative trait data, linkage disequilibrium will be carried out in all samples.
+</div>
+<br>
+<h3>5. Multiple comparision</h3>
+<div style="text-indent:2em">
+We provided the methods to adjust for multiple testing. Two types of methods are available. One is p-value based methods including Holm's step down procedure, Sidal single-step procedure, Sidak step-down procedure, Benjamini & Hocheberg step-up FDR control and Benjamini & Yekutieli step-up FDR control. The other is permutation test, which is a data-level method and is much slower. If you want to perform p-value based adjustment, clicking the checkbox <i>Sidak, FDR, Holm's correction</i> after the label <i>Multiple comparision</i>. If you want to perform permutation test, enter the number of permutations in the textfiled <i>Number of permutations</i>. Currently, SHEsis webserver accepts number of permutations <10000.
+</div>
+<br>
+<h3>6. Send a mail when completed</h3>
+<div style="text-indent:2em">
+Sometimes the analysis takes a long time, especially when your dataset is very large, or permutation test is selected. Under such circumstance, you can provide your e-mail address in the textfiled <i>Your E-mail</i>. When the analysis is done, the link to the results will be sent to your mailbox. Additionally, you can also specify the name of the dataset, which will be included in the mail subject. 
+</div>
+</div>
+</font>
+</div>
+</div>
 </div>
 </body>
 </html>
