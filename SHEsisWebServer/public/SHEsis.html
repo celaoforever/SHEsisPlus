@@ -71,7 +71,7 @@
 <font size="4">
           <form name="SHEsisMain" autocomplete="off"  onsubmit="return validateForm()" action="Results" method="post">
           <fildset>
-	    <table style="width:100%">
+	    <table style="width:100%;table-layout:auto">
 	    <tr>
 	      <td colspan=5>
 	      <legend name="legend">
@@ -80,36 +80,43 @@
 	      </td>
 	     </tr>
 	    <tr>  
-	    <div class="input-control checkbox" data-role="input-control">
-	      <td>
+	      <td style="width:220px">
 		Choose analysis :
 	      </td>
 	      <td>
 	      <label class="inline-block">
+		<div class="input-control checkbox" data-role="input-control">
 		<input name="CheckBoxAnalysisTypeAssoc"   type="checkbox"></input>
 		<span class="check"></span>
 		Association Test
+		</div>
 	      </label>
 	      </td>
-	      <td>
+	      <td style="width:300px">
 	      <label class="inline-block">
+		<div class="input-control checkbox" data-role="input-control">
 		<input name="CheckBoxAnalysisTypeHWE"  type="checkbox"></input>
 		<span class="check"></span>
-		Hardy-Weinberg Equilibrium Analysis
+		Hardy-Weinberg Equilibrium
+		</div>
 	      </label>
 	      </td>
 	      <td>
 	      <label class="inline-block">
+		<div class="input-control checkbox" data-role="input-control">
 		<input name="CheckBoxAnalysisTypeHap"   type="checkbox"></input>
 		<span class="check"></span>
 		Haplptype Analysis
+		</div>
 	      </label>	 
 	      </td>
 	      <td>
 	      <label class="inline-block">
+		<div class="input-control checkbox" data-role="input-control">
 		<input name="CheckBoxAnalysisTypeLD"   type="checkbox"></input>
 		<span class="check"></span>
-		Linkage Disequilibrium Analysis
+		Linkage Disequilibrium
+		</div>
 	      </label>
 	      </td>
 	    </div>
@@ -129,14 +136,15 @@
 		  </select>  
 		  </div>
 	     </td>
-	     <td>
-	       Selected site for haplotype analysis:
-	     </td>
-	     <td colspan=2>
-	       <div class="input-control text">
-	       <input name="TextMask" style="width:100%" type="text" placeholder="eg. 1,0,1,1 to choose 1st,2nd&4th sites for when there are 4 sites."></input>
-	       </div>
-	     </td>  
+	      <td>
+		Marker name (Optional):
+              </td>
+	      <td colspan="2">
+		<div class="input-control text">
+		<input name="TextMarkername" style="width:100%" type="text" placeholder="eg. rs11,rs22,rs33,rs44 when there are 4 sites."
+		</div>
+	      </td>
+
 	    </tr>
 	    <tr>
 	      <td>
@@ -151,12 +159,14 @@
 		 </div>
 	     </td>
 	     <td>
-	       Lowest frequency for haplotype analysis:
+	       Mask for hap-analysis (Optional):
 	     </td>
 	     <td colspan=2>
-	        <div class="input-control text">
-	       <input name="TextLFT" style="width:100%" type="number" min="0" max="1" step="0.01" value="0.03"></input>
+	       <div class="input-control text">
+	       <input name="TextMask" style="width:100%" type="text" placeholder="eg. 1,0,1,1 to choose 1st,2nd&4th sites when there are 4 sites."></input>
 	       </div>
+	     </td> 
+
 	    </tr>
 	    <tr>
 	      <td>
@@ -171,18 +181,55 @@
 		  </select>  
 		 </div>
 	     </td>
-	      <td>
-		Marker name:
-              </td>
-	      <td colspan="2">
-		<div class="input-control text">
-		<input name="TextMarkername" style="width:100%" type="text" placeholder="eg. rs11,rs22,rs33,rs44 when there are 4 sites."
+	     <td>
+	       Lowest frequency for hap-analysis:
+	     </td>
+	     <td colspan=2>
+	        <div class="input-control text">
+	       <input name="TextLFT" style="width:100%" type="number" min="0" max="1" step="0.01" value="0.03"></input>
+	       </div>
+	     </td> 
+	     <tr>
+	       <td>Multiple comparision:</td>
+	       <td>
+	      <label class="inline-block">
+		<div class="input-control checkbox" data-role="input-control">
+		<input name="CheckBoxMultiCompPbased"   type="checkbox"></input>
+		<span class="check"></span>
+		Sidak, FDR, Holm's correction 
 		</div>
-	      </td>
+	      </label>	 
+	       </td>   
+	       <td>
+		 Number of permutations:
+	       </td>  
+	       <td colspan=2>
+	        <div class="input-control text">
+	       <input name="TextPermutation" style="width:100%" type="number" min="0" max="10000" step="1" value="0"></input>
+	       </div>		 
+	       </td>
+	     </tr>
             </tr>
+	    <tr>
+	      <td>Your E-mail (Optional):</td>
+	      <td>
+	      <div class="input-control text">
+		 <input name="TextEmail" placeholder="Send email when completed" style="width:85%" type="text"></input>
+	      </div>
+	      </td>
+	      <td>
+		Dataset name (Optional):
+	      </td>
+	      <td colspan=2>
+	      <div class="input-control text">
+		 <input name="TextDatasetName"  placeholder="Identifier for the dataset, will be included in the mail subject" style="width:100%" type="text"></input>
+	      </div>		
+	      </td>
+	    </tr>
 	    <tr>
 	      <td><br> </td>
 	    </tr>
+
 	    <tr>
 	      <td colspan="5">
 		<table  name="TableInputData" style="width:100%">

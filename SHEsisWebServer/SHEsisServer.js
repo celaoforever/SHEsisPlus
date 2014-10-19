@@ -1,3 +1,4 @@
+var shell=require('shelljs');
 var sys=require('sys');
 var express=require('express');
 var app=express();
@@ -35,7 +36,7 @@ Enqueue(req,res);
 jobs.process('Run',12,function(job,done){
 console.log("processing job",job.id);
 var finalarg=job.data.arg.replace(/DuMmY1234_output/g,job.id);
-RunSHEsis(finalarg,job.id);
+RunSHEsis(finalarg,job.id,job.data.email,job.data.dataset);
 done && done();
 });
 
@@ -50,7 +51,7 @@ var id=JSONARG.IP+"_"+getDateTime();
 var args=setArgs(req,id,JSONARG);
 insertToDB("post",JSONARG);
 console.log("cmd:bin/SHEsis "+args);
-   var job=jobs.create('Run',{arg:args});
+var job=jobs.create('Run',{arg:args,email:JSONARG.EMAIL,dataset:JSONARG.DATASET});
    job.on('complete',function(){
         var page="tmp/"+job.id+".html";
         setTimeout(function(){res.redirect(page);res.end();}, 1000);
@@ -124,6 +125,14 @@ if(req.body.CheckBoxAnalysisTypeHap=="on"){
 {
 	jsonarg.HAP=0;
 }
+if(req.body.CheckBoxMultiCompPbased=="on"){
+	args+=" --adjust";
+	jsonarg.ADJUST=1;
+}else
+{
+	jsonarg.ADJUST=0;
+};
+
 
 if(req.body.CheckBoxAnalysisTypeLD=="on"){
 	if(req.body.SelectLDType=="Both case and control"){
@@ -143,7 +152,10 @@ if(req.body.CheckBoxAnalysisTypeLD=="on"){
 		jsonarg.LD=0;
 	};
 }
-
+if(req.body.TextPermutation>0){
+	args+=" --permutation "+req.body.TextPermutation;
+};
+jsonarg.PERMUTATION=req.body.TextPermutation;
 args+=" --ploidy "+req.body.SelectPloidy;
 args+=" --lft "+req.body.TextLFT;
 args+=" --snpname-line \""+req.body.TextMarkername  + "\"";
@@ -151,9 +163,11 @@ args+=" --mask "+"\""+req.body.TextMask+"\"";
 jsonarg.PLOIDY=req.body.SelectPloidy;
 jsonarg.LFT=req.body.TextLFT;
 jsonarg.SNP=req.body.TextMarkername;
-jsonarg.mask=req.body.TextMask;
+jsonarg.MASK=req.body.TextMask;
 args+=" --output "+output;
 args+=" --webserver";
+jsonarg.EMAIL=req.body.TextEmail;
+jsonarg.DATASET=req.body.TextDatasetName;
 return args;
 };
 
@@ -224,22 +238,59 @@ function getDateTimeFormated() {
     return (year+"-" + month +"-"+ day +" "+ hour +":"+  min +":"+  sec);
 
 }
+function SendEmail(addr,page,dataset){
+    if(addr=="" || addr ==null)
+	return;
+console.log("sending email..");
+var mail=
+"Dear user, \n \
+\n\
+Your results are ready. You can access the results via "+page+" \n\
+\n\
+Please note that the results will be deleted after 5 days. If neccessary, please save the results before they become unavailable.\n\
+\n\
+Thank you for using SHEsis.\n\
+\n\
+Best Regards,\n\
+SHEsis Team\n\
+";
+var cmd='echo "'+mail+'" '+'|mutt -s "SHEsis results';
+if(dataset!=""){
+	cmd+=" for dataset:"+dataset;
+}
+cmd+=' are ready" '+ addr +";";
 
+var bin=cp.exec(cmd,function(err,stdout,stderr){
+})
+}
 
-function RunSHEsis(args,jobid){
+function RunSHEsis(args,jobid,email,dataset){
 console.log('bin/SHEsis ',args);
 var bin=cp.exec('bin/SHEsis '+args,{timeout:36000000},function(err,stdout,stderr){
-if(err&&err.killed){
- console.log("timed out");
-}
 var arrMatches=stdout.toString().match('ERROR.*');
-if(arrMatches != null){
-       if(arrMatches.length>0){
-               console.log(arrMatches[0]);
-        };
-};
+
+if(err&&err.killed){
+    	    shell.exec('echo "'+args+'"| mutt -s "job '+jobid+' timed out" jiawei.shen@outlook.com'); 
+}else if(arrMatches != null && arrMatches.length){
+    	    shell.exec('echo "'+args+"\nerr:"+arrMatches[0]+'"| mutt -s "job '+jobid+' failed" jiawei.shen@outlook.com');    
+}else if(err){
+        	    shell.exec('echo "'+args+"\n"+err+'\n"| mutt -s "job '+jobid+' failed, unknwon" jiawei.shen@outlook.com'); 
+}else
+{
+     	SendEmail(email,"http://202.120.31.144:5903/tmp/"+jobid+".html",dataset);   
+}
 })
-console.log("finished");
+}
+
+function RunSHEsisSync(args,jobid){
+    var ret=shell.exec('bin/SHEsis '+args);
+    var err=ret.output.match('ERROR.*');
+    if(ret.code != 0 || (err!=null && err.length>0)){
+	    shell.exec('echo "'+args+'"| mutt -s "job '+jobid+' failed" jiawei.shen@outlook.com'); 
+	    return -1;
+    }
+    console.log("finished");
+    return 0;
 }
 
 
