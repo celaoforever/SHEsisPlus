@@ -19,7 +19,8 @@ namespace SHEsis {
 AssociationTest::AssociationTest(boost::shared_ptr<SHEsisData> mdata)
     : data(mdata),
       vAssocationTestResult(mdata->getSnpNum()),
-      NumOfPermutation(-1) {}
+      NumOfPermutation(-1),
+      adjust(false){};
 
 AssociationTest::~AssociationTest() { vAssocationTestResult.clear(); }
 
@@ -77,10 +78,17 @@ std::string AssociationTest::reporttxt(){
 	    }
 	    res<<"Call rate is "<<this->data->vLocusInfo[i].AlleleCallrate<<"\n";
 	    res<<"Chi2 is "<<this->vAssocationTestResult[i].AlleleChiSquare<<"\n";
-	    res<<"Fisher's p value is "<<this->vAssocationTestResult[i].AlleleFisherP<<"\n";
-	    res<<"Pearson's p value is "<<this->vAssocationTestResult[i].AllelePearsonP<<"\n";
+	    res<<"Fisher's p value is "<<convert2string(this->vAssocationTestResult[i].AlleleFisherP)<<"\n";
+	    res<<"Pearson's p value is "<<convert2string(this->vAssocationTestResult[i].AllelePearsonP)<<"\n";
 	    if (this->NumOfPermutation != -1){
-	    	res<<"Permutation P value is "<<this->vAssocationTestResult[i].AllelePermutationP<<"\n";
+	    	res<<"Permutation P value is "<<convert2string(this->vAssocationTestResult[i].AllelePermutationP)<<"\n";
+	    }
+	    if(this->adjust){
+	    	res<<"Holm step-down adjusted p-value is "<<convert2string(this->vAssocationTestResult[i].AlleleHolmP)<<"\n";
+	    	res<<"Sidak single-step adjusted p-value is "<<convert2string(this->vAssocationTestResult[i].AlleleSidakSSP)<<"\n";
+	    	res<<"Sidak step-down adjusted p-value is "<<convert2string(this->vAssocationTestResult[i].AlleleSidakSDP)<<"\n";
+	    	res<<"Benjamini & Hochberg step-up FDR controled p value is "<<convert2string(this->vAssocationTestResult[i].AlleleBHP)<<"\n";
+	    	res<<"Benjamini & Yekutieli step-up FDR controled p value is "<<convert2string(this->vAssocationTestResult[i].AlleleBYP)<<"\n";
 	    }
 	    res<<"-------------------------------------------------------\n";
 		res<<this->data->vLocusName[i]<<"(Genotype):\n";
@@ -121,10 +129,17 @@ std::string AssociationTest::reporttxt(){
 		    	}
 		    res<<detail<<"\n";
 		    res<<"Chi2 is "<<this->vAssocationTestResult[i].GenotypeChiSquare<<"\n";
-		    res<<"Fisher's p is "<<this->vAssocationTestResult[i].GenotypeFisherP<<"\n";
-		    res<<"Pearson's p is "<<this->vAssocationTestResult[i].GenoTypePearsonP<<"\n";
+		    res<<"Fisher's p is "<<convert2string(this->vAssocationTestResult[i].GenotypeFisherP)<<"\n";
+		    res<<"Pearson's p is "<<convert2string(this->vAssocationTestResult[i].GenoTypePearsonP)<<"\n";
 		    if (this->NumOfPermutation != -1){
-		    	res<<"Permutation P value is "<<this->vAssocationTestResult[i].GenotypePermutationP<<"\n";
+		    	res<<"Permutation P value is "<<convert2string(this->vAssocationTestResult[i].GenotypePermutationP)<<"\n";
+		    }
+		    if(this->adjust){
+		    	res<<"Holm step-down adjusted p-value is "<<convert2string(this->vAssocationTestResult[i].GenotypeHolmP)<<"\n";
+		    	res<<"Sidak single-step adjusted p-value is "<<convert2string(this->vAssocationTestResult[i].GenotypeSidakSSP)<<"\n";
+		    	res<<"Sidak step-down adjusted p-value is "<<convert2string(this->vAssocationTestResult[i].GenotypeSidakSDP)<<"\n";
+		    	res<<"Benjamini & Hochberg step-up FDR controled p value is "<<convert2string(this->vAssocationTestResult[i].GenotypeBHP)<<"\n";
+		    	res<<"Benjamini & Yekutieli step-up FDR controled p value is "<<convert2string(this->vAssocationTestResult[i].GenotypeBYP)<<"\n";
 		    }
 			res<<"-------------------------------------------------------\n";
 	}
@@ -153,6 +168,13 @@ std::string AssociationTest::reporthtmlAllele() {
   data.push_back("Fisher's p");
   if (this->NumOfPermutation != -1) data.push_back("Permutaion P");
   data.push_back("OR [95% CI]");
+  if(this->adjust){
+	  data.push_back("Holm");
+	  data.push_back("SidakSS");
+	  data.push_back("SidakSD");
+	  data.push_back("FDR_BH");
+	  data.push_back("FDR_BY");
+  }
   data.push_back("Detail");
   html->addHeadRow(data);
   for (int i = 0; i < this->vAssocationTestResult.size(); i++) {
@@ -232,6 +254,7 @@ std::string AssociationTest::reporthtmlAllele() {
     if (this->NumOfPermutation != -1)
       data.push_back(
           convert2string(this->vAssocationTestResult[i].AllelePermutationP));
+
     std::string OR =
         convert2string(this->vAssocationTestResult[i].AlleleOddsRatio) + " [" +
         convert2string(this->vAssocationTestResult[i].AlleleOddsRatioLowLimit) +
@@ -239,6 +262,14 @@ std::string AssociationTest::reporthtmlAllele() {
         convert2string(this->vAssocationTestResult[i].AlleleOddsRatioUpLimit) +
         "]";
     data.push_back(OR);
+
+    if(this->adjust){
+  	  data.push_back(convert2string(this->vAssocationTestResult[i].AlleleHolmP));
+  	  data.push_back(convert2string(this->vAssocationTestResult[i].AlleleSidakSSP));
+  	  data.push_back(convert2string(this->vAssocationTestResult[i].AlleleSidakSDP));
+  	  data.push_back(convert2string(this->vAssocationTestResult[i].AlleleBHP));
+  	  data.push_back(convert2string(this->vAssocationTestResult[i].AlleleBYP));
+    }
     data.push_back(detail);
     html->addDataRow(data);
   };
@@ -255,6 +286,13 @@ std::string AssociationTest::reporthtmlGenotype() {
   data.push_back("Pearson's p");
   data.push_back("Fisher's p");
   if (this->NumOfPermutation != -1) data.push_back("Permutaion P");
+  if(this->adjust){
+	  data.push_back("Holm");
+	  data.push_back("SidakSS");
+	  data.push_back("SidakSD");
+	  data.push_back("FDR_BH");
+	  data.push_back("FDR_BY");
+  }
   data.push_back("Detail");
   html->addHeadRow(data);
   for (int i = 0; i < this->vAssocationTestResult.size(); i++) {
@@ -269,6 +307,14 @@ std::string AssociationTest::reporthtmlGenotype() {
     if (this->NumOfPermutation != -1)
       data.push_back(
           convert2string(this->vAssocationTestResult[i].GenotypePermutationP));
+    if(this->adjust){
+  	  data.push_back(convert2string(this->vAssocationTestResult[i].GenotypeHolmP));
+  	  data.push_back(convert2string(this->vAssocationTestResult[i].GenotypeSidakSSP));
+  	  data.push_back(convert2string(this->vAssocationTestResult[i].GenotypeSidakSDP));
+  	  data.push_back(convert2string(this->vAssocationTestResult[i].GenotypeBHP));
+  	  data.push_back(convert2string(this->vAssocationTestResult[i].GenotypeBYP));
+    }
+
     std::string detail="<pre>\n\t";
     boost::unordered_map<std::string, double>::iterator iter;
     int count = 0;
@@ -322,6 +368,7 @@ std::string AssociationTest::reporthtmlGenotype() {
 //      };
 //      count++;
 //    }
+
     data.push_back(detail);
     html->addDataRow(data);
   };
@@ -347,6 +394,38 @@ void AssociationTest::AssociationTestForAllSnpsAllele() {
         this->vAssocationTestResult[i].AlleleOddsRatioLowLimit,
         this->vAssocationTestResult[i].AlleleOddsRatioUpLimit);
   }
+  //adjust p
+   if(this->adjust){
+ 	  std::vector<MultiComp> originp;
+ 	  std::vector<double> adjusted;
+ 	  for(int i=0;i<this->vAssocationTestResult.size();i++){
+ 		 MultiComp val;
+ 		 val.p=this->vAssocationTestResult[i].AllelePearsonP;
+ 		 val.idx=i;
+ 		 originp.push_back(val);
+ 	  }
+
+ 	  std::sort(originp.begin(),originp.end());
+ 	  HolmCorrection(originp,adjusted);
+ 	  for(int i=0;i<this->vAssocationTestResult.size();i++)
+ 		  this->vAssocationTestResult[i].AlleleHolmP=adjusted[i];
+
+ 	  SidakSDCorrection(originp,adjusted);
+ 	  for(int i=0;i<this->vAssocationTestResult.size();i++)
+ 		  this->vAssocationTestResult[i].AlleleSidakSDP=adjusted[i];
+
+ 	  SidakSSCorrection(originp,adjusted);
+ 	  for(int i=0;i<this->vAssocationTestResult.size();i++)
+ 		  this->vAssocationTestResult[i].AlleleSidakSSP=adjusted[i];
+
+ 	  BHCorrection(originp,adjusted);
+ 	  for(int i=0;i<this->vAssocationTestResult.size();i++)
+ 		  this->vAssocationTestResult[i].AlleleBHP=adjusted[i];
+
+ 	  BYCorrection(originp,adjusted);
+ 	  for(int i=0;i<this->vAssocationTestResult.size();i++)
+ 		  this->vAssocationTestResult[i].AlleleBYP=adjusted[i];
+   }
 }
 
 void AssociationTest::AssociationTestForAllSnpsGenotype() {
@@ -356,6 +435,38 @@ void AssociationTest::AssociationTestForAllSnpsGenotype() {
         this->vAssocationTestResult[i].GenoTypePearsonP,
         this->vAssocationTestResult[i].GenotypeChiSquare);
   }
+  //adjust p
+   if(this->adjust){
+ 	  //allele
+ 	  std::vector<MultiComp> originp;
+ 	  std::vector<double> adjusted;
+  	  for(int i=0;i<this->vAssocationTestResult.size();i++){
+  		  MultiComp val;
+  		  val.p=this->vAssocationTestResult[i].GenoTypePearsonP;
+  		  val.idx=i;
+ 		  originp.push_back(val);
+  	  };
+ 	  std::sort(originp.begin(),originp.end());
+ 	  HolmCorrection(originp,adjusted);
+ 	  for(int i=0;i<this->vAssocationTestResult.size();i++)
+ 		  this->vAssocationTestResult[i].GenotypeHolmP=adjusted[i];
+
+ 	  SidakSDCorrection(originp,adjusted);
+ 	  for(int i=0;i<this->vAssocationTestResult.size();i++)
+ 		  this->vAssocationTestResult[i].GenotypeSidakSDP=adjusted[i];
+
+ 	  SidakSSCorrection(originp,adjusted);
+ 	  for(int i=0;i<this->vAssocationTestResult.size();i++)
+ 		  this->vAssocationTestResult[i].GenotypeSidakSSP=adjusted[i];
+
+ 	  BHCorrection(originp,adjusted);
+ 	  for(int i=0;i<this->vAssocationTestResult.size();i++)
+ 		  this->vAssocationTestResult[i].GenotypeBHP=adjusted[i];
+
+ 	  BYCorrection(originp,adjusted);
+ 	  for(int i=0;i<this->vAssocationTestResult.size();i++)
+ 		  this->vAssocationTestResult[i].GenotypeBYP=adjusted[i];
+   }
 }
 
 void getTheSmallestP(std::vector<LocusAssiciationTestResult> res,
@@ -405,14 +516,14 @@ void AssociationTest::permutation() {
   this->AssociationTestForAllSnpsAllele();
   this->AssociationTestForAllSnpsGenotype();
   for (int i = 0; i < this->vAssocationTestResult.size(); i++) {
-    this->vAssocationTestResult[i].AllelePermutationP =
+    this->vAssocationTestResult[i].AllelePermutationP =this->vAssocationTestResult[i].AllelePearsonP>0?
         (double)getRank(this->vAssocationTestResult[i].AllelePearsonP,
                         this->PermutationPAllele) /
-        (double)this->NumOfPermutation;
-    this->vAssocationTestResult[i].GenotypePermutationP =
+        (double)this->NumOfPermutation:-999;
+    this->vAssocationTestResult[i].GenotypePermutationP =this->vAssocationTestResult[i].GenoTypePearsonP>0?
         (double)getRank(this->vAssocationTestResult[i].GenoTypePearsonP,
                         this->PermutationPGenotype) /
-        (double)this->NumOfPermutation;
+        (double)this->NumOfPermutation:-999;
   };
 }
 
@@ -501,6 +612,7 @@ void AssociationTest::SingleSnpTestAllele(int iSnp, double& FisherP,
   }
   delete[] contigency;
   contigency = 0;
+
 }
 
 void AssociationTest::SingleSnpTestGenotype(int iSnp, double& FisherP,

@@ -9,6 +9,93 @@
 #include <stdarg.h>
 #include <string>
 #include <algorithm>
+
+void HolmCorrection(std::vector<MultiComp>& p, std::vector<double>& adjusted){
+	//p is sorted
+	int count=p.size();
+	adjusted.resize(count,0);
+	if(p[0].p<0)
+		adjusted[p[0].idx]=-999;
+	else
+		adjusted[p[0].idx]=(p[0].p*count >1 ? 1: p[0].p*count);
+	for(int i=1;i<count;i++){
+		if(p[i].p<0){
+			adjusted[p[i].idx]=-999;
+			continue;
+		};
+		double x=(count-i)*p[i].p<1?(count-i)*p[i].p:1;
+		adjusted[p[i].idx]=adjusted[p[i-1].idx]>x?adjusted[p[i-1].idx]:x;
+	};
+}
+
+void SidakSSCorrection(std::vector<MultiComp>& p, std::vector<double>& adjusted){
+	int count=p.size();
+	adjusted.resize(count,0);
+	for(int i=0;i<count;i++){
+		if(p[i].p<0){
+			adjusted[p[i].idx]=-999;
+			continue;
+		};
+		adjusted[p[i].idx]=1-pow(1-p[i].p,count);
+	}
+}
+
+void SidakSDCorrection(std::vector<MultiComp>& p, std::vector<double>& adjusted){
+	int count=p.size();
+	adjusted.resize(count,0);
+	if(p[0].p<0)
+		adjusted[p[0].idx]=-999;
+	else
+		adjusted[p[0].idx]=1-pow(1-p[0].p,count);
+	for(int i=0;i<count;i++){
+		if(p[i].p<0){
+			adjusted[p[i].idx]=-999;
+			continue;
+		};
+		double x= 1-pow(1-p[i].p,count-i);
+		adjusted[p[i].idx]=adjusted[p[i-1].idx]>x?adjusted[p[i-1].idx]:x;
+	}
+}
+
+
+void BHCorrection(std::vector<MultiComp>& p, std::vector<double>& adjusted){
+	int count=p.size();
+	adjusted.resize(count,0);
+	if(p[count-1].p<0)
+		adjusted[p[count-1].idx]=-999;
+	else
+		adjusted[p[count-1].idx]=p[count-1].p;
+	for(int i=count-2;i>=0;i--){
+		if(p[i].p<0){
+			adjusted[p[i].idx]=-999;
+			continue;
+		};
+		double x=((double)count)/((double)(i+1))*p[i].p<1?((double)count/((double)(i+1)))*p[i].p:1;
+		adjusted[p[i].idx]=adjusted[p[i+1].idx]<x?adjusted[p[i+1].idx]:x;
+	}
+}
+
+void BYCorrection(std::vector<MultiComp>& p, std::vector<double>& adjusted){
+	int count=p.size();
+	adjusted.resize(count,0);
+	double a=0;
+	for(double i=1;i<=count;i++)
+		a+=1/i;
+	if(p[count-1].p<0)
+		adjusted[p[count-1].idx]=-999;
+	else
+		adjusted[p[count-1].idx]=a*p[count-1].p<1?a*p[count-1].p:1;
+
+	for(int i=count-2;i>=0;i--){
+		if(p[i].p<0){
+			adjusted[p[i].idx]=-999;
+			continue;
+		};
+		double x=(((double)count*a)/(double(i+1)))*p[i].p<1?(((double)count*a)/((double)(i+1)))*p[i].p:1;
+		adjusted[p[i].idx]=adjusted[p[i+1].idx]<x?adjusted[p[i+1].idx]:x;
+	}
+};
+
 int getRank(double p, std::vector<double> v)
 {
   for (int i = 0; i < v.size() - 1; i++) {

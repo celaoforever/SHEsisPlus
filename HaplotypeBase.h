@@ -22,6 +22,11 @@ struct singleHapRes {
   double OR;
   double orlow;
   double orUp;
+  double HolmP;
+  double SidakSSP;
+  double SidakSDP;
+  double BHP;
+  double BYP;
 };
 struct singHapQTLRes{
 	singHapQTLRes():p(1),ValidSampleNum(0),beta(0),se(0),R2(0),T(0){};
@@ -31,6 +36,11 @@ struct singHapQTLRes{
 	double R2;
 	double T;
 	double p;
+	double HolmP;
+	double SidakSSP;
+	double SidakSDP;
+	double BHP;
+	double BYP;
 };
 struct HapTestResult {
   std::vector<boost::shared_ptr<short[]> > haplotypes;
@@ -59,12 +69,14 @@ class HaplotypeBase {
         mask(mask),
         Results(data->getSampleNum(), data->getNumOfChrSet()),
         silent(true),
-        freqthreshold(0.03) {};
+        freqthreshold(0.03),
+        adjust(false){};
   HaplotypeBase(boost::shared_ptr<SHEsisData> data)
       : data(data),
         Results(data->getSampleNum(), data->getNumOfChrSet()),
         silent(true),
-        freqthreshold(0.03) {};
+        freqthreshold(0.03),
+        adjust(false){};
   virtual ~HaplotypeBase() {
     this->mask.clear();
     this->SnpIdx.clear();
@@ -77,6 +89,9 @@ class HaplotypeBase {
   void setFreqThreshold(double t) {
     this->freqthreshold = t;
   };
+  void setAdjust(bool b){
+	  this->adjust=b;
+  }
 
   std::string reporthtml();
   std::string reporttxt();
@@ -95,6 +110,7 @@ class HaplotypeBase {
   std::string reporttxttableBinary();
   std::string reporttxttableQTL();
   bool silent;
+  bool adjust;
   double freqthreshold;
 };
 

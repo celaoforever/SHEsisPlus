@@ -224,6 +224,17 @@ std::string convert2string(T v) {
     ss << "NA";
   return ss.str();
 }
+
+struct MultiComp{
+	double p;
+	int idx;
+	  bool operator< (const MultiComp & p2) const
+	  {
+	    return ( p < p2.p );
+	  }
+
+};
+
 int getRank(double p, std::vector<double> v) ;
 std::string get_file_name_from_full_path(const std::string& file_path);
 std::string ToBinaryString(int i);
@@ -234,6 +245,11 @@ int GeneralIndexingGetIndex(boost::shared_ptr<int[]> sizes,
                             boost::shared_ptr<int[]> indices);
 int GeneralIndexingGetSize(boost::shared_ptr<int[]> sizes);
 boost::shared_ptr<int[]> toBooleanInt(int n, int i);
+void HolmCorrection(std::vector<MultiComp>& p, std::vector<double>& adjusted);
+void SidakSSCorrection(std::vector<MultiComp>& p, std::vector<double>& adjusted);
+void SidakSDCorrection(std::vector<MultiComp>& p, std::vector<double>& adjusted);
+void BHCorrection(std::vector<MultiComp>& p, std::vector<double>& adjusted);
+void BYCorrection(std::vector<MultiComp>& p, std::vector<double>& adjusted);
 
 template <typename T>
 // tab is stored in column-major format

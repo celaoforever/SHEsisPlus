@@ -16,6 +16,11 @@ struct LocusAssiciationTestResult {
   double GenotypeFisherP;
   double GenotypeChiSquare;
   double GenotypePermutationP;  // pearson's p
+  double GenotypeHolmP;
+  double GenotypeSidakSSP;
+  double GenotypeSidakSDP;
+  double GenotypeBHP;
+  double GenotypeBYP;
   double AllelePearsonP;
   double AlleleFisherP;
   double AlleleChiSquare;
@@ -23,8 +28,18 @@ struct LocusAssiciationTestResult {
   double AlleleOddsRatioLowLimit;
   double AlleleOddsRatioUpLimit;
   double AllelePermutationP;
-};
+  double AlleleHolmP;
+  double AlleleSidakSSP;
+  double AlleleSidakSDP;
+  double AlleleBHP;
+  double AlleleBYP;
 
+};
+//void HolmCorrection(std::vector<double>& p, std::vector<double>& adjusted);
+//void SidakSSCorrection(std::vector<double>& p, std::vector<double>& adjusted);
+//void SidakSDCorrection(std::vector<double>& p, std::vector<double>& adjusted);
+//void BHCorrection(std::vector<double>& p, std::vector<double>& adjusted);
+//void BYCorrection(std::vector<double>& p, std::vector<double>& adjusted);
 class AssociationTest {
  public:
   boost::shared_ptr<SHEsisData> data;
@@ -33,6 +48,7 @@ class AssociationTest {
   void setPermutationTimes(int p) {
     this->NumOfPermutation = p;
   };
+  void setAdjust(bool b){this->adjust=b;};
   virtual ~AssociationTest();
   void printAssociationTestResults();
   void report();
@@ -46,6 +62,7 @@ class AssociationTest {
   std::vector<double> PermutationPAllele;
   std::vector<double> PermutationPGenotype;
   std::vector<SampleStatus> vPermutateLabel;
+  bool adjust;
   void SingleSnpTestAllele(int iSnp, double& FisherP, double& PearsonP,
                            double& ChiSquare, double& oddsRatio,
                            double& ORLowLimit, double& ORUpLimit);

@@ -35,6 +35,7 @@ struct arguments {
         webserver(false),
         qtl(false),
         lft(0.03),
+        adjust(false),
         hapmethod(EM)
         {};
   std::vector<std::string> inputfiles;
@@ -51,6 +52,7 @@ struct arguments {
   bool hweAnalysis;
   bool ldAnalysis;
   bool webserver;
+  bool adjust;
   double lft;
   std::vector<short> mask;
   SHEsis::LD_TYPE ldtype;
@@ -135,6 +137,8 @@ int main(int argc, char* argv[]) {
     std::cout << "Starting association test...\n";
     if(data->vQuantitativeTrait.size() == 0){
 		AssocHandle.reset(new SHEsis::AssociationTest(data));
+		if(SHEsisArgs.adjust)
+			AssocHandle->setAdjust(true);
 		if (SHEsisArgs.permutation != -1) {
 		  AssocHandle->setPermutationTimes(SHEsisArgs.permutation);
 		  AssocHandle->permutation();
@@ -144,6 +148,8 @@ int main(int argc, char* argv[]) {
 		std::cout << "done\n";
     }else{
     	QTLHandle.reset(new SHEsis::QTL(data));
+		if(SHEsisArgs.adjust)
+			AssocHandle->setAdjust(true);
     	if(SHEsisArgs.permutation!=-1){
     		QTLHandle->setPermutation(SHEsisArgs.permutation);
     		QTLHandle->QTLPermutation();
@@ -178,6 +184,8 @@ int main(int argc, char* argv[]) {
 		  else
 			  HapHandle.reset(new SHEsis::HaplotypeEM(data,snpnum, SHEsisArgs.mask));
 	  }
+		if(SHEsisArgs.adjust)
+			HapHandle->setAdjust(true);
 	  if(SAT == SHEsisArgs.hapmethod){
 		  if(0 == snpnum) //no mask
 			  HapHandle.reset(new SHEsis::Haplotype(data));
@@ -409,6 +417,7 @@ void addOptions(int argc, char* argv[], po::options_description& desc,
       "ld-in-case", "perform Linkage disequilibrium test in cases")(
       "ld-in-ctrl", "perform Linkage disequilibrium test in controls")(
       "ld", "perform Linkage disequilibrium test in both cases and controls")(
+       "adjust","adjust p-value for multiple testing")(
        "webserver","Internal use for webserver");
   po::store(po::parse_command_line(argc, argv, desc), vm);
   po::notify(vm);
@@ -540,6 +549,8 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
 	  SHEsisArgs.haploAnalysis = true;
 	  SHEsisArgs.hapmethod=EM;
   };
+  if(vm.count("adjust")!=0)
+	  SHEsisArgs.adjust=true;
 
   if (vm.count("mask")) {
     std::string maskstr = vm["mask"].as<std::string>();

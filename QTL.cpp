@@ -13,7 +13,7 @@
 template std::string convert2string<double>(double v);
 namespace SHEsis {
 
-QTL::QTL(boost::shared_ptr<SHEsisData> data):data(data),NumOfPermutation(-1) {
+QTL::QTL(boost::shared_ptr<SHEsisData> data):data(data),NumOfPermutation(-1),adjust(false) {
 	// TODO Auto-generated constructor stub
 	this->data->statCount();
 }
@@ -133,7 +133,7 @@ void QTL::QTLPermutation(){
 
 	for(int i=0;i<this->vResults.size();i++){
 		int rank=getRank(this->vResults[i].p,this->permutationp);
-		this->vResults[i].permutatedp=(double)rank/(double)this->NumOfPermutation;
+		this->vResults[i].permutatedp=this->vResults[i].p>0?(double)rank/(double)this->NumOfPermutation:-999;
 	}
 
 
@@ -150,6 +150,36 @@ void QTL::QTLTest(){
 			Res=CurAlleleRes<Res?CurAlleleRes:Res;
 		};
 		this->vResults.push_back(Res);
+	}
+	if(this->adjust){
+		  std::vector<MultiComp> originp;
+		  std::vector<double> adjusted;
+		  for(int i=0;i<this->vResults.size();i++){
+			  MultiComp val;
+			  val.p=this->vResults[i].p;
+			  val.idx=i;
+			  originp.push_back(val);
+		  };
+		  std::sort(originp.begin(),originp.end());
+		  HolmCorrection(originp,adjusted);
+		  for(int i=0;i<this->vResults.size();i++)
+			  this->vResults[i].HolmP=adjusted[i];
+
+		  SidakSDCorrection(originp,adjusted);
+		  for(int i=0;i<this->vResults.size();i++)
+			  this->vResults[i].SidakSDP=adjusted[i];
+
+		  SidakSSCorrection(originp,adjusted);
+		  for(int i=0;i<this->vResults.size();i++)
+			  this->vResults[i].SidakSSP=adjusted[i];
+
+		  BHCorrection(originp,adjusted);
+		  for(int i=0;i<this->vResults.size();i++)
+			  this->vResults[i].BHP=adjusted[i];
+
+		  BYCorrection(originp,adjusted);
+		  for(int i=0;i<this->vResults.size();i++)
+			  this->vResults[i].BYP=adjusted[i];
 	}
 }
 
@@ -177,6 +207,9 @@ std::string QTL::reporttxt(){
 	if(this->NumOfPermutation!=-1){
 		  res<<"\tpermutation p value";
 	};
+	if(this->adjust){
+		res<<"\tHolm\tSidakSS\tSidakSD\tFDR_BH\tFDR_BY";
+	}
 	res<<"\n";
 	for (int i = 0; i < this->vResults.size(); i++) {
 		res<<this->data->vLocusName[i]<<"\t";
@@ -186,9 +219,14 @@ std::string QTL::reporttxt(){
 		res<<this->vResults[i].se<<"\t\t";
 		res<<this->vResults[i].R2<<"\t\t";
 		res<<this->vResults[i].T<<"\t\t";
-		res<<this->vResults[i].p<<"\t\t";
+		res<<convert2string(this->vResults[i].p)<<"\t\t";
 	    if(this->NumOfPermutation!=-1){
-	  	  res<<this->vResults[i].permutatedp;
+	  	  res<<convert2string(this->vResults[i].permutatedp);
+	    }
+	    if(this->adjust){
+	    	res<<convert2string(this->vResults[i].HolmP)<<"\t"<<convert2string(this->vResults[i].SidakSSP)<<
+	    		"\t"<<convert2string(this->vResults[i].SidakSDP)<<"\t"<<convert2string(this->vResults[i].BHP)
+	    		<<"\t"<<convert2string(this->vResults[i].BYP);
 	    }
 	    res<<"\n";
 	}
@@ -213,6 +251,13 @@ std::string QTL::reporthtml() {
   if(this->NumOfPermutation!=-1){
 	  data.push_back("permutation p");
   }
+  if(this->adjust){
+	  data.push_back("Holm");
+	  data.push_back("SidakSS");
+	  data.push_back("SidakSD");
+	  data.push_back("FDR_BH");
+	  data.push_back("FDR_BY");
+  }
   html->addHeadRow(data);
   for (int i = 0; i < this->vResults.size(); i++) {
     data.clear();
@@ -226,6 +271,13 @@ std::string QTL::reporthtml() {
     data.push_back(convert2string(this->vResults[i].p));
     if(this->NumOfPermutation!=-1){
   	  data.push_back(convert2string(this->vResults[i].permutatedp));
+    }
+    if(this->adjust){
+  	  data.push_back(convert2string(this->vResults[i].HolmP));
+  	  data.push_back(convert2string(this->vResults[i].SidakSSP));
+  	  data.push_back(convert2string(this->vResults[i].SidakSDP));
+  	  data.push_back(convert2string(this->vResults[i].BHP));
+  	  data.push_back(convert2string(this->vResults[i].BYP));
     }
     html->addDataRow(data);
   }

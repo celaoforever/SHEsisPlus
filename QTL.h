@@ -21,6 +21,11 @@ struct QTLResults{
 	double p;
 	short allele;
 	double permutatedp;
+	double HolmP;
+	double SidakSSP;
+	double SidakSDP;
+	double BHP;
+	double BYP;
 	bool operator<(const QTLResults& res) {
 		if(p<res.p)
 			return true;
@@ -44,10 +49,12 @@ public:
 	QTL(boost::shared_ptr<SHEsisData> data);
 	virtual ~QTL();
 	void setPermutation(int p){this->NumOfPermutation=p;};
+	void setAdjust(bool b){this->adjust=b;};
 	void QTLPermutation();
 	std::string reporthtml();
 	std::string reporttxt();
 private:
+	bool adjust;
 	int NumOfPermutation;
 	std::vector<double> vPermutatedQT;
 	QTLResults OneLocusQTLAnalysis(int snp, short allele,std::vector<double> qt);

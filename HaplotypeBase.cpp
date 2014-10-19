@@ -75,9 +75,40 @@ void HaplotypeBase:: AssociationTestQTL(){
 		singHapQTLRes res=SingleHaploAssociationTestQTL(hapIdx);
 		this->Results.singleHapQTL.push_back(res);
 	}
+	if(this->adjust){
+		std::vector<MultiComp> originp;
+		std::vector<double> adjusted;
+	 for(int i=0;i<this->Results.singleHapQTL.size();i++){
+		 MultiComp val;
+		 val.p=this->Results.singleHapQTL[i].p;
+		 val.idx=i;
+		 originp.push_back(val);
+	 }
+		 std::sort(originp.begin(),originp.end());
+		 HolmCorrection(originp,adjusted);
+		  for(int i=0;i<this->Results.singleHapQTL.size();i++)
+			  this->Results.singleHapQTL[i].HolmP=adjusted[i];
+
+		  SidakSDCorrection(originp,adjusted);
+		  for(int i=0;i<this->Results.singleHapQTL.size();i++)
+			  this->Results.singleHapQTL[i].SidakSDP=adjusted[i];
+
+		  SidakSSCorrection(originp,adjusted);
+		  for(int i=0;i<this->Results.singleHapQTL.size();i++)
+			  this->Results.singleHapQTL[i].SidakSSP=adjusted[i];
+
+		  BHCorrection(originp,adjusted);
+		  for(int i=0;i<this->Results.singleHapQTL.size();i++)
+			  this->Results.singleHapQTL[i].BHP=adjusted[i];
+
+		  BYCorrection(originp,adjusted);
+		  for(int i=0;i<this->Results.singleHapQTL.size();i++)
+			  this->Results.singleHapQTL[i].BYP=adjusted[i];
+	};
 }
 
 void HaplotypeBase::AssociationTest(){
+
 	if(this->data->vQuantitativeTrait.size() == 0){
 		this->AssociationTestBinary();
 	}else
@@ -167,6 +198,40 @@ void HaplotypeBase::AssociationTestBinary() {
   PearsonChiSquareTest(contigency, nrow, validHap, this->Results.ChiSquare,
                        this->Results.PearsonP);
   delete[] contigency;
+
+  if(this->adjust){
+  		std::vector<MultiComp> originp;
+  		std::vector<double> adjusted;
+  			 for(int i=0;i<this->Results.singleHap.size();i++){
+  				MultiComp val;
+  				val.p=this->Results.singleHap[i].pearsonp;
+  				val.idx=i;
+  				 originp.push_back(val);
+  			 };
+
+  			 std::sort(originp.begin(),originp.end());
+  			 HolmCorrection(originp,adjusted);
+  			  for(int i=0;i<this->Results.singleHap.size();i++)
+  				  this->Results.singleHap[i].HolmP=adjusted[i];
+
+  			  SidakSDCorrection(originp,adjusted);
+  			  for(int i=0;i<this->Results.singleHap.size();i++)
+  				  this->Results.singleHap[i].SidakSDP=adjusted[i];
+
+  			  SidakSSCorrection(originp,adjusted);
+  			  for(int i=0;i<this->Results.singleHap.size();i++)
+  				  this->Results.singleHap[i].SidakSSP=adjusted[i];
+
+  			  BHCorrection(originp,adjusted);
+  			  for(int i=0;i<this->Results.singleHap.size();i++)
+  				  this->Results.singleHap[i].BHP=adjusted[i];
+
+  			  BYCorrection(originp,adjusted);
+  			  for(int i=0;i<this->Results.singleHap.size();i++)
+  				  this->Results.singleHap[i].BYP=adjusted[i];
+  		}
+
+
 }
 
 std::string HaplotypeBase::reporthtml() {
@@ -228,7 +293,11 @@ std::string HaplotypeBase::reporttxt(){
 std::string HaplotypeBase::reporttxttableBinary(){
 	std::stringstream res;
 	res.precision(3);
-	res<<"Haplotype\tCase(freq)\tControl(freq)\tChi2\t\tFisher's p\tPearson's p\tOR [95% CI]\n";
+	res<<"Haplotype\tCase(freq)\tControl(freq)\tChi2\t\tFisher's p\tPearson's p\tOR [95% CI]";
+	if(this->adjust){
+		res<<"\tHolm\tSidakSS\tSidakSD\tFDR_BH\tFDR_BY";
+	}
+	res<<"\n";
 	for (int i = 0; i < this->Results.singleHap.size(); i++) {
 	    if (-999 == this->Results.singleHap[i].pearsonp) continue;
 	    for (int j = 0; j < this->SnpIdx.size(); j++) {
@@ -248,7 +317,13 @@ std::string HaplotypeBase::reporttxttableBinary(){
 	    res<<convert2string(this->Results.singleHap[i].fisherp)<<"\t\t";
 	    res<<convert2string(this->Results.singleHap[i].OR)<<"["<<
 	    		convert2string(this->Results.singleHap[i].orlow)
-	    		<<"~"<<convert2string(this->Results.singleHap[i].orUp)<<"]\n";
+	    		<<"~"<<convert2string(this->Results.singleHap[i].orUp)<<"]";
+	    if(this->adjust){
+	    	res<<"\t"<<this->Results.singleHap[i].HolmP<<"\t"<<this->Results.singleHap[i].SidakSSP<<
+	    		"\t"<<this->Results.singleHap[i].SidakSDP<<"\t"<<this->Results.singleHap[i].BHP
+	    		<<"\t"<<this->Results.singleHap[i].BYP;
+	    }
+	    res<<"\n";
 	};
 	return res.str();
 
@@ -265,6 +340,13 @@ std::string HaplotypeBase::reporthtmltableBinary() {
   data.push_back("Fisher's p");
   data.push_back("Pearson's p");
   data.push_back("OR [95% CI]");
+  if(this->adjust){
+	  data.push_back("Holm");
+	  data.push_back("SidakSS");
+	  data.push_back("SidakSD");
+	  data.push_back("FDR_BH");
+	  data.push_back("FDR_BY");
+  }
   html->addHeadRow(data);
   for (int i = 0; i < this->Results.singleHap.size(); i++) {
     if (-999 == this->Results.singleHap[i].pearsonp) continue;
@@ -290,11 +372,21 @@ std::string HaplotypeBase::reporthtmltableBinary() {
     data.push_back(convert2string(this->Results.singleHap[i].chisquare));
     data.push_back(convert2string(this->Results.singleHap[i].pearsonp));
     data.push_back(convert2string(this->Results.singleHap[i].fisherp));
+
     std::string OR;
     OR += convert2string(this->Results.singleHap[i].OR) + " [" +
           convert2string(this->Results.singleHap[i].orlow) + "~" +
           convert2string(this->Results.singleHap[i].orUp) + "]";
     data.push_back(OR);
+
+    if(this->adjust){
+  	  data.push_back(convert2string(this->Results.singleHap[i].HolmP));
+  	  data.push_back(convert2string(this->Results.singleHap[i].SidakSSP));
+  	  data.push_back(convert2string(this->Results.singleHap[i].SidakSDP));
+  	  data.push_back(convert2string(this->Results.singleHap[i].BHP));
+  	  data.push_back(convert2string(this->Results.singleHap[i].BYP));
+    }
+
     html->addDataRow(data);
   }
   return html->getTable();
@@ -303,7 +395,11 @@ std::string HaplotypeBase::reporthtmltableBinary() {
 std::string HaplotypeBase::reporttxttableQTL(){
 	std::stringstream res;
 	res.precision(3);
-	res<<"Haplotype\tTotal count\tRegression coefficient\tStandard error\t Regression r2\t T statistics\tP value\n";
+	res<<"Haplotype\tTotal count\tRegression coefficient\tStandard error\t Regression r2\t T statistics\tP value";
+	if(this->adjust){
+		res<<"\tHolm\tSidakSS\tSidakSD\tFDR_BH\tFDR_BY";
+	}
+	res<<"\n";
 	  for (int i = 0; i < this->Results.singleHapQTL.size(); i++) {
 	    if (0 == this->Results.singleHapQTL[i].ValidSampleNum) continue;
 	    for (int j = 0; j < this->SnpIdx.size(); j++) {
@@ -315,7 +411,13 @@ std::string HaplotypeBase::reporttxttableQTL(){
 	    res<<this->Results.singleHapQTL[i].se<<"\t\t";
 	    res<<this->Results.singleHapQTL[i].R2<<"\t\t";
 	    res<<this->Results.singleHapQTL[i].T<<"\t\t";
-	    res<<this->Results.singleHapQTL[i].p<<"\n";
+	    res<<this->Results.singleHapQTL[i].p;
+	    if(this->adjust){
+	    	res<<"\t"<<this->Results.singleHapQTL[i].HolmP<<"\t"<<this->Results.singleHapQTL[i].SidakSSP<<
+	    		"\t"<<this->Results.singleHapQTL[i].SidakSDP<<"\t"<<this->Results.singleHapQTL[i].BHP
+	    		<<"\t"<<this->Results.singleHapQTL[i].BYP;
+	    }
+	    res<<"\n";
 	  };
 	 return res.str();
 }
@@ -331,6 +433,13 @@ std::string HaplotypeBase::reporthtmltableQTL() {
   data.push_back("Regression r<sup>2</sup>");
   data.push_back("T statistics");
   data.push_back("p value");
+  if(this->adjust){
+	  data.push_back("Holm");
+	  data.push_back("SidakSS");
+	  data.push_back("SidakSD");
+	  data.push_back("FDR_BH");
+	  data.push_back("FDR_BY");
+  }
   html->addHeadRow(data);
   for (int i = 0; i < this->Results.singleHapQTL.size(); i++) {
     if (0 == this->Results.singleHapQTL[i].ValidSampleNum) continue;
@@ -346,6 +455,13 @@ std::string HaplotypeBase::reporthtmltableQTL() {
     data.push_back(convert2string(this->Results.singleHapQTL[i].R2));
     data.push_back(convert2string(this->Results.singleHapQTL[i].T));
     data.push_back(convert2string(this->Results.singleHapQTL[i].p));
+    if(this->adjust){
+  	  data.push_back(convert2string(this->Results.singleHapQTL[i].HolmP));
+  	  data.push_back(convert2string(this->Results.singleHapQTL[i].SidakSSP));
+  	  data.push_back(convert2string(this->Results.singleHapQTL[i].SidakSDP));
+  	  data.push_back(convert2string(this->Results.singleHapQTL[i].BHP));
+  	  data.push_back(convert2string(this->Results.singleHapQTL[i].BYP));
+    }
     html->addDataRow(data);
   }
   return html->getTable();
