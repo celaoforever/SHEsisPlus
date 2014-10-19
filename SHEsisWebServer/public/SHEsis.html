@@ -28,18 +28,12 @@
     </font>
      </a>
     <span class="element-divider"></span>
-    <div class="element">
-       <a class="dropdown-toggle" href="#">
+       <a class="element" href="#">
 	     <font size="4">
 	       Help
 	     </font>
        </a>
-       <ul class="dropdown-menu " data-role="dropdown" style="display:none">
-	 <li><a href="#">Web-based Version</a></li>
-	 <li><a href="#">Standalone Version</a></li>
-       </ul>
-    </div>
-    <span class="element-divider"></span>
+      <span class="element-divider"></span>
     <a class="element" href="#">
     <font size="4">
       Download
@@ -133,6 +127,12 @@
 		   <option value="4">4</option>
 		   <option value="5">5</option>
 		   <option value="6">6</option>
+		   <option value="7">7</option>
+		   <option value="8">8</option>
+		   <option value="9">9</option>
+		   <option value="10">10</option>
+		   <option value="11">11</option>
+		   <option value="12">12</option>
 		  </select>  
 		  </div>
 	     </td>
@@ -214,7 +214,7 @@
 	      <td>Your E-mail (Optional):</td>
 	      <td>
 	      <div class="input-control text">
-		 <input name="TextEmail" placeholder="Send email when completed" style="width:85%" type="text"></input>
+		 <input type="email" name="TextEmail" placeholder="Send email when completed" style="width:85%" type="text"></input>
 	      </div>
 	      </td>
 	      <td>
@@ -234,18 +234,20 @@
 	      <td colspan="5">
 		<table  name="TableInputData" style="width:100%">
 		  <tr>
-		    <td>Input data for cases:<button type="button" title="Load sample data" onclick="loadSampleBinary()" class="bg-white"><i class="fg-lightBlue icon-help on-left"></i></button></td>
+		    <td >Input data for cases:
+<button type="button" title="Load sample data" onclick="loadSampleBinary()" class="bg-white"><i class="fg-lightBlue icon-help on-left"></i></button></td>
 		    <td></td>
-		    <td>Input data for controls:</td>
+		    <td >Input data for controls:
+		    </td>
 		  </tr>
 		  <tr>
-		    <td>
+		    <td style="width:200px">
 		      <div class="input-control textarea">
 			<textarea name="TextareaCasedata" rows="30" cols="20" wrap="OFF"></textarea>
 		      </div>
 		    </td>
 		    <td style="width:15px"></td>
-		    <td>
+		    <td style="width:200px">
 		      <div class="input-control textarea">
 			<textarea name="TextareaControldata" rows="30" cols="20" wrap="OFF"></textarea>
 		      </div>		      
