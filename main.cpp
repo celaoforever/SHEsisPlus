@@ -160,14 +160,14 @@ int main(int argc, char* argv[]) {
     }
   };
 
-  if (SHEsisArgs.hweAnalysis) {
+  if (SHEsisArgs.hweAnalysis&&SHEsisArgs.ploidy>1) {
     std::cout << "Starting Hardy-Weinberg equilibrium test...\n";
     HWEHandle.reset(new SHEsis::HWETest(data));
     HWEHandle->AllSnpHWETest();
     std::cout << "done\n";
   }
 
-  if (SHEsisArgs.haploAnalysis) {
+  if (SHEsisArgs.haploAnalysis&&SHEsisArgs.ploidy>1) {
 	  std::cout << "Starting haplotype analysis...\n";
 	  int snpnum=0;
 	  if (SHEsisArgs.mask.size() != 0 && SHEsisArgs.mask.size() != data->getSnpNum()) {
@@ -203,7 +203,7 @@ int main(int argc, char* argv[]) {
 	    std::cout << "done\n";
   }
 
-  if (SHEsisArgs.ldAnalysis) {
+  if (SHEsisArgs.ldAnalysis&&SHEsisArgs.ploidy>1) {
     std::cout << "Starting linkage disequilibrium analysis...\n";
     LDHandle.reset(new SHEsis::LDTest(data, SHEsisArgs.output));
     LDHandle->setLDType(SHEsisArgs.ldtype);
@@ -501,7 +501,7 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
 
   if (0 == vm.count("ploidy"))
     throw std::runtime_error("no ploidy information given.");
-  else if (vm["ploidy"].as<int>() <= 1)
+  else if (vm["ploidy"].as<int>() < 1)
     throw std::runtime_error("number of ploidy should be higher than 1.");
   else
     SHEsisArgs.ploidy = vm["ploidy"].as<int>();

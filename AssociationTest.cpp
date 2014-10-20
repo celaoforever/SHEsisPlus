@@ -90,6 +90,7 @@ std::string AssociationTest::reporttxt(){
 	    	res<<"Benjamini & Hochberg step-up FDR controled p value is "<<convert2string(this->vAssocationTestResult[i].AlleleBHP)<<"\n";
 	    	res<<"Benjamini & Yekutieli step-up FDR controled p value is "<<convert2string(this->vAssocationTestResult[i].AlleleBYP)<<"\n";
 	    }
+	    if(this->data->getNumOfChrSet()>1){
 	    res<<"-------------------------------------------------------\n";
 		res<<this->data->vLocusName[i]<<"(Genotype):\n";
 		detail="\t";
@@ -141,6 +142,7 @@ std::string AssociationTest::reporttxt(){
 		    	res<<"Benjamini & Hochberg step-up FDR controled p value is "<<convert2string(this->vAssocationTestResult[i].GenotypeBHP)<<"\n";
 		    	res<<"Benjamini & Yekutieli step-up FDR controled p value is "<<convert2string(this->vAssocationTestResult[i].GenotypeBYP)<<"\n";
 		    }
+	    }
 			res<<"-------------------------------------------------------\n";
 	}
 	return res.str();
@@ -151,8 +153,10 @@ std::string AssociationTest::reporthtml() {
   res<<"\n<h2> Single Locus Association Test (Binary phenotype): </h2>\n";
   res << "<h3>Alleles:</h3>\n";
   res << this->reporthtmlAllele();
+  if(this->data->getNumOfChrSet()>1){
   res << "<h3>Genotypes:</h3>\n";
   res << this->reporthtmlGenotype();
+  }
   return res.str();
 }
 
@@ -381,7 +385,8 @@ void AssociationTest::association() {
 	else if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()==0)
 		this->data->statCount(this->data->vLabel);
   this->AssociationTestForAllSnpsAllele();
-  this->AssociationTestForAllSnpsGenotype();
+  if(this->data->getNumOfChrSet()>1)
+	  this->AssociationTestForAllSnpsGenotype();
 }
 
 void AssociationTest::AssociationTestForAllSnpsAllele() {
@@ -500,7 +505,8 @@ void AssociationTest::permutation() {
                         this->vPermutateLabel.end());
     this->data->statCount(this->vPermutateLabel);
     this->AssociationTestForAllSnpsAllele();
-    this->AssociationTestForAllSnpsGenotype();
+    if(this->data->getNumOfChrSet()>1)
+    	this->AssociationTestForAllSnpsGenotype();
     double ap, gp;
     getTheSmallestP(this->vAssocationTestResult, ap, gp);
     this->PermutationPAllele.push_back(ap);
@@ -514,13 +520,15 @@ void AssociationTest::permutation() {
 
   this->data->statCount(data->vLabel);
   this->AssociationTestForAllSnpsAllele();
-  this->AssociationTestForAllSnpsGenotype();
+  if(this->data->getNumOfChrSet()>1)
+	  this->AssociationTestForAllSnpsGenotype();
   for (int i = 0; i < this->vAssocationTestResult.size(); i++) {
     this->vAssocationTestResult[i].AllelePermutationP =this->vAssocationTestResult[i].AllelePearsonP>0?
         (double)getRank(this->vAssocationTestResult[i].AllelePearsonP,
                         this->PermutationPAllele) /
         (double)this->NumOfPermutation:-999;
-    this->vAssocationTestResult[i].GenotypePermutationP =this->vAssocationTestResult[i].GenoTypePearsonP>0?
+    if(this->data->getNumOfChrSet()>1)
+    	this->vAssocationTestResult[i].GenotypePermutationP =this->vAssocationTestResult[i].GenoTypePearsonP>0?
         (double)getRank(this->vAssocationTestResult[i].GenoTypePearsonP,
                         this->PermutationPGenotype) /
         (double)this->NumOfPermutation:-999;
