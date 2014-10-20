@@ -1,4 +1,4 @@
-const SPLIT = 50;
+var SPLIT = 50;
 var gData2Draw;
 var gHeader;
 var gNames;
