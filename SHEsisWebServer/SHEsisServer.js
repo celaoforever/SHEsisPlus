@@ -270,11 +270,13 @@ var bin=cp.exec('bin/SHEsis '+args,{timeout:36000000},function(err,stdout,stderr
 var arrMatches=stdout.toString().match('ERROR.*');
 
 if(err&&err.killed){
+	    console.log("job",jobid,"timed out");
     	    shell.exec('echo "'+args+'"| mutt -s "job '+jobid+' timed out" jiawei.shen@outlook.com'); 
 }else if(arrMatches != null && arrMatches.length){
-    	    shell.exec('echo "'+args+"\nerr:"+arrMatches[0]+'"| mutt -s "job '+jobid+' failed" jiawei.shen@outlook.com');    
+	    console.log("job",jobid,"failed");
+   	    shell.exec('echo "'+args+" "+arrMatches[0]+'"| mutt -s "job '+jobid+' failed" jiawei.shen@outlook.com');    
 }else if(err){
-        	    shell.exec('echo "'+args+"\n"+err+'\n"| mutt -s "job '+jobid+' failed, unknwon" jiawei.shen@outlook.com'); 
+            shell.exec('echo "'+args+"\n"+err+'\n"| mutt -s "job '+jobid+' failed, unknwon" jiawei.shen@outlook.com'); 
 }else
 {
      	SendEmail(email,"http://202.120.31.144:5903/tmp/"+jobid+".html",dataset);   
