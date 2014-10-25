@@ -11,8 +11,11 @@ class SHEsisGUI:
                         ("/File",None,None,0,"<Branch>"),
                         ("/File/Load Case data",None,None,0,None),
                         ("/File/Load Control data",None,None,0,None),
+			("/File/Load QTL data",None,None,0,None),
                         ("/File/sep1",None,None,0,"<Separator>"),
                         ("/File/Exit",None,self.destroy,0,None),
+			("/Edit",None,None,0,"<Branch>"),
+			("/Edit/Reset",None,None,0,None),
                         ("/Help",None,None,0,"<Branch>"),
                         ("/Help/SHEsis Help",None,None,0,None),
                         ("/Help/About SHEsis",None,None,0,None),
@@ -23,9 +26,7 @@ class SHEsisGUI:
                 self.ItemFactory.create_items(self.MenuItems)
                 self.window.add_accel_group(self.AccelGroup)
                 self.MenuBar=self.ItemFactory.get_widget("<main>")
-                self.vBox=gtk.VBox(False,1)
-                self.vBox.set_border_width(1)
-                self.vBox.pack_start(self.MenuBar,False,True,0)
+		self.vBox.pack_start(self.MenuBar,False,True,0)
                 self.MenuBar.show()
         
 
@@ -54,7 +55,7 @@ class SHEsisGUI:
           
         def AddPloidy(self):
  		self.LabelPloidy=gtk.Label()
-		self.LabelPloidy.set_text("Ploidy:")
+		self.LabelPloidy.set_text("Enter ploidy:")
                 self.LabelPloidy.set_alignment(1,0.5)
 		self.table.attach(self.LabelPloidy,0,1,1,2)
 		self.LabelPloidy.show() 
@@ -94,8 +95,166 @@ class SHEsisGUI:
                 self.LabelMask.show()          
                 self.TextMaskName=gtk.Entry()
                 self.table.attach(self.TextMaskName,3,5,2,3)
-                self.TextMaskName.show()               
-             
+                self.TextMaskName.show() 
+
+	def AddLD(self):
+		self.LabelLD=gtk.Label()
+		self.LabelLD.set_text("Calculate LD in:")
+		self.LabelLD.set_alignment(1,0.5)
+		self.table.attach(self.LabelLD,0,1,3,4)
+		self.LabelLD.show()
+		self.ComboLD=gtk.combo_box_new_text()
+		self.ComboLD.append_text("All samples")
+		self.ComboLD.append_text("Just cases")
+		self.ComboLD.append_text("Just controls")
+		self.ComboLD.set_active(0)
+		self.table.attach(self.ComboLD,1,2,3,4)
+		self.ComboLD.show()
+
+	def AddLFT(self):
+		self.LabelLFT=gtk.Label()
+		self.LabelLFT.set_text("Lowest freq for hap-analysis:")
+		self.LabelLFT.set_alignment(1,0.5)
+		self.table.attach(self.LabelLFT,2,3,3,4)
+		self.LabelLFT.show()
+		self.TextLFT=gtk.Entry()
+		self.TextLFT.set_text("0.03")
+		self.table.attach(self.TextLFT,3,5,3,4)
+		self.TextLFT.show()
+	
+	def AddOutput(self):
+		self.LabelOutput=gtk.Label()
+		self.LabelOutput.set_text("Output format:")
+		self.LabelOutput.set_alignment(1,0.5)
+		self.table.attach(self.LabelOutput,2,3,5,6)
+		self.LabelOutput.show()
+		self.ComboOutput=gtk.combo_box_new_text()
+		self.ComboOutput.append_text("html")
+		self.ComboOutput.append_text("txt")
+		self.ComboOutput.set_active(0)
+		self.table.attach(self.ComboOutput,3,5,5,6)
+		self.ComboOutput.show()
+
+	def AddAlgorithm(self):
+		self.LabelAlg=gtk.Label()
+		self.LabelAlg.set_text("Algorithm for hap-analysis:")
+		self.LabelAlg.set_alignment(1,0.5)
+		self.table.attach(self.LabelAlg,2,3,4,5)
+		self.LabelAlg.show()
+		self.ComboAlg=gtk.combo_box_new_text()
+		self.ComboAlg.append_text("Expectation maximization")
+		self.ComboAlg.append_text("SAT-based")
+		self.ComboAlg.set_active(0)
+		self.table.attach(self.ComboAlg,3,5,4,5)
+		self.ComboAlg.show()
+		
+	def AddMultiComp(self):
+		self.LabelMultiComp=gtk.Label()
+		self.LabelMultiComp.set_text("Multiple comparision:")
+		self.LabelMultiComp.set_alignment(1,0.5)
+		self.table.attach(self.LabelMultiComp,0,1,4,5)
+		self.LabelMultiComp.show()
+		self.CheckMultiComp=gtk.CheckButton("Sidak,FDR,Holm's correction")
+		self.table.attach(self.CheckMultiComp,1,2,4,5)
+		self.CheckMultiComp.show()
+		
+	def AddPermutation(self):
+		self.LabelPermutation=gtk.Label()
+		self.LabelPermutation.set_text("Number of permutations:")
+		self.LabelPermutation.set_alignment(1,0.5)
+		self.table.attach(self.LabelPermutation,0,1,5,6)
+		self.LabelPermutation.show()
+                adj=gtk.Adjustment(0,0,99999999,100,1000,0)
+                self.SpinPermutation=gtk.SpinButton(adj,0.1,0)
+                self.table.attach(self.SpinPermutation,1,2,5,6)
+                self.SpinPermutation.show()
+
+	def ShowCaseCtrlData(self):
+		self.LabelDataCase.show()
+		self.TextviewDataCase.show()
+		self.scrolledwindowCase.show()
+		self.LabelDataCtrl.show()
+		self.TextviewDataCtrl.show()
+		self.scrolledwindowCtrl.show()
+
+	def HideCaseCtrlData(self):
+		self.LabelDataCase.hide()
+		self.TextviewDataCase.hide()
+		self.scrolledwindowCase.hide()
+		self.LabelDataCtrl.hide()
+		self.TextviewDataCtrl.hide()
+		self.scrolledwindowCtrl.hide()
+		
+	def ShowQTLData(self):
+		self.LabelQTL.show()
+		self.TextviewQTL.show()
+		self.scrolledwindowQTL.show()
+
+	def HideQTLData(self):
+		self.LabelQTL.hide()
+		self.TextviewQTL.hide()
+		self.scrolledwindowQTL.hide()
+		
+	def AddDataInput(self):
+		self.TableData=gtk.Table(3,3,False)
+		self.TableData.set_col_spacing(1,20)
+		self.TableData.set_row_spacing(1,400)
+		#case/contrl
+		self.LabelDataCase=gtk.Label()
+		self.LabelDataCase.set_text("Input case data:")
+		self.LabelDataCase.set_alignment(0,0.5)
+		self.TableData.attach(self.LabelDataCase,0,1,0,1)
+		self.LabelDataCtrl=gtk.Label()
+		self.LabelDataCtrl.set_text("Input control data:")
+		self.LabelDataCtrl.set_alignment(0,0.5)
+		self.TableData.attach(self.LabelDataCtrl,2,3,0,1)
+		self.scrolledwindowCase=gtk.ScrolledWindow()
+		self.scrolledwindowCase.set_policy(gtk.POLICY_AUTOMATIC,gtk.POLICY_AUTOMATIC)
+		self.TextviewDataCase=gtk.TextView()
+		self.TextviewDataCase.set_border_window_size(gtk.TEXT_WINDOW_TOP,10)
+		self.textbufferCase=self.TextviewDataCase.get_buffer()
+		self.scrolledwindowCase.add(self.TextviewDataCase)
+		self.TableData.attach(self.scrolledwindowCase,0,1,1,3)
+		self.scrolledwindowCtrl=gtk.ScrolledWindow()
+		self.scrolledwindowCtrl.set_policy(gtk.POLICY_AUTOMATIC,gtk.POLICY_AUTOMATIC)
+		self.TextviewDataCtrl=gtk.TextView()
+		self.TextviewDataCtrl.set_border_window_size(gtk.TEXT_WINDOW_TOP,10)
+		self.textbufferCtrl=self.TextviewDataCtrl.get_buffer()
+		self.scrolledwindowCtrl.add(self.TextviewDataCtrl)
+		self.TableData.attach(self.scrolledwindowCtrl,2,3,1,3)		
+		#qtl
+		self.LabelQTL=gtk.Label()
+		self.LabelQTL.set_text("Input QTL data:")
+		self.LabelQTL.set_alignment(0,0.5)
+		self.TableData.attach(self.LabelQTL,0,1,0,1)
+		self.scrolledwindowQTL=gtk.ScrolledWindow()
+		self.scrolledwindowQTL.set_policy(gtk.POLICY_AUTOMATIC,gtk.POLICY_AUTOMATIC)
+		self.TextviewQTL=gtk.TextView()
+		self.TextviewQTL.set_border_window_size(gtk.TEXT_WINDOW_TOP,10)
+		self.textbufferQTL=self.TextviewQTL.get_buffer()
+		self.scrolledwindowQTL.add(self.TextviewQTL)
+		self.TableData.attach(self.scrolledwindowQTL,0,3,1,3)
+		#show
+		self.table.attach(self.TableData,0,5,6,7)
+		self.ShowCaseCtrlData()
+		self.TableData.show()
+		
+	def AddCalculate(self):
+		self.TableButton=gtk.Table(1,9,False)
+		self.TableButton.set_col_spacing(1,310)
+		self.TableButton.set_col_spacing(7,290)
+		self.TableButton.set_col_spacing(6,40)
+		self.ButtonCal=gtk.Button("Calculate")
+		self.ButtonCal.set_border_width(5)
+		self.TableButton.attach(self.ButtonCal,3,4,0,1)
+		self.ButtonCal.show()
+		self.ButtonReset=gtk.Button("  Reset  ")
+		self.ButtonReset.set_border_width(5)
+		self.TableButton.attach(self.ButtonReset,4,5,0,1)
+		self.ButtonReset.show()		
+		self.vBox.pack_start(self.TableButton,False,False,0)
+		self.TableButton.show()
+		
 	def __init__(self):
                 #create main window
 		self.window=gtk.Window(gtk.WINDOW_TOPLEVEL)
@@ -104,25 +263,36 @@ class SHEsisGUI:
 		self.window.set_border_width(10)
                 self.window.set_title("SHEsis")
                 self.window.set_resizable(False)
+		#create vbox
+		self.vBox=gtk.VBox(False,1)
+                self.vBox.set_border_width(1)
+                #add menu bar
+                self.AddMenuBar()
 		#add table to manage layout
 		self.table=gtk.Table(3,5,False)
 		self.table.set_row_spacings(5)
 		self.table.set_col_spacings(10)
-                #add menu bar
-                self.AddMenuBar()
+		self.vBox.pack_start(self.table,False,True,10)
                 #add components
                 self.AddAnalysisType()
                 self.AddPloidy()
                 self.AddMarkerName()
 		self.AddPhenotype()
 		self.AddMask()
-                #add table to window and show
-		self.vBox.pack_start(self.table,False,True,20)
+		self.AddLD()
+		self.AddLFT()
+		self.AddOutput()
+		self.AddAlgorithm()
+		self.AddMultiComp()
+		self.AddPermutation()
+		self.AddDataInput()
+		self.AddCalculate()
+                #add table to window and show		
                 self.window.add(self.vBox)
 		self.table.show()
                 self.vBox.show()
 		self.window.show()
-	
+
 	def main(self):
 		gtk.main()
 
