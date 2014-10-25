@@ -5,7 +5,11 @@ import gtk
 class SHEsisGUI:
 	def destroy(self, widget, data=None):
 		gtk.main_quit()
-	
+	def alert(self,msg):
+		message=gtk.MessageDialog(None,0,gtk.MESSAGE_ERROR,gtk.BUTTONS_OK,"Error")
+		message.set_markup(msg)
+		message.run()
+		message.destroy()
         def AddMenuBar(self):
                 self.MenuItems=(
                         ("/File",None,None,0,"<Branch>"),
@@ -29,7 +33,6 @@ class SHEsisGUI:
 		self.vBox.pack_start(self.MenuBar,False,True,0)
                 self.MenuBar.show()
         
-
         def AddAnalysisType(self):
   		self.LabelChooseAnalysis=gtk.Label()
 		self.LabelChooseAnalysis.set_text("Choose analysis:")
@@ -74,6 +77,47 @@ class SHEsisGUI:
                 self.table.attach(self.TextMarkerName,3,5,1,2)
                 self.TextMarkerName.show()
 
+	def ShowCaseCtrlData(self):
+		self.LabelDataCase.show()
+		self.TextviewDataCase.show()
+		self.scrolledwindowCase.show()
+		self.LabelDataCtrl.show()
+		self.TextviewDataCtrl.show()
+		self.scrolledwindowCtrl.show()
+
+	def HideCaseCtrlData(self):
+		self.LabelDataCase.hide()
+		self.TextviewDataCase.hide()
+		self.scrolledwindowCase.hide()
+		self.LabelDataCtrl.hide()
+		self.TextviewDataCtrl.hide()
+		self.scrolledwindowCtrl.hide()
+		
+	def ShowQTLData(self):
+		self.LabelQTL.show()
+		self.TextviewQTL.show()
+		self.scrolledwindowQTL.show()
+
+	def HideQTLData(self):
+		self.LabelQTL.hide()
+		self.TextviewQTL.hide()
+		self.scrolledwindowQTL.hide()
+
+	def PhenotypeOnChange(self,widget):
+		model=self.ComboPhenotype.get_model()
+		index=self.ComboPhenotype.get_active()
+		if model[index][0] == "Case/Control" :
+			self.HideQTLData()
+			self.ShowCaseCtrlData()
+			self.ComboLD.set_button_sensitivity(gtk.SENSITIVITY_ON)
+		elif model[index][0] == "Quantitative Trait":
+			self.HideCaseCtrlData()
+			self.ShowQTLData()
+			self.ComboLD.set_active(0)
+			self.ComboLD.set_button_sensitivity(gtk.SENSITIVITY_OFF)
+		else:
+			raise Exception("Unknown phenotype")	
+		
         def AddPhenotype(self):
  		self.LabelPhenotype=gtk.Label()
 		self.LabelPhenotype.set_text("Choose Phenotype:")
@@ -84,6 +128,7 @@ class SHEsisGUI:
                 self.ComboPhenotype.append_text("Case/Control")
                 self.ComboPhenotype.append_text("Quantitative Trait")
                 self.ComboPhenotype.set_active(0)
+		self.ComboPhenotype.connect("changed",self.PhenotypeOnChange)
                 self.table.attach(self.ComboPhenotype,1,2,2,3)
                 self.ComboPhenotype.show()
 
@@ -169,31 +214,7 @@ class SHEsisGUI:
                 self.table.attach(self.SpinPermutation,1,2,5,6)
                 self.SpinPermutation.show()
 
-	def ShowCaseCtrlData(self):
-		self.LabelDataCase.show()
-		self.TextviewDataCase.show()
-		self.scrolledwindowCase.show()
-		self.LabelDataCtrl.show()
-		self.TextviewDataCtrl.show()
-		self.scrolledwindowCtrl.show()
 
-	def HideCaseCtrlData(self):
-		self.LabelDataCase.hide()
-		self.TextviewDataCase.hide()
-		self.scrolledwindowCase.hide()
-		self.LabelDataCtrl.hide()
-		self.TextviewDataCtrl.hide()
-		self.scrolledwindowCtrl.hide()
-		
-	def ShowQTLData(self):
-		self.LabelQTL.show()
-		self.TextviewQTL.show()
-		self.scrolledwindowQTL.show()
-
-	def HideQTLData(self):
-		self.LabelQTL.hide()
-		self.TextviewQTL.hide()
-		self.scrolledwindowQTL.hide()
 		
 	def AddDataInput(self):
 		self.TableData=gtk.Table(3,3,False)
@@ -238,7 +259,107 @@ class SHEsisGUI:
 		self.table.attach(self.TableData,0,5,6,7)
 		self.ShowCaseCtrlData()
 		self.TableData.show()
-		
+
+	def ParseArgs(self):
+		self.argument="./SHEsis "
+		analysisCount=0;
+		if self.CheckAssoc.get_active():
+			self.argument+=" --assoc"
+			analysisCount+=1
+		if self.CheckHWE.get_active():
+			self.argument+=" --hwe"
+			analysisCount+=1
+		marker=self.TextMarkerName.get_text()
+		ploidy=str(self.SpinPloidy.get_value_as_int())
+		self.argument+=" --ploidy "+ploidy
+		PhenotypeModel=self.ComboPhenotype.get_model()
+		PhenotypeIndex=self.ComboPhenotype.get_active()
+		if PhenotypeModel[PhenotypeIndex][0] == "Quantitative Trait":
+			self.argument+=" --qtl"
+		if self.CheckMultiComp.get_active():
+			self.argument+=" --adjust"
+		permutation=self.SpinPermutation.get_value_as_int()
+		if permutation > 0:
+			self.argument+=" --permutation "+str(permutation)
+		if marker!="":
+			self.argument+=' --snpname-line "'+marker+'"'
+		if self.CheckLD.get_active():
+			analysisCount+=1
+			LDModel=self.ComboLD.get_model()
+			LDIndex=self.ComboLD.get_active()
+			ld=LDModel[LDIndex][0]
+			if ld == "All samples":
+				self.argument+=" --ld"
+			elif ld == "Just cases":
+				self.argument+=" --ld-in-case"
+			elif ld == "Just controls":
+				self.argument+=" --ld-in-ctrl"
+			else:
+				raise Exception("Unknown ld type")
+		if self.CheckHap.get_active():
+			analysisCount+=1
+			HapModel=self.ComboAlg.get_model()
+			HapIndex=self.ComboAlg.get_active()
+			hap=HapModel[HapIndex][0]
+			if hap == "Expectation maximization":
+				self.argument+=" --haplo-EM"
+			elif hap == "SAT-based":
+				self.argument+=" --haplo-SAT"
+			else:
+				raise Exception("Unknwon haplotype algorithm")
+			mask=self.TextMaskName.get_text()
+			if mask!="":
+				self.argument+=' --mask "'+mask+'"'
+			lft=self.TextLFT.get_text()
+			if lft!="":
+				self.argument+=" --lft "+lft	
+		OutputModel=self.ComboOutput.get_model()
+		OutputIndex=self.ComboOutput.get_active()
+		Output=OutputModel[OutputIndex][0]
+		if Output == "txt":
+			self.argument+=" --report-txt"
+		if analysisCount ==0:
+			self.alert("At leaset one analysis should be selected")
+			return -1
+		print self.argument
+		return 0
+
+	def CreateDialog(self):
+		self.SHEsisDialog=gtk.Dialog("SHEsis",self.window,gtk.DIALOG_DESTROY_WITH_PARENT,None)
+		self.LabelRuntime=gtk.Label(" SHEsis runtime output:")
+		self.LabelRuntime.set_alignment(0,0.5)
+		self.LabelRuntime.show()
+		self.SHEsisDialog.vbox.pack_start(self.LabelRuntime,True,True,10)
+		self.TableRuntime=gtk.Table(4,3)
+		self.TableRuntime.set_row_spacing(0,300)
+		self.TableRuntime.set_row_spacing(1,6)
+		self.TableRuntime.set_col_spacing(0,200)
+		self.TableRuntime.set_col_spacing(1,200)
+		self.SHEsisDialog.action_area.pack_start(self.TableRuntime,True,True,5)			
+		self.scrolledwindowRuntime=gtk.ScrolledWindow()
+		self.scrolledwindowRuntime.set_policy(gtk.POLICY_AUTOMATIC,gtk.POLICY_AUTOMATIC)
+		self.TextviewRuntime=gtk.TextView()
+		self.TextviewRuntime.set_editable(False)
+		self.TextviewRuntime.set_border_window_size(gtk.TEXT_WINDOW_TOP,10)
+		self.textbufferRuntime=self.TextviewRuntime.get_buffer()
+		self.scrolledwindowRuntime.add(self.TextviewRuntime)
+		self.TableRuntime.attach(self.scrolledwindowRuntime,0,3,0,2)
+		self.ButtonRuntime=gtk.Button("Terminate")
+		self.TableRuntime.attach(self.ButtonRuntime,1,2,3,4)
+		self.ButtonRuntime.show()
+		self.scrolledwindowRuntime.show()
+		self.TextviewRuntime.show()
+		self.TableRuntime.show()
+		self.SHEsisDialog.show()
+
+	def RunSHEsis(self,widget):
+		ret=self.ParseArgs()
+		if ret == 0:
+			self.CreateDialog()
+			print self.argument
+		else:
+			print "Error"
+	
 	def AddCalculate(self):
 		self.TableButton=gtk.Table(1,9,False)
 		self.TableButton.set_col_spacing(1,310)
@@ -246,6 +367,7 @@ class SHEsisGUI:
 		self.TableButton.set_col_spacing(6,40)
 		self.ButtonCal=gtk.Button("Calculate")
 		self.ButtonCal.set_border_width(5)
+		self.ButtonCal.connect("clicked",self.RunSHEsis)
 		self.TableButton.attach(self.ButtonCal,3,4,0,1)
 		self.ButtonCal.show()
 		self.ButtonReset=gtk.Button("  Reset  ")
@@ -253,7 +375,9 @@ class SHEsisGUI:
 		self.TableButton.attach(self.ButtonReset,4,5,0,1)
 		self.ButtonReset.show()		
 		self.vBox.pack_start(self.TableButton,False,False,0)
-		self.TableButton.show()
+		self.TableButton.show()	
+
+
 		
 	def __init__(self):
                 #create main window
