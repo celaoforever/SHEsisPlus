@@ -47,7 +47,7 @@ void SidakSDCorrection(std::vector<MultiComp>& p, std::vector<double>& adjusted)
 		adjusted[p[0].idx]=-999;
 	else
 		adjusted[p[0].idx]=1-pow(1-p[0].p,count);
-	for(int i=0;i<count;i++){
+	for(int i=1;i<count;i++){
 		if(p[i].p<0){
 			adjusted[p[i].idx]=-999;
 			continue;

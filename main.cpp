@@ -149,7 +149,7 @@ int main(int argc, char* argv[]) {
     }else{
     	QTLHandle.reset(new SHEsis::QTL(data));
 		if(SHEsisArgs.adjust)
-			AssocHandle->setAdjust(true);
+			QTLHandle->setAdjust(true);
     	if(SHEsisArgs.permutation!=-1){
     		QTLHandle->setPermutation(SHEsisArgs.permutation);
     		QTLHandle->QTLPermutation();
@@ -220,15 +220,6 @@ int main(int argc, char* argv[]) {
   ofile << report.str();
   ofile.close();
   std::cout<<"Results saved to "<<filename<<".\n";
-//  if(!SHEsisArgs.webserver){
-//  std::string cmd = "firefox " + SHEsisArgs.output + ".html";
-//#ifdef _WIN32
-//  ShellExecute(NULL, "open", SHEsisArgs.output + ".html", NULL, NULL,
-//               SW_SHOWNORMAL);
-//#else
-//  system(cmd.c_str());
-//#endif
-//  };
   return 0;
 }
 
@@ -292,13 +283,6 @@ void reportHtml(std::stringstream& report,
 		  report<<HapHandle->reporthtml();
 	  }
 	  if(LDHandle){
-//		  std::string ldreport=LDHandle->reporthtml();
-//		  if(SHEsisArgs.webserver){
-//			  std::string filepath=SHEsisArgs.output;
-//			  std::string filename=get_file_name_from_full_path(filepath);
-//			  boost::replace_all(ldreport,filename,"tmp/"+filename);
-//		    };
-//		  report<<ldreport;
 		  report<<LDHandle->reporthtml();
 	  }
 	  if(!SHEsisArgs.webserver)
