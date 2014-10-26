@@ -10,12 +10,37 @@ class SHEsisGUI:
 		message.set_markup(msg)
 		message.run()
 		message.destroy()
+
+	def LoadCaseFile(self,widget,data=None):
+		chooser = gtk.FileChooserDialog(title="Load case data...",action=gtk.FILE_CHOOSER_ACTION_OPEN,buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+		response = chooser.run()
+		if response == gtk.RESPONSE_OK:
+			file=open(chooser.get_filename(),'r')
+			self.textbufferCase.set_text(file.read())			
+		chooser.destroy()
+
+	def LoadCtrlFile(self,widget,data=None):
+		chooser = gtk.FileChooserDialog(title="Load case data...",action=gtk.FILE_CHOOSER_ACTION_OPEN,buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+		response = chooser.run()
+		if response == gtk.RESPONSE_OK:
+			file=open(chooser.get_filename(),'r')
+			self.textbufferCtrl.set_text(file.read())			
+		chooser.destroy()
+
+	def LoadQTLFile(self,widget,data=None):
+		chooser = gtk.FileChooserDialog(title="Load case data...",action=gtk.FILE_CHOOSER_ACTION_OPEN,buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+		response = chooser.run()
+		if response == gtk.RESPONSE_OK:
+			file=open(chooser.get_filename(),'r')
+			self.textbufferQTL.set_text(file.read())			
+		chooser.destroy()
+
         def AddMenuBar(self):
                 self.MenuItems=(
                         ("/File",None,None,0,"<Branch>"),
-                        ("/File/Load Case data",None,None,0,None),
-                        ("/File/Load Control data",None,None,0,None),
-			("/File/Load QTL data",None,None,0,None),
+                        ("/File/Load Case data",None,self.LoadCaseFile,0,None),
+                        ("/File/Load Control data",None,self.LoadCtrlFile,0,None),
+			("/File/Load QTL data",None,self.LoadQTLFile,0,None),
                         ("/File/sep1",None,None,0,"<Separator>"),
                         ("/File/Exit",None,self.destroy,0,None),
 			("/Edit",None,None,0,"<Branch>"),
@@ -321,7 +346,6 @@ class SHEsisGUI:
 		if analysisCount ==0:
 			self.alert("At leaset one analysis should be selected")
 			return -1
-		print self.argument
 		return 0
 
 	def CreateDialog(self):
