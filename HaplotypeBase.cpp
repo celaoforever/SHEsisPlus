@@ -428,11 +428,11 @@ std::string HaplotypeBase::reporthtmltableQTL() {
   std::vector<std::string> data;
   data.push_back("Haplotype");
   data.push_back("Total count");
-  data.push_back("Regression coefficient");
-  data.push_back("Standard error");
-  data.push_back("Regression r<sup>2</sup>");
-  data.push_back("T statistics");
-  data.push_back("p value");
+  data.push_back("Beta");
+  data.push_back("SE");
+  data.push_back("R<sup>2</sup>");
+  data.push_back("T");
+  data.push_back("p");
   if(this->adjust){
 	  data.push_back("Holm");
 	  data.push_back("SidakSS");

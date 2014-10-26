@@ -242,12 +242,12 @@ std::string QTL::reporthtml() {
   std::vector<std::string> data;
   data.push_back("SNP");
   data.push_back("Effect allele");
-  data.push_back("Nonmissing sample");
-  data.push_back("Regression coefficient");
-  data.push_back("Standard error");
-  data.push_back("Regression r<sup>2</sup>");
-  data.push_back("T statistics");
-  data.push_back("p value");
+  data.push_back("Nonmissing");
+  data.push_back("Beta");
+  data.push_back("SE");
+  data.push_back("R<sup>2</sup>");
+  data.push_back("T");
+  data.push_back("p");
   if(this->NumOfPermutation!=-1){
 	  data.push_back("permutation p");
   }
