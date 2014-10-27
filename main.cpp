@@ -184,14 +184,15 @@ int main(int argc, char* argv[]) {
 		  else
 			  HapHandle.reset(new SHEsis::HaplotypeEM(data,snpnum, SHEsisArgs.mask));
 	  }
-		if(SHEsisArgs.adjust)
-			HapHandle->setAdjust(true);
+
 	  if(SAT == SHEsisArgs.hapmethod){
 		  if(0 == snpnum) //no mask
 			  HapHandle.reset(new SHEsis::Haplotype(data));
 		  else
 			  HapHandle.reset(new SHEsis::Haplotype(data,snpnum, SHEsisArgs.mask));
 	  }
+		if(SHEsisArgs.adjust)
+			HapHandle->setAdjust(true);
 	    if (SHEsisArgs.lft >= 0 && SHEsisArgs.lft < 1)
 	      HapHandle->setFreqThreshold(SHEsisArgs.lft);
 	    else
