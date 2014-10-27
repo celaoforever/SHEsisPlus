@@ -620,8 +620,11 @@ int ReadInput(int ploidy, bool containsPhenotype, std::string filepath,
     };
     lineidx++;
     filecontent.push_back(strs);
+    if(filecontent.size() == 0)
+    	throw std::runtime_error("Empty file: "+filepath );
   }
-
+  if(snpnum == 0)
+  	throw std::runtime_error("No snp data found in "+filepath );
   return snpnum;
 }
 
