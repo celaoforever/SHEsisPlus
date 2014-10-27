@@ -1,22 +1,50 @@
 import pygtk
 pygtk.require('2.0')
 import gtk
+import os
+import platform
+import subprocess
+import shlex
+from subprocess import Popen, PIPE
+import glib
+import gobject
+import threading
 
 class SHEsisGUI:
 	def destroy(self, widget, data=None):
 		gtk.main_quit()
+
 	def alert(self,msg):
 		message=gtk.MessageDialog(None,0,gtk.MESSAGE_ERROR,gtk.BUTTONS_OK,"Error")
 		message.set_markup(msg)
 		message.run()
 		message.destroy()
+        
+        def read_output(self,view,buffer,cmd):
+                args = shlex.split(cmd)
+                self.proc = Popen(args,stdout=PIPE,stderr=subprocess.STDOUT)   
+                while 1:
+                        line=self.proc.stdout.read(1)
+                        if not line:
+                                break
+                        gtk.gdk.threads_enter()
+                        iter=buffer.get_end_iter()
+                        buffer.insert(iter,line)
+                        view.scroll_to_mark(buffer.get_insert(),0.1)
+                        gtk.gdk.threads_leave()
+
+        def WriteToFile(self,textbuffer,filename):
+                file=open(filename,'w')
+                text=textbuffer.get_text(*textbuffer.get_bounds())
+                file.write(text)
+                file.close()
 
 	def LoadCaseFile(self,widget,data=None):
 		chooser = gtk.FileChooserDialog(title="Load case data...",action=gtk.FILE_CHOOSER_ACTION_OPEN,buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
 		response = chooser.run()
 		if response == gtk.RESPONSE_OK:
 			file=open(chooser.get_filename(),'r')
-			self.textbufferCase.set_text(file.read())			
+			self.textbufferCase.set_text(file.read())
 		chooser.destroy()
 
 	def LoadCtrlFile(self,widget,data=None):
@@ -35,28 +63,6 @@ class SHEsisGUI:
 			self.textbufferQTL.set_text(file.read())			
 		chooser.destroy()
 
-        def AddMenuBar(self):
-                self.MenuItems=(
-                        ("/File",None,None,0,"<Branch>"),
-                        ("/File/Load Case data",None,self.LoadCaseFile,0,None),
-                        ("/File/Load Control data",None,self.LoadCtrlFile,0,None),
-			("/File/Load QTL data",None,self.LoadQTLFile,0,None),
-                        ("/File/sep1",None,None,0,"<Separator>"),
-                        ("/File/Exit",None,self.destroy,0,None),
-			("/Edit",None,None,0,"<Branch>"),
-			("/Edit/Reset",None,None,0,None),
-                        ("/Help",None,None,0,"<Branch>"),
-                        ("/Help/SHEsis Help",None,None,0,None),
-                        ("/Help/About SHEsis",None,None,0,None),
-                        )
-                
-                self.AccelGroup=gtk.AccelGroup()
-                self.ItemFactory=gtk.ItemFactory(gtk.MenuBar,"<main>",self.AccelGroup)
-                self.ItemFactory.create_items(self.MenuItems)
-                self.window.add_accel_group(self.AccelGroup)
-                self.MenuBar=self.ItemFactory.get_widget("<main>")
-		self.vBox.pack_start(self.MenuBar,False,True,0)
-                self.MenuBar.show()
         
         def AddAnalysisType(self):
   		self.LabelChooseAnalysis=gtk.Label()
@@ -286,7 +292,13 @@ class SHEsisGUI:
 		self.TableData.show()
 
 	def ParseArgs(self):
-		self.argument="./SHEsis "
+                os=platform.system()
+                if os =="Windows":
+                        self.argument="SHEsis "
+                elif os == "Darwin" or os == "Linux":
+                        self.argument="./SHEsis "
+                else:
+                        raise Exception("Unknown operating system")
 		analysisCount=0;
 		if self.CheckAssoc.get_active():
 			self.argument+=" --assoc"
@@ -301,6 +313,16 @@ class SHEsisGUI:
 		PhenotypeIndex=self.ComboPhenotype.get_active()
 		if PhenotypeModel[PhenotypeIndex][0] == "Quantitative Trait":
 			self.argument+=" --qtl"
+                        self.WriteToFile(self.textbufferQTL,"qtl.txt")
+                        self.argument+=" --input qtl.txt"
+                elif PhenotypeModel[PhenotypeIndex][0] == "Case/Control":
+                        self.WriteToFile(self.textbufferCase,"case.txt")
+                        self.WriteToFile(self.textbufferCtrl,"ctrl.txt")
+                        self.argument+=" --input-case case.txt"
+                        self.argument+=" --input-ctrl ctrl.txt"
+                else:
+                        raise Exception("Unknown phenotype")
+                
 		if self.CheckMultiComp.get_active():
 			self.argument+=" --adjust"
 		permutation=self.SpinPermutation.get_value_as_int()
@@ -348,6 +370,15 @@ class SHEsisGUI:
 			return -1
 		return 0
 
+        def TerminateProcess(self,widget):
+                if self.proc.poll() is None:
+                        self.proc.terminate()
+                        iter=self.textbufferRuntime.get_end_iter()
+                        self.textbufferRuntime.insert(iter,"\nTerminated by user")
+                        self.TextviewRuntime.scroll_to_mark(self.textbufferRuntime.get_insert(),0.1)
+                else:
+                        self.SHEsisDialog.destroy()
+                
 	def CreateDialog(self):
 		self.SHEsisDialog=gtk.Dialog("SHEsis",self.window,gtk.DIALOG_DESTROY_WITH_PARENT,None)
 		self.LabelRuntime=gtk.Label(" SHEsis runtime output:")
@@ -369,6 +400,7 @@ class SHEsisGUI:
 		self.scrolledwindowRuntime.add(self.TextviewRuntime)
 		self.TableRuntime.attach(self.scrolledwindowRuntime,0,3,0,2)
 		self.ButtonRuntime=gtk.Button("Terminate")
+                self.ButtonRuntime.connect("clicked",self.TerminateProcess)
 		self.TableRuntime.attach(self.ButtonRuntime,1,2,3,4)
 		self.ButtonRuntime.show()
 		self.scrolledwindowRuntime.show()
@@ -377,12 +409,35 @@ class SHEsisGUI:
 		self.SHEsisDialog.show()
 
 	def RunSHEsis(self,widget):
+                gobject.threads_init()
+                gtk.gdk.threads_init()
 		ret=self.ParseArgs()
 		if ret == 0:
 			self.CreateDialog()
 			print self.argument
+                        thr=threading.Thread(target=self.read_output,args=(self.TextviewRuntime,self.textbufferRuntime,self.argument))
+                        thr.start()
 		else:
 			print "Error"
+
+        def reset(self,widget,data=None):
+                self.textbufferCase.set_text("")
+                self.textbufferCtrl.set_text("")
+                self.textbufferQTL.set_text("")
+                self.TextMarkerName.set_text("")
+                self.TextMaskName.set_text("")
+                self.TextLFT.set_text("0.03")
+                self.ComboPhenotype.set_active(0)
+                self.ComboLD.set_active(0)
+                self.ComboAlg.set_active(0)
+                self.ComboOutput.set_active(0)
+                self.SpinPermutation.set_value(0)
+                self.SpinPloidy.set_value(2)
+                self.CheckAssoc.set_active(0)
+                self.CheckHWE.set_active(0)
+                self.CheckLD.set_active(0)
+                self.CheckHap.set_active(0)
+                self.CheckMultiComp.set_active(0)
 	
 	def AddCalculate(self):
 		self.TableButton=gtk.Table(1,9,False)
@@ -396,11 +451,36 @@ class SHEsisGUI:
 		self.ButtonCal.show()
 		self.ButtonReset=gtk.Button("  Reset  ")
 		self.ButtonReset.set_border_width(5)
+                self.ButtonReset.connect("clicked",self.reset)
 		self.TableButton.attach(self.ButtonReset,4,5,0,1)
 		self.ButtonReset.show()		
 		self.vBox.pack_start(self.TableButton,False,False,0)
 		self.TableButton.show()	
 
+
+
+        def AddMenuBar(self):
+                self.MenuItems=(
+                        ("/File",None,None,0,"<Branch>"),
+                        ("/File/Load Case data",None,self.LoadCaseFile,0,None),
+                        ("/File/Load Control data",None,self.LoadCtrlFile,0,None),
+			("/File/Load QTL data",None,self.LoadQTLFile,0,None),
+                        ("/File/sep1",None,None,0,"<Separator>"),
+                        ("/File/Exit",None,self.destroy,0,None),
+			("/Edit",None,None,0,"<Branch>"),
+			("/Edit/Reset",None,self.reset,0,None),
+                        ("/Help",None,None,0,"<Branch>"),
+                        ("/Help/SHEsis Help",None,None,0,None),
+                        ("/Help/About SHEsis",None,None,0,None),
+                        )
+                
+                self.AccelGroup=gtk.AccelGroup()
+                self.ItemFactory=gtk.ItemFactory(gtk.MenuBar,"<main>",self.AccelGroup)
+                self.ItemFactory.create_items(self.MenuItems)
+                self.window.add_accel_group(self.AccelGroup)
+                self.MenuBar=self.ItemFactory.get_widget("<main>")
+		self.vBox.pack_start(self.MenuBar,False,True,0)
+                self.MenuBar.show()
 
 		
 	def __init__(self):
