@@ -498,9 +498,11 @@ void getTheSmallestP(std::vector<LocusAssiciationTestResult> res,
 void AssociationTest::permutation() {
   this->vPermutateLabel = this->data->vLabel;
   for (int i = 0; i < this->NumOfPermutation; i++) {
+	if(i % 200 == 0){
     printf("\rPermutating...%d%%",
            (int)(100 * (double)i / (double)this->NumOfPermutation));
     fflush(stdout);
+	}
     std::random_shuffle(this->vPermutateLabel.begin(),
                         this->vPermutateLabel.end());
     this->data->statCount(this->vPermutateLabel);
