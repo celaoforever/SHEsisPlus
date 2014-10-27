@@ -48,7 +48,7 @@ class SHEsisGUI:
 		chooser.destroy()
 
 	def LoadCtrlFile(self,widget,data=None):
-		chooser = gtk.FileChooserDialog(title="Load case data...",action=gtk.FILE_CHOOSER_ACTION_OPEN,buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+		chooser = gtk.FileChooserDialog(title="Load control data...",action=gtk.FILE_CHOOSER_ACTION_OPEN,buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
 		response = chooser.run()
 		if response == gtk.RESPONSE_OK:
 			file=open(chooser.get_filename(),'r')
@@ -56,7 +56,7 @@ class SHEsisGUI:
 		chooser.destroy()
 
 	def LoadQTLFile(self,widget,data=None):
-		chooser = gtk.FileChooserDialog(title="Load case data...",action=gtk.FILE_CHOOSER_ACTION_OPEN,buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+		chooser = gtk.FileChooserDialog(title="Load QTL data...",action=gtk.FILE_CHOOSER_ACTION_OPEN,buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
 		response = chooser.run()
 		if response == gtk.RESPONSE_OK:
 			file=open(chooser.get_filename(),'r')
