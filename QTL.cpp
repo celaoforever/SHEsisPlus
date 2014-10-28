@@ -43,7 +43,7 @@ std::vector<short> QTL::FindAllele(int snp){
 	std::vector<short> res;
 	boost::unordered_map<short,double>::iterator iter=this->data->vLocusInfo[snp].BothAlleleCount.begin();
 	if(this->data->vLocusInfo[snp].BothAlleleCount.size() == 1){
-		res.push_back(iter->first);
+//		res.push_back(iter->first);
 		return res;
 	}
 	if(this->data->vLocusInfo[snp].BothAlleleCount.size() == 2){
@@ -62,8 +62,6 @@ QTLResults QTL::OneLocusQTLAnalysis(int snp,short allele,std::vector<double> qt)
 	double qt_g_covar=0;
 	int ValidSampleNum=0;
 	for(int iSample=0;iSample<this->data->getSampleNum();iSample++){
-		if(0 == qt[iSample]/*this->data->vQuantitativeTrait[iSample]*/)
-			continue;
 		if(this->IsGenotypeMissing(iSample,snp))
 			continue;
 		qt_mean+=qt[iSample]/*this->data->vQuantitativeTrait[iSample]*/;
@@ -145,9 +143,14 @@ void QTL::QTLTest(){
 	for(int iSnp=0;iSnp<this->data->getSnpNum();iSnp++){
 		std::vector<short> allelesToTest=this->FindAllele(iSnp);
 		QTLResults Res;
-		for(int a=0;a<allelesToTest.size();a++){
-			QTLResults CurAlleleRes=this->OneLocusQTLAnalysis(iSnp,allelesToTest[a],this->data->vQuantitativeTrait);
-			Res=CurAlleleRes<Res?CurAlleleRes:Res;
+		if(allelesToTest.size() == 0){
+			Res.BHP=-999;Res.BYP=-999;Res.HolmP=-999;Res.R2=-999;Res.SidakSDP=-999;Res.SidakSSP=-999;
+			Res.T=-999;Res.ValidSampleNum=-999;Res.allele=-999;Res.beta=-999;Res.p=-999;Res.permutatedp=-999;Res.se=-999;
+		}else{
+			for(int a=0;a<allelesToTest.size();a++){
+				QTLResults CurAlleleRes=this->OneLocusQTLAnalysis(iSnp,allelesToTest[a],this->data->vQuantitativeTrait);
+				Res=CurAlleleRes<Res?CurAlleleRes:Res;
+			};
 		};
 		this->vResults.push_back(Res);
 	}
@@ -189,10 +192,15 @@ void QTL::QTLTest(std::vector<double> qt){
 	for(int iSnp=0;iSnp<this->data->getSnpNum();iSnp++){
 		std::vector<short> allelesToTest=this->FindAllele(iSnp);
 		QTLResults Res;
-		for(int a=0;a<allelesToTest.size();a++){
-			QTLResults CurAlleleRes=this->OneLocusQTLAnalysis(iSnp,allelesToTest[a],qt);
-			Res=CurAlleleRes<Res?CurAlleleRes:Res;
-		};
+		if(allelesToTest.size() == 0){
+			Res.BHP=-999;Res.BYP=-999;Res.HolmP=-999;Res.R2=-999;Res.SidakSDP=-999;Res.SidakSSP=-999;
+			Res.T=-1;Res.ValidSampleNum=-999;Res.allele=-999;Res.beta=-999;Res.p=-999;Res.permutatedp=-999;Res.se=-999;
+		}else{
+			for(int a=0;a<allelesToTest.size();a++){
+				QTLResults CurAlleleRes=this->OneLocusQTLAnalysis(iSnp,allelesToTest[a],qt);
+				Res=CurAlleleRes<Res?CurAlleleRes:Res;
+			};
+		}
 		this->vResults.push_back(Res);
 	}
 }
