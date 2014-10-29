@@ -63,8 +63,16 @@ singHapQTLRes HaplotypeBase::SingleHaploAssociationTestQTL(int hapIdx){
 	res.beta=qt_g_covar/g_var;
 	res.se=sqrt((qt_var/g_var-(qt_g_covar*qt_g_covar)/(g_var*g_var))/((double)ValidSampleNum-2));
 	res.T=res.beta/res.se;
-	boost::math::students_t dist(ValidSampleNum-2);
-	res.p=2*boost::math::cdf(boost::math::complement(dist,fabs(res.T)));
+	if(res.T<0.0000001)
+		res.T=0;
+	if(res.T>99999)
+		res.T=99999;
+	if(ValidSampleNum-2<1)
+		res.p=-999;
+	else{
+		boost::math::students_t dist(ValidSampleNum-2);
+		res.p=2*boost::math::cdf(boost::math::complement(dist,fabs(res.T)));
+	}
 	res.R2=(qt_g_covar*qt_g_covar)/(qt_var*g_var);
 	res.ValidSampleNum=ValidSampleNum;
 	return res;

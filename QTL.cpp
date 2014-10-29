@@ -94,8 +94,12 @@ QTLResults QTL::OneLocusQTLAnalysis(int snp,short allele,std::vector<double> qt)
 		res.T=0;
 	if(res.T>99999)
 		res.T=99999;
-	boost::math::students_t dist(ValidSampleNum-2);
-	res.p=2*boost::math::cdf(boost::math::complement(dist,fabs(res.T)));
+	if(ValidSampleNum-2<1)
+		res.p=-999;
+	else{
+		boost::math::students_t dist(ValidSampleNum-2);
+		res.p=2*boost::math::cdf(boost::math::complement(dist,fabs(res.T)));
+	}
 	res.R2=(qt_g_covar*qt_g_covar)/(qt_var*g_var);
 	res.allele=allele;
 	res.ValidSampleNum=ValidSampleNum;
