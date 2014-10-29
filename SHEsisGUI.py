@@ -45,6 +45,7 @@ class SHEsisGUI:
 		if response == gtk.RESPONSE_OK:
 			file=open(chooser.get_filename(),'r')
 			self.textbufferCase.set_text(file.read())
+                        self.casepath=chooser.get_filename()
 		chooser.destroy()
 
 	def LoadCtrlFile(self,widget,data=None):
@@ -52,7 +53,8 @@ class SHEsisGUI:
 		response = chooser.run()
 		if response == gtk.RESPONSE_OK:
 			file=open(chooser.get_filename(),'r')
-			self.textbufferCtrl.set_text(file.read())			
+			self.textbufferCtrl.set_text(file.read())
+			self.ctrlpath=chooser.get_filename()
 		chooser.destroy()
 
 	def LoadQTLFile(self,widget,data=None):
@@ -60,7 +62,8 @@ class SHEsisGUI:
 		response = chooser.run()
 		if response == gtk.RESPONSE_OK:
 			file=open(chooser.get_filename(),'r')
-			self.textbufferQTL.set_text(file.read())			
+			self.textbufferQTL.set_text(file.read())
+			self.qtlpath=chooser.get_filename()
 		chooser.destroy()
 
         
@@ -313,11 +316,17 @@ class SHEsisGUI:
 		PhenotypeIndex=self.ComboPhenotype.get_active()
 		if PhenotypeModel[PhenotypeIndex][0] == "Quantitative Trait":
 			self.argument+=" --qtl"
-                        self.WriteToFile(self.textbufferQTL,"qtl.txt")
-                        self.argument+=" --input qtl.txt"
+                        if self.qtlpath =="":
+                                self.WriteToFile(self.textbufferQTL,"qtl.txt")
+                                self.qtlpath="qtl.txt"
+                        self.argument+=" --input "+self.qtlpath
                 elif PhenotypeModel[PhenotypeIndex][0] == "Case/Control":
-                        self.WriteToFile(self.textbufferCase,"case.txt")
-                        self.WriteToFile(self.textbufferCtrl,"ctrl.txt")
+                        if self.casepath=="":
+                                self.WriteToFile(self.textbufferCase,"case.txt")
+                                self.casepath="case.txt"
+                        if self.ctrlpath=="":
+                                self.WriteToFile(self.textbufferCtrl,"ctrl.txt")
+                                self.ctrlpath="ctrl.txt"
                         self.argument+=" --input-case case.txt"
                         self.argument+=" --input-ctrl ctrl.txt"
                 else:
