@@ -26,7 +26,7 @@ std::vector<int> GenerateBinaryData(std::vector<boost::shared_ptr<short[]> > hap
 void printHap(std::vector<boost::shared_ptr<short[]> > haps, std::vector<int> count,int snpnum);
 std::vector<boost::shared_ptr<short[]> >  GenerateHaplotype(int alleletype, int hapnum, int snpnum);
 struct args{
-	args():casenum(100),ctrlnum(100),qtlnum(0),ploidy(2),snp(10),output("output"),hap(5),seed(1234),allele(2){}
+	args():casenum(100),ctrlnum(100),qtlnum(0),ploidy(2),snp(10),output("output"),hap(5),seed(1234),allele(2),missing(0){}
 	int casenum;
 	int ctrlnum;
 	int qtlnum;
@@ -34,6 +34,7 @@ struct args{
 	int snp;
 	int hap;
 	int allele;
+	float missing;
 	std::string output;
 	int seed;
 }par;
@@ -66,7 +67,8 @@ void addOptions(int argc, char* argv[], po::options_description& desc,
 						("hap",po::value<int>(),"number of haplotypes")
 						("allele",po::value<int>(),"number of allele types")
 						("output",po::value<std::string>(),"output prefix")
-						("seed", po::value<int>(),"seed for random generator");
+						("seed", po::value<int>(),"seed for random generator")
+						("missing",po::value<float>(),"missing rate");
 	  po::store(po::parse_command_line(argc, argv, desc), vm);
 	  po::notify(vm);
 }
@@ -108,6 +110,9 @@ void checkOptions(po::options_description& desc, po::variables_map& vm){
 	  if(vm.count("output")){
 		  par.output=vm["output"].as<std::string>();
 	  }
+	  if(vm.count("missing")){
+		  par.missing=vm["missing"].as<float>();
+	  }
 }
 
 void printPar(){
@@ -119,7 +124,7 @@ void printPar(){
 	}
 	std::cout<<"snpnum: "<<par.snp<<", ploidy: "<<par.ploidy<<", allele types: "<<par.allele<<"\n";
 	std::cout<<"seed: "<<par.seed<<", hap: "<<par.hap<<"\n";
-	std::cout<<"output: "<<par.output<<"\n";
+	std::cout<<"missing rate: "<<par.missing<<", output: "<<par.output<<"\n";
 }
 
 int translateRandomNumber(int number){
@@ -152,7 +157,7 @@ std::vector<int> GenerateBinaryData(std::vector<boost::shared_ptr<short[]> > hap
 		throw std::runtime_error("Unable to open output file: "+prefix+"_ctrl.txt");
 	std::vector<int> selection;
 	boost::random::uniform_int_distribution<> HapSelection(0, haps.size() - 1);
-	boost::random::uniform_int_distribution<> Missing(0, 100);
+	boost::random::uniform_int_distribution<> Missing(0, 1000);
 	for(int i=0;i<casenum;i++){
 		casefile<<"case"<<i<<" ";
 		selection.resize(ploidy,-1);
@@ -165,7 +170,7 @@ std::vector<int> GenerateBinaryData(std::vector<boost::shared_ptr<short[]> > hap
 			std::vector<int> tmp;
 			for(int select=0;select<selection.size();select++){
 				BOOST_ASSERT(selection[select]!=-1);
-				if(Missing(rng)==0)
+				if(Missing(rng)<par.missing*1000)
 					tmp.push_back(0);
 				else
 					tmp.push_back(haps[selection[select]][s]);
@@ -191,7 +196,10 @@ std::vector<int> GenerateBinaryData(std::vector<boost::shared_ptr<short[]> > hap
 			std::vector<int> tmp;
 			for(int select=0;select<selection.size();select++){
 				BOOST_ASSERT(selection[select]!=-1);
-				tmp.push_back(haps[selection[select]][s]);
+				if(Missing(rng)<par.missing*1000)
+					tmp.push_back(0);
+				else
+					tmp.push_back(haps[selection[select]][s]);
 			}
 			std::random_shuffle(tmp.begin(),tmp.end());
 			for(int select=0;select<selection.size();select++){
@@ -214,7 +222,7 @@ std::vector<int> GenerateQTLData(std::vector<boost::shared_ptr<short[]> > haps, 
 		throw std::runtime_error("Unable to open output file: "+prefix+"_case.txt");
 	std::vector<int> selection;
 	boost::random::uniform_int_distribution<> HapSelection(0, haps.size() - 1);
-	boost::random::uniform_int_distribution<> Missing(0, 100);
+	boost::random::uniform_int_distribution<> Missing(0, 1000);
 	boost::normal_distribution<> normal(1,10);
 	for(int i=0;i<samplenum;i++){
 		qtlfile<<"qtl"<<i<<" "<<abs(normal(rng))<<" ";
@@ -228,7 +236,7 @@ std::vector<int> GenerateQTLData(std::vector<boost::shared_ptr<short[]> > haps, 
 			std::vector<int> tmp;
 			for(int select=0;select<selection.size();select++){
 				BOOST_ASSERT(selection[select]!=-1);
-				if(Missing(rng)==0)
+				if(Missing(rng)<par.missing*1000)
 					tmp.push_back(0);
 				else
 					tmp.push_back(haps[selection[select]][s]);
