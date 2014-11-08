@@ -854,6 +854,7 @@ void HaplotypeEM::startHaplotypeAnalysis() {
 	//this->sortGenotype();
 //	std::cout<<"generating combination...\n";
 //	this->getCombination();
+if(0 != this->NonmissingCase+this->NonmissingCtrl){
   while (this->phased < this->SnpIdx.size()) {
     if (!this->silent && this->phased % 10 == 0) {
       int per = 100 * (double)this->phased / (double)this->SnpIdx.size();
@@ -873,7 +874,7 @@ void HaplotypeEM::startHaplotypeAnalysis() {
     printf("\rProgress:%d%%\n", 100);
     fflush(stdout);
   }
-
+}
   this->getResults();
 }
 
