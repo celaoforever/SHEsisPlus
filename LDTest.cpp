@@ -21,7 +21,7 @@ LDTest::LDTest(boost::shared_ptr<SHEsisData> data, std::string path)
       path(path),
       bForceSAT(false),
       resD(boost::extents[this->data->getSnpNum()][this->data->getSnpNum()]),
-      resR2(boost::extents[this->data->getSnpNum()][this->data->getSnpNum()]) {
+      resR2(boost::extents[this->data->getSnpNum()][this->data->getSnpNum()]){
   // TODO Auto-generated constructor stub
 }
 
@@ -95,8 +95,52 @@ int getHapIdx(std::vector<boost::shared_ptr<short[]> >& v, int a1, int a2) {
   return -1;
 }
 
+void LDTest::resetMissing()
+{
+	this->Snp1AlleleCount.casecount.clear();
+	this->Snp1AlleleCount.ctrlcount.clear();
+	this->Snp2AlleleCount.casecount.clear();
+	this->Snp2AlleleCount.ctrlcount.clear();
+};
+
+void LDTest::StatAllelesInNonmissingSample(boost::shared_ptr<bool[]> missing, int snp1, int snp2){
+	this->resetMissing();
+	int sampleNum=this->data->getSampleNum();
+	int ploidy=this->data->getNumOfChrSet();
+	for(int iSample=0;iSample<sampleNum;iSample++){
+		if(missing[iSample])
+			continue;
+		for(int p=0;p<ploidy;p++){
+			short curAllele1=this->data->mGenotype[iSample][snp1][p];
+			short curAllele2=this->data->mGenotype[iSample][snp2][p];
+		if(this->data->vQuantitativeTrait.size()>0 || CASE == this->data->vLabel[iSample]){
+				if(this->Snp1AlleleCount.casecount.find(curAllele1) == this->Snp1AlleleCount.casecount.end())
+					this->Snp1AlleleCount.casecount[curAllele1]=1;
+				else
+					this->Snp1AlleleCount.casecount[curAllele1]++;
+				if(this->Snp2AlleleCount.casecount.find(curAllele2) == this->Snp2AlleleCount.casecount.end())
+					this->Snp2AlleleCount.casecount[curAllele2]=1;
+				else
+					this->Snp2AlleleCount.casecount[curAllele2]++;
+		}else if (CONTROL == this->data->vLabel[iSample]){
+				if(this->Snp1AlleleCount.ctrlcount.find(curAllele1) == this->Snp1AlleleCount.ctrlcount.end())
+					this->Snp1AlleleCount.ctrlcount[curAllele1]=1;
+				else
+					this->Snp1AlleleCount.ctrlcount[curAllele1]++;
+				if(this->Snp2AlleleCount.ctrlcount.find(curAllele2) == this->Snp2AlleleCount.ctrlcount.end())
+					this->Snp2AlleleCount.ctrlcount[curAllele2]=1;
+				else
+					this->Snp2AlleleCount.ctrlcount[curAllele2]++;
+			}
+		}
+	}
+
+
+}
+
 void LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type, double& R2, double& D) {
-  D = 0;
+	std::cout<<"site "<<snp1<<"-site"<<snp2<<"\n";
+  D=0;
   R2=0;
   std::vector<short> mask;
   for (int i = 0; i < this->data->getSnpNum(); i++) {
@@ -120,6 +164,9 @@ void LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type, double& R2, double&
 //    this->hp.reset(new Haplotype(this->data, 2, mask));
 //  }
   hp->startHaplotypeAnalysis();
+  boost::shared_ptr<HaplotypeEM> hp_em=boost::dynamic_pointer_cast<HaplotypeEM> (this->hp);
+  if(hp_em)
+	  StatAllelesInNonmissingSample(hp_em->missing,snp1,snp2);
 
   boost::unordered_map<short, double>::iterator iter1;
   boost::unordered_map<short, double>::iterator iter2;
@@ -140,48 +187,57 @@ void LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type, double& R2, double&
 
           hapfreq = i == -1 ? 0 : (double)hp->Results.CaseCount[i] /
                                       (double)(this->data->getNumOfChrSet() *
-                                               this->data->getCaseNum());
+                                               /*this->data->getCaseNum()*/this->hp->NonmissingCase);
           allele = iter1->first;
-          allelefreq1 =
-              (double)data->vLocusInfo[snp1].CaseAlleleCount[allele] /
-              (double)(this->data->getNumOfChrSet() * this->data->getCaseNum());
+          allelefreq1 = hp_em?
+        		  ((double)this->Snp1AlleleCount.casecount[allele]/(double)(this->hp->NonmissingCase*this->data->getNumOfChrSet()))
+        		  :((double)data->vLocusInfo[snp1].CaseAlleleCount[allele] /
+        			(double)(this->data->getNumOfChrSet() * this->data->getCaseCallrate(snp1)*this->data->getCaseNum()));
           allele = iter2->first;
-          allelefreq2 =
-              (double)data->vLocusInfo[snp2].CaseAlleleCount[allele] /
-              (double)(this->data->getNumOfChrSet() * this->data->getCaseNum());
+          allelefreq2 =hp_em?
+        		  ((double)this->Snp2AlleleCount.casecount[allele]/(double)(this->hp->NonmissingCase*this->data->getNumOfChrSet()))
+        		  :((double)data->vLocusInfo[snp2].CaseAlleleCount[allele] /(
+        			(double)(this->data->getNumOfChrSet() * this->data->getCaseCallrate(snp2)*this->data->getCaseNum())));
           break;
+
         case LD_IN_CTRL:
           hapfreq = i == -1 ? 0 : (double)hp->Results.ControlCount[i] /
                                       (double)(this->data->getNumOfChrSet() *
-                                               this->data->getControlNum());
+                                               /*this->data->getControlNum()*/ this->hp->NonmissingCtrl);
           allele = iter1->first;
-          allelefreq1 =
-              (double)data->vLocusInfo[snp1].ControlAlleleCount[allele] /
+          allelefreq1 =hp_em?
+        	 ((double)this->Snp1AlleleCount.ctrlcount[allele]/(double)(this->hp->NonmissingCtrl*this->data->getNumOfChrSet()))
+              :((double)data->vLocusInfo[snp1].ControlAlleleCount[allele] /
               (double)(this->data->getNumOfChrSet() *
-                       this->data->getControlNum());
+                       this->data->getControlCallrate(snp1)*this->data->getControlNum()));
           allele = iter2->first;
-          allelefreq2 =
-              (double)data->vLocusInfo[snp2].ControlAlleleCount[allele] /
-              (double)(this->data->getNumOfChrSet() * this->data->getCaseNum());
+          allelefreq2 =hp_em?
+        	((double)this->Snp2AlleleCount.ctrlcount[allele]/(double)(this->hp->NonmissingCtrl*this->data->getNumOfChrSet()))
+             :((double)data->vLocusInfo[snp2].ControlAlleleCount[allele] /
+              (double)(this->data->getNumOfChrSet() * this->data->getControlCallrate(snp2)*this->data->getControlNum()));
           break;
         case LD_IN_BOTH:
           hapfreq = i == -1 ? 0 : (double)(hp->Results.BothCount[i]) /
                                       (double)(this->data->getNumOfChrSet() *
-                                               this->data->getSampleNum());
+                                               /*this->data->getSampleNum()*/
+                                    		  (this->hp->NonmissingCase+this->hp->NonmissingCtrl));
           allele = iter1->first;
-          allelefreq1 = (double)data->vLocusInfo[snp1].BothAlleleCount[allele] /
+          allelefreq1 =hp_em?(this->Snp1AlleleCount.casecount[allele]+this->Snp1AlleleCount.ctrlcount[allele])/(double)((this->hp->NonmissingCtrl+this->hp->NonmissingCase)*this->data->getNumOfChrSet())
+        		  :((double)data->vLocusInfo[snp1].BothAlleleCount[allele] /
                         (double)(this->data->getNumOfChrSet() *
-                                 this->data->getSampleNum());
+                                 this->data->getCallrate(snp1)*this->data->getSampleNum()));
           allele = iter2->first;
-          allelefreq2 = (double)data->vLocusInfo[snp2].BothAlleleCount[allele] /
+          allelefreq2 = hp_em?(this->Snp2AlleleCount.casecount[allele]+this->Snp2AlleleCount.ctrlcount[allele])/(double)((this->hp->NonmissingCtrl+this->hp->NonmissingCase)*this->data->getNumOfChrSet())
+        		  :(double)data->vLocusInfo[snp2].BothAlleleCount[allele] /
                         (double)(this->data->getNumOfChrSet() *
-                                 this->data->getSampleNum());
+                        		this->data->getCallrate(snp2)*this->data->getSampleNum());
 //          std::cout<<"hapfreq="<<hapfreq<<",a1="<<allelefreq1<<",a2="<<allelefreq2;
           break;
         default:
           std::cout << "***ERROR:no such ld analysis type\n";
           exit(-1);
       };
+      std::cout<<"Nonmissing case="<<this->hp->NonmissingCase<<",Nonmissing ctrl="<<this->hp->NonmissingCtrl<<",allelfreq1="<<allelefreq1<<","<<"allelefreq2="<<allelefreq2<<",hapfreq="<<hapfreq<<"\n";
       d = hapfreq - allelefreq1 * allelefreq2;
       double pq = allelefreq1 * allelefreq2;
       double p1q1 = (1 - allelefreq1) * (1 - allelefreq2);
@@ -189,12 +245,14 @@ void LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type, double& R2, double&
       double q1p = allelefreq2 * (1 - allelefreq1);
       if (d < 0) {
         dmax = pq < p1q1 ? pq : p1q1;
-      } else {
+      } else if (d >0) {
         dmax = p1q < q1p ? p1q : q1p;
       }
-      double absd = ABS(d / dmax);
-      D += allelefreq1 * allelefreq2 * absd;
-      R2+=d*d/(1-allelefreq1)/(1-allelefreq2);
+      if( dmax != 0 ){
+		  double absd = ABS(d / dmax);
+		  D += allelefreq1 * allelefreq2 * absd;
+		  R2+=d*d/(1-allelefreq1)/(1-allelefreq2);
+      }
 //      std::cout<<",d="<<d<<",dmax="<<dmax<<",d/dmax="<<adsd<<",normalizedd="<<normalizedD<<"\n";
     }
   }

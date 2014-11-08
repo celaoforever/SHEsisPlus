@@ -9,7 +9,7 @@
 
 #include <limits>
 #define SINT_MAX INT_MAX
-
+int loopnum=0;
 #undef min
 #undef max
 #define max(a, b) ((a) < (b) ? (b) : (a))
@@ -754,8 +754,11 @@ L300:
   /* Get next PASTP on chain */
   ipn = ifrq[ipn + ikstp2];
   if (ipn > 0) {
+	  loopnum++;
     pastp = stp[ipn + ikstp];
     ifreq = ifrq[ipn + ikstp];
+    if(loopnum>5000)
+    	throw std::runtime_error("Timed out");
     goto L300;
   }
   /* Generate a new daughter node */

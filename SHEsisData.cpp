@@ -23,7 +23,8 @@ SHEsisData::SHEsisData(int SampleNum, int SnpNum, int NumOfChrSet)
       ControlNum(-1),
       codeIdx(1),
       vLabel(SampleNum),
-      vLocusName(SnpNum) {
+      vLocusName(SnpNum),
+      missingalleles(SnpNum){
   for (int i = 0; i < this->vLocusInfo.size(); i++) {
     std::stringstream ss;
     ss << "site" << i + 1;
@@ -124,9 +125,23 @@ int SHEsisData::getCaseNum() {
   return this->CaseNum;
 }
 
+double SHEsisData::getCallrate(int snp){
+	return 1-(double)(this->missingalleles[snp].CaseAlleleNum + this->missingalleles[snp].CtrlAlleleNum)/
+			(this->getSampleNum()*this->getNumOfChrSet());
+//	return 1-(double)(this->missingalleles[snp].CaseAlleleNum)/(double)(this->getSampleNum()*this->getNumOfChrSet());
+}
+
+double SHEsisData::getCaseCallrate(int snp) {
+  return 1-(double)(this->missingalleles[snp].CaseAlleleNum)/(double)(this->getCaseNum()*this->getNumOfChrSet());
+}
+
 int SHEsisData::getControlNum() {
   if (-1 == this->ControlNum) this->getCaseAndControlNum();
   return this->ControlNum;
+}
+
+double SHEsisData::getControlCallrate(int snp) {
+  return 1-(double)(this->missingalleles[snp].CtrlAlleleNum)/(double)(this->getControlNum()*this->getNumOfChrSet());
 }
 
 void SHEsisData::statCount(){
@@ -143,6 +158,7 @@ void SHEsisData::statCount(){
 	        short Cur = this->mGenotype[iSample][iSnp][iChrset];
 	        if (GENOTYPE_MISSING == Cur) {
 	        	this->vLocusInfo[iSnp].AlleleCallrate++;
+	        	this->missingalleles[iSnp].CaseAlleleNum++;// for qtl, using CaseAlleleNum to store the missingness status
 	        	continue;
 	        }
 	        {
@@ -192,6 +208,10 @@ void SHEsisData::statCount(std::vector<SampleStatus>& label) {
         short Cur = this->mGenotype[iSample][iSnp][iChrset];
         if (GENOTYPE_MISSING == Cur) {
         	this->vLocusInfo[iSnp].AlleleCallrate++;
+        	if(CASE == label[iSample])
+        		this->missingalleles[iSnp].CaseAlleleNum++;
+        	else if (CONTROL == label[iSample])
+        		this->missingalleles[iSnp].CtrlAlleleNum++;
         	continue;
         }
         if (CASE == label[iSample]) {

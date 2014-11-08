@@ -121,12 +121,24 @@ void HaplotypeEM::statMissing() {
     	for(int p=0;p<data->getNumOfChrSet();p++){
     		if(0 == this->data->mGenotype[sample][this->SnpIdx[snp]][p] ){
     			this->missing[sample] = true;
+    			if(CASE == this->data->vLabel[sample])
+    				this->NonmissingCase++;
+    			else if(CONTROL == this->data->vLabel[sample])
+    				this->NonmissingCtrl++;
+    			else if(this->data->vQuantitativeTrait.size())
+    				this->NonmissingCase++;
     			break;
     		}
     	}
 		if(this->missing[sample])
 			break;
     }
+  }
+  if(this->data->vQuantitativeTrait.size())
+	  this->NonmissingCase=this->data->getSampleNum()-this->NonmissingCase;
+  else{
+	  this->NonmissingCase=this->data->getCaseNum()-this->NonmissingCase;
+	  this->NonmissingCtrl=this->data->getControlNum()-this->NonmissingCtrl;
   }
 }
 

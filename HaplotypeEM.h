@@ -37,7 +37,7 @@ class HaplotypeEM : public HaplotypeBase {
                    std::vector<short> mask);
   virtual ~HaplotypeEM();
   virtual void startHaplotypeAnalysis();
-
+  boost::shared_ptr<bool[]> missing;
  private:
   void sortGenotype();
   void sortInterMediate();
@@ -63,7 +63,6 @@ class HaplotypeEM : public HaplotypeBase {
   std::vector<int> CurGenotypeCount;
   boost::shared_ptr<int[]> Sample2Genotype;
   std::vector<OneGenotypeExpandedHaplo> Expanded;
-  boost::shared_ptr<bool[]> missing;
   std::vector< std::vector<int> > combination;
   int phased;
   double err;

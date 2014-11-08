@@ -27,9 +27,13 @@ bool HaplotypeBase::IsHaploMissing(int sample){
 }
 singHapQTLRes HaplotypeBase::SingleHaploAssociationTestQTL(int hapIdx){
 	singHapQTLRes res;
+//    double freq = ((double)this->Results.BothCount[hapIdx])/
+//                  ((double)this->data->getSampleNum() *
+//                   (double)this->data->getNumOfChrSet());
     double freq = ((double)this->Results.BothCount[hapIdx])/
-                  ((double)this->data->getSampleNum() *
+                  ((double)(this->NonmissingCase+this->NonmissingCtrl) *
                    (double)this->data->getNumOfChrSet());
+//    std::cout<<"freq="<<freq<<", nonmissing case="<<this->NonmissingCase<<",nonmissing ctrl="<<this->NonmissingCtrl<<"\n";
     if(freq<this->freqthreshold)
     	return res;
 
@@ -140,9 +144,13 @@ void HaplotypeBase::AssociationTestBinary() {
   double* contigency = new double[4];
   // single hapotype statistics
   for (int i = 0; i < haploNum; i++) {
+//    double freq = ((double)this->Results.ControlCount[i] +
+//                   (double)this->Results.CaseCount[i]) /
+//                  ((double)this->data->getSampleNum() *
+//                   (double)this->data->getNumOfChrSet());
     double freq = ((double)this->Results.ControlCount[i] +
                    (double)this->Results.CaseCount[i]) /
-                  ((double)this->data->getSampleNum() *
+                  ((double)(this->NonmissingCase+this->NonmissingCtrl) *
                    (double)this->data->getNumOfChrSet());
     if (freq < this->freqthreshold) continue;
     validHap++;
@@ -313,11 +321,13 @@ std::string HaplotypeBase::reporttxttableBinary(){
 	    }
 	    res<<"\t\t";
 	    double freq=(double)this->Results.CaseCount[i] /
-                ((double)this->data->getCaseNum() *
+//                ((double)this->data->getCaseNum() *
+	    		((double)this->NonmissingCase *
                  (double)this->data->getNumOfChrSet());
 	    res<<this->Results.CaseCount[i]<<"("<<freq<<")\t\t";
 	    freq=(double)this->Results.ControlCount[i] /
-                ((double)this->data->getControlNum() *
+                //((double)this->data->getControlNum() *
+	    		((double)this->NonmissingCtrl*
                  (double)this->data->getNumOfChrSet());
 	    res<<this->Results.ControlCount[i]<<"("<<freq<<")\t\t";
 	    res<<this->Results.singleHap[i].chisquare<<"\t\t";
@@ -367,13 +377,15 @@ std::string HaplotypeBase::reporthtmltableBinary() {
     std::string casefreq, controlfreq;
     casefreq += convert2string((double)this->Results.CaseCount[i]) + "(" +
                 convert2string((double)this->Results.CaseCount[i] /
-                               ((double)this->data->getCaseNum() *
+//                               ((double)this->data->getCaseNum() *
+                				((double)this->NonmissingCase *
                                 (double)this->data->getNumOfChrSet())) +
                 ")";
     data.push_back(casefreq);
     controlfreq += convert2string((double)this->Results.ControlCount[i]) + "(" +
                    convert2string((double)this->Results.ControlCount[i] /
-                                  ((double)this->data->getControlNum() *
+//                                  ((double)this->data->getControlNum() *
+                		   	   	   ((double)this->NonmissingCtrl*
                                    (double)this->data->getNumOfChrSet())) +
                    ")";
     data.push_back(controlfreq);

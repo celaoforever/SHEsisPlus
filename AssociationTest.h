@@ -51,7 +51,6 @@ class AssociationTest {
   void setAdjust(bool b){this->adjust=b;};
   virtual ~AssociationTest();
   void printAssociationTestResults();
-  void report();
   void permutation();
   void association();
   std::string reporthtml();

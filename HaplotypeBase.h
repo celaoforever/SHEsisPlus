@@ -70,13 +70,19 @@ class HaplotypeBase {
         Results(data->getSampleNum(), data->getNumOfChrSet()),
         silent(true),
         freqthreshold(0.03),
-        adjust(false){};
+        adjust(false),
+        NonmissingCase(0),
+        NonmissingCtrl(0)
+  	  	{};
   HaplotypeBase(boost::shared_ptr<SHEsisData> data)
       : data(data),
         Results(data->getSampleNum(), data->getNumOfChrSet()),
         silent(true),
         freqthreshold(0.03),
-        adjust(false){};
+        adjust(false),
+        NonmissingCase(0),
+        NonmissingCtrl(0)
+        {};
   virtual ~HaplotypeBase() {
     this->mask.clear();
     this->SnpIdx.clear();
@@ -96,13 +102,15 @@ class HaplotypeBase {
   std::string reporthtml();
   std::string reporttxt();
   HapTestResult Results;
-
+  int NonmissingCase;
+  int NonmissingCtrl;
  protected:
   void AssociationTestBinary();
   void AssociationTestQTL();
   singHapQTLRes SingleHaploAssociationTestQTL(int hapIdx);
   int getHaploCount(int sample,int hapIdx);
   bool IsHaploMissing(int sample);
+
   std::vector<short> mask;
   std::vector<int> SnpIdx;
   std::string reporthtmltableBinary();
