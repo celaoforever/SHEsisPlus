@@ -139,7 +139,7 @@ void LDTest::StatAllelesInNonmissingSample(boost::shared_ptr<bool[]> missing, in
 }
 
 void LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type, double& R2, double& D) {
-	std::cout<<"site "<<snp1<<"-site"<<snp2<<"\n";
+//	std::cout<<"site "<<snp1<<"-site"<<snp2<<"\n";
   D=0;
   R2=0;
   std::vector<short> mask;
@@ -237,7 +237,7 @@ void LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type, double& R2, double&
           std::cout << "***ERROR:no such ld analysis type\n";
           exit(-1);
       };
-      std::cout<<"Nonmissing case="<<this->hp->NonmissingCase<<",Nonmissing ctrl="<<this->hp->NonmissingCtrl<<",allelfreq1="<<allelefreq1<<","<<"allelefreq2="<<allelefreq2<<",hapfreq="<<hapfreq<<"\n";
+//      std::cout<<"Nonmissing case="<<this->hp->NonmissingCase<<",Nonmissing ctrl="<<this->hp->NonmissingCtrl<<",allelfreq1="<<allelefreq1<<","<<"allelefreq2="<<allelefreq2<<",hapfreq="<<hapfreq<<"\n";
       d = hapfreq - allelefreq1 * allelefreq2;
       double pq = allelefreq1 * allelefreq2;
       double p1q1 = (1 - allelefreq1) * (1 - allelefreq2);
