@@ -519,8 +519,11 @@ void AssociationTest::permutation() {
   std::sort(this->PermutationPAllele.begin(), this->PermutationPAllele.end());
   std::sort(this->PermutationPGenotype.begin(),
             this->PermutationPGenotype.end());
-
+//  for(int i=0;i<this->PermutationPAllele.size();i++){
+//	  std::cout<<this->PermutationPAllele[i]<<",";
+//  }
   this->data->statCount(data->vLabel);
+  std::cout<<"\n";
   this->AssociationTestForAllSnpsAllele();
   if(this->data->getNumOfChrSet()>1)
 	  this->AssociationTestForAllSnpsGenotype();
@@ -534,6 +537,7 @@ void AssociationTest::permutation() {
         (double)getRank(this->vAssocationTestResult[i].GenoTypePearsonP,
                         this->PermutationPGenotype) /
         (double)this->NumOfPermutation:-999;
+//    std::cout<<"allep,genop="<<this->vAssocationTestResult[i].AllelePearsonP<<","<<this->vAssocationTestResult[i].GenoTypePearsonP<<"\n";
   };
 }
 

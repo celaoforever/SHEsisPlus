@@ -98,6 +98,8 @@ void BYCorrection(std::vector<MultiComp>& p, std::vector<double>& adjusted){
 
 int getRank(double p, std::vector<double> v)
 {
+  if(p<v[0])
+	  return 0;
   for (int i = 0; i < v.size() - 1; i++) {
     if (p >= v[i] && p <= v[i + 1]) return i;
   }
