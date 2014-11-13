@@ -133,7 +133,7 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
   CaseChi = 0;
   for (int i = 0; i < NumOfCol * NumOfRow; i = i + 2) {
     //if (contigency[i] <= 1) contigency[i] *= totalGenotype;
-    /**if (contigency[i + 1] <= 1) */contigency[i + 1] *= totalGenotype;
+    if (contigency[i + 1] <= 1) contigency[i + 1] *= totalGenotype;
     if (contigency[i + 1] != 0)
       CaseChi += (contigency[i + 1] - contigency[i]) *
                  (contigency[i + 1] - contigency[i]) / contigency[i + 1];

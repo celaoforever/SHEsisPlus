@@ -85,21 +85,21 @@ static std::string HtmlHeaderServer=
 		<body class=\"metro\">\n\
 		<div class=\"navigation-bar\">\n\
 		  <div class=\"navigation-bar-content container\">\n\
-		    <a class=\"element\" href=\"http://analysis2.bio-x.cn/SHEsisMain.htm\" title=\"Back to SHEsis main page\">\n\
+		    <a class=\"element\" href=\"http://analysis.bio-x.cn/SHEsisMain.htm\" title=\"Back to SHEsis main page\">\n\
 		    <span class=\"icon-home\"></span>\n\
 			SHEsis\n\
 			<sup>2.0</sup>\n\
 		     </a>\n\
 		    <span class=\"element-divider\"></span>\n\
-		    <a class=\"element\">\n\
+		    <a class=\"element\" href=\"Help.html\">\n\
 		      Help\n\
 		    </a>\n\
 		    <span class=\"element-divider\"></span>\n\
-		    <a class=\"element\">\n\
+		    <a class=\"element\" href=\"CiteUs.html\">\n\
 		      Cite Us \n\
 		    </a>   \n\
 		    <span class=\"element-divider\"></span>\n\
-		    <a class=\"element\">\n\
+		    <a class=\"element\" href=\"ContactUs.html\">\n\
 		      Contact Us \n\
 		    </a> \n\
 		    <span class=\"element-divider\"></span>\n\
@@ -216,12 +216,18 @@ class array1D {
 template <typename T>
 std::string convert2string(T v) {
   std::stringstream ss;
-  int tmp = v * 1000;
-  v = (T)tmp / 1000.0;
-  if (v != -999)
-    ss << v;
-  else
-    ss << "NA";
+  if (v == -999)
+	  return "NA";
+  if (v == 0)
+	  return "0";
+  if(v >0.001){
+	  int tmp = v * 1000;
+	  v = (T)tmp / 1000.0;
+	  ss<<v;
+  }else{
+	  ss<<std::setprecision(2)<<std::scientific<<v;
+  }
+
   return ss.str();
 }
 
