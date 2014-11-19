@@ -220,7 +220,7 @@ std::string convert2string(T v) {
 	  return "NA";
   if (v == 0)
 	  return "0";
-  if(v >0.001){
+  if(v >0.001 || v<-0.001){
 	  int tmp = v * 1000;
 	  v = (T)tmp / 1000.0;
 	  ss<<v;
@@ -294,8 +294,12 @@ void PearsonChiSquareTest(T* tab, int row, int col, double& chi, double& p) {
       if (0 == expected) continue;
       chi += (observe - expected) * (observe - expected) / expected;
     }
-  boost::math::chi_squared dist(degreeOfFreedom);
-  p = boost::math::cdf(boost::math::complement(dist, chi));
+  try{
+	  boost::math::chi_squared dist(degreeOfFreedom);
+	  p = boost::math::cdf(boost::math::complement(dist, chi));
+  }catch(...){
+	  p=-999;
+  }
 }
 
 template void PearsonChiSquareTest<double>(double* tab, int row, int col,

@@ -90,6 +90,7 @@ QTLResults QTL::OneLocusQTLAnalysis(int snp,short allele,std::vector<double> qt)
 	res.beta=qt_g_covar/g_var;
 	res.se=sqrt((qt_var/g_var-(qt_g_covar*qt_g_covar)/(g_var*g_var))/((double)ValidSampleNum-2));
 	res.T=res.beta/res.se;
+
 	try{
 		boost::math::students_t dist(ValidSampleNum-2);
 		res.p=2*boost::math::cdf(boost::math::complement(dist,fabs(res.T)));
