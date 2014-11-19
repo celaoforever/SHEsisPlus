@@ -297,7 +297,7 @@ class SHEsisGUI:
 	def ParseArgs(self):
                 os=platform.system()
                 if os =="Windows":
-                        self.argument="SHEsis "
+                        self.argument="SHEsisPlus "
                 elif os == "Darwin" or os == "Linux":
                         self.argument="./SHEsis "
                 else:
@@ -327,8 +327,8 @@ class SHEsisGUI:
                         if self.ctrlpath=="":
                                 self.WriteToFile(self.textbufferCtrl,"ctrl.txt")
                                 self.ctrlpath="ctrl.txt"
-                        self.argument+=" --input-case case.txt"
-                        self.argument+=" --input-ctrl ctrl.txt"
+                        self.argument+=" --input-case "+self.casepath
+                        self.argument+=" --input-ctrl "+self.ctrlpath
                 else:
                         raise Exception("Unknown phenotype")
                 
@@ -389,8 +389,8 @@ class SHEsisGUI:
                         self.SHEsisDialog.destroy()
                 
 	def CreateDialog(self):
-		self.SHEsisDialog=gtk.Dialog("SHEsis",self.window,gtk.DIALOG_DESTROY_WITH_PARENT,None)
-		self.LabelRuntime=gtk.Label(" SHEsis runtime output:")
+		self.SHEsisDialog=gtk.Dialog("SHEsisPlus",self.window,gtk.DIALOG_DESTROY_WITH_PARENT,None)
+		self.LabelRuntime=gtk.Label(" SHEsisPlus runtime output:")
 		self.LabelRuntime.set_alignment(0,0.5)
 		self.LabelRuntime.show()
 		self.SHEsisDialog.vbox.pack_start(self.LabelRuntime,True,True,10)
@@ -416,6 +416,18 @@ class SHEsisGUI:
 		self.TextviewRuntime.show()
 		self.TableRuntime.show()
 		self.SHEsisDialog.show()
+	
+	def About(self,widget,data=None):
+		self.SHEsisAbout=gtk.Dialog("About SHEsisPlus",self.window,gtk.DIALOG_DESTROY_WITH_PARENT,(gtk.STOCK_OK,gtk.RESPONSE_OK))
+		self.LabelAbout=gtk.Label("\n\n\t\t\t\t\t\tSHEsisPlus, by Jiawei Shen\n\n\t\tIf you have any problem, please email to jiawei.shen@outlook.com\t\t \n\n\n")
+		self.SHEsisAbout.set_resizable(False)
+		self.LabelAbout.set_alignment(0,0.5)
+		self.LabelAbout.show()
+		self.SHEsisAbout.vbox.pack_start(self.LabelAbout,True,True,10)
+		r=self.SHEsisAbout.run()
+		if r == gtk.RESPONSE_OK:
+			self.SHEsisAbout.destroy()
+		
 
 	def RunSHEsis(self,widget):
                 gobject.threads_init()
@@ -426,8 +438,6 @@ class SHEsisGUI:
 			print self.argument
                         thr=threading.Thread(target=self.read_output,args=(self.TextviewRuntime,self.textbufferRuntime,self.argument))
                         thr.start()
-		else:
-			print "Error"
 
         def reset(self,widget,data=None):
                 self.textbufferCase.set_text("")
@@ -479,8 +489,8 @@ class SHEsisGUI:
 			("/Edit",None,None,0,"<Branch>"),
 			("/Edit/Reset",None,self.reset,0,None),
                         ("/Help",None,None,0,"<Branch>"),
-                        ("/Help/SHEsis Help",None,None,0,None),
-                        ("/Help/About SHEsis",None,None,0,None),
+                        ("/Help/SHEsisPlus Help",None,None,0,None),
+                        ("/Help/About SHEsisPlus",None,self.About,0,None),
                         )
                 
                 self.AccelGroup=gtk.AccelGroup()
@@ -493,12 +503,15 @@ class SHEsisGUI:
 
 		
 	def __init__(self):
+		self.casepath=""
+		self.ctrlpath=""
+		self.qtlpath=""
                 #create main window
 		self.window=gtk.Window(gtk.WINDOW_TOPLEVEL)
-		self.window.set_title("SHEsis")
+		self.window.set_title("SHEsisPlus")
 		self.window.connect("destroy",self.destroy)
 		self.window.set_border_width(10)
-                self.window.set_title("SHEsis")
+                self.window.set_title("SHEsisPlus")
                 self.window.set_resizable(False)
 		#create vbox
 		self.vBox=gtk.VBox(False,1)
