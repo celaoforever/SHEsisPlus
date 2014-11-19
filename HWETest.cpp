@@ -186,8 +186,8 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
   // Fisher's exact test:
   ControlChi = 0;
   for (int i = 0; i < NumOfCol * NumOfRow; i = i + 2) {
-    if (contigency[i] < 1) contigency[i] *= totalGenotype;
-    if (contigency[i + 1] < 1) contigency[i + 1] *= totalGenotype;
+   // if (contigency[i] < 1) contigency[i] *= totalGenotype;
+    if (contigency[i + 1] <= 1) contigency[i + 1] *= totalGenotype;
     if (contigency[i + 1] != 0)
       ControlChi += (contigency[i + 1] - contigency[i]) *
                     (contigency[i + 1] - contigency[i]) / contigency[i + 1];
@@ -231,8 +231,8 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
   // Fisher's exact test:
   BothChi = 0;
   for (int i = 0; i < NumOfCol * NumOfRow; i = i + 2) {
-    if (contigency[i] < 1) contigency[i] *= totalGenotype;
-    if (contigency[i + 1] < 1) contigency[i + 1] *= totalGenotype;
+    //if (contigency[i] < 1) contigency[i] *= totalGenotype;
+    if (contigency[i + 1] <=1) contigency[i + 1] *= totalGenotype;
     if (contigency[i + 1] != 0)
       BothChi += (contigency[i + 1] - contigency[i]) *
                  (contigency[i + 1] - contigency[i]) / contigency[i + 1];
@@ -321,8 +321,8 @@ void HWETest::SingleSnpHWETestBoth(int iSnp, double& BothChi, double& BothPearso
   // Fisher's exact test:
   BothChi = 0;
   for (int i = 0; i < NumOfCol * NumOfRow; i = i + 2) {
-    if (contigency[i] < 1) contigency[i] *= totalGenotype;
-    if (contigency[i + 1] < 1) contigency[i + 1] *= totalGenotype;
+ //   if (contigency[i] < 1) contigency[i] *= totalGenotype;
+    if (contigency[i + 1] <= 1) contigency[i + 1] *= totalGenotype;
     if (contigency[i + 1] != 0)
     	BothChi += (contigency[i + 1] - contigency[i]) *
                  (contigency[i + 1] - contigency[i]) / contigency[i + 1];
