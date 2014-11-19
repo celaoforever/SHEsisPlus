@@ -18,18 +18,20 @@ app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 bodyParser({strict:false});
-
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.get('/',function(req,res){
-console.log("request /");
 res.redirect("SHEsis.html");
 var ip=req.connection.remoteAddress;
 var time=getDateTimeFormated();
+console.log(ip+" requested / at "+time);
 insertToDB("get",{IP:ip,TIME:time});
 });
 
 app.post('/Results',function(req,res){
-console.log("post Results");
-
+var ip=req.connection.remoteAddress;
+var time=getDateTimeFormated();
+console.log("post Results for "+ip+" at "+time);
 Enqueue(req,res);
 });
 
@@ -41,7 +43,7 @@ done && done();
 });
 
 app.listen(5903);
-console.log("SHEsis web server has started.");
+console.log("SHEsis web server started at "+getDateTimeFormated());
 
 function Enqueue(req,res){
 var JSONARG={};
@@ -50,7 +52,6 @@ JSONARG.TIME=getDateTimeFormated();
 var id=JSONARG.IP+"_"+getDateTime();
 var args=setArgs(req,id,JSONARG);
 insertToDB("post",JSONARG);
-console.log("cmd:bin/SHEsis "+args);
 var job=jobs.create('Run',{arg:args,email:JSONARG.EMAIL,dataset:JSONARG.DATASET});
    job.on('complete',function(){
         var page="tmp/"+job.id+".html";
@@ -264,6 +265,18 @@ var bin=cp.exec(cmd,function(err,stdout,stderr){
 })
 }
 
+function SendInternalEmail(addr,sub,content){
+if(addr=="" || addr == null)
+	return;
+console.log("Sending internal e-mail...");
+
+var cmd= 'echo \''+content.replace(/\'/g,'')+'\' '+ '|mutt -s "'+sub+'" ' +addr+";";
+//console.log(cmd)
+var bin=cp.exec(cmd,function(err,stdout,stderr){
+})
+}
+
+
 function RunSHEsis(args,jobid,email,dataset){
 console.log('bin/SHEsis ',args);
 var bin=cp.exec('bin/SHEsis '+args,{timeout:36000000},function(err,stdout,stderr){
@@ -271,28 +284,19 @@ var arrMatches=stdout.toString().match('ERROR.*');
 
 if(err&&err.killed){
 	    console.log("job",jobid,"timed out");
-    	    shell.exec('echo "'+args+'"| mutt -s "job '+jobid+' timed out" jiawei.shen@outlook.com'); 
+	    var msg="args: "+args;
+	    SendInternalEmail("jiawei.shen@outlook.com","job "+jobid+ " timed out", msg);
 }else if(arrMatches != null && arrMatches.length){
 	    console.log("job",jobid,"failed");
-   	    shell.exec('echo "'+args+" "+arrMatches[0]+'"| mutt -s "job '+jobid+' failed" jiawei.shen@outlook.com');    
-}else if(err){
-            shell.exec('echo "'+args+"\n"+err+'\n"| mutt -s "job '+jobid+' failed, unknwon" jiawei.shen@outlook.com'); 
+	    var msg="args: "+args+"\n"+"msg: "+arrMatches[0];
+	    SendInternalEmail("jiawei.shen@outlook.com","job "+jobid+" failed",msg);
+}else if(err){	    
+	    console.log("job",jobid,"error:",stderr);
+	    var msg="args: "+args+"\n"+"SHEsis msg: "+stderr+"\nNode msg: "+err;
+	    SendInternalEmail("jiawei.shen@outlook.com","job "+jobid+" error",msg); 
 }else
 {
      	SendEmail(email,"http://202.120.31.144:5903/tmp/"+jobid+".html",dataset);   
 }
 })
 }
-
-function RunSHEsisSync(args,jobid){
-    var ret=shell.exec('bin/SHEsis '+args);
-    var err=ret.output.match('ERROR.*');
-    if(ret.code != 0 || (err!=null && err.length>0)){
-	    shell.exec('echo "'+args+'"| mutt -s "job '+jobid+' failed" jiawei.shen@outlook.com'); 
-	    return -1;
-    }
-    console.log("finished");
-    return 0;
-}
-
-
