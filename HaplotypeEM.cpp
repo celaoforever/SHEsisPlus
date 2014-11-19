@@ -803,6 +803,14 @@ void HaplotypeEM::getResults() {
     	this->Results.genotypes[sample][ploidy] = hm[p.str()];
     }
   };
+//  for(int i=0;i<this->data->getSampleNum();i++){
+//	  	 std::cout<<"sample"<<i;
+//	  for(int j=0;j<this->data->getNumOfChrSet();j++){
+//		  std::cout<<" "<<this->Results.genotypes[i][j];
+//	  }
+//	  std::cout<<"\n";
+//  }
+
 
   int haploNum = hm.size();
   this->Results.CaseCount.reset(new int[haploNum]);
