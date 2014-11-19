@@ -89,7 +89,9 @@ class SHEsisData {
   double getCallrate(int snp);
   std::string getStrFromSortedGenotype(std::vector<short> v);
   std::string getallele(short a) {
-    return code2allele[a];
+	  if(code2allele.find(a) != code2allele.end())
+		  return code2allele[a];
+	  return "NA";
   };
   std::string getOriginGenotype(std::string geno);
 
