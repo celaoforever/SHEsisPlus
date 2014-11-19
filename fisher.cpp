@@ -173,7 +173,9 @@ void fexact(int* nrow, int* ncol, double* table, int* ldtabl, double* expect,
   int i3a, i3b, i3c, i9a, iwkmax, iwkpt;
 
   /* Workspace Allocation (freed at end) */
+
   double* equiv;
+  try{
   iwkmax = 2 * (int)(*workspace / 2);
   //    equiv = (double *) R_alloc(iwkmax / 2, sizeof(double));
   equiv = (double*)calloc(iwkmax / 2, sizeof(double));
@@ -284,7 +286,10 @@ prterr(0, "Can not allocate specified workspace");
          iwrk + i3c, iwrk + i4, &ldkey, iwrk + i5, dwrk + i6, &ldstp, iwrk + i7,
          dwrk + i8, dwrk + i9, dwrk + i9a, iwrk + i10, iwrk + iiwk,
          dwrk + irwk);
-
+  }catch(...){
+	  free(equiv);
+	  throw std::runtime_error("error in fexact test");
+  }
 L_End:
   /* Free(equiv); */
   free(equiv);
