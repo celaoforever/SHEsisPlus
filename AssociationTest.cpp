@@ -528,9 +528,9 @@ void AssociationTest::permutation() {
 //  }
   this->data->statCount(data->vLabel);
   std::cout<<"\n";
-  this->AssociationTestForAllSnpsAllele();
+  this->AssociationTestForAllSnpsAllele(false);
   if(this->data->getNumOfChrSet()>1)
-	  this->AssociationTestForAllSnpsGenotype();
+	  this->AssociationTestForAllSnpsGenotype(false);
   for (int i = 0; i < this->vAssocationTestResult.size(); i++) {
     this->vAssocationTestResult[i].AllelePermutationP =this->vAssocationTestResult[i].AllelePearsonP>0?
         (double)getRank(this->vAssocationTestResult[i].AllelePearsonP,
