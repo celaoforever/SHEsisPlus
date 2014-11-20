@@ -57,6 +57,7 @@ The format for quantitative trait data is similar to that for case/control data 
 ##Arguments
 
 ###Allowed options:
+<pre>
   --help                produce help message
   --input arg           path for the input file containing both cases and 
                         controls, can be specified for multiple times
@@ -91,7 +92,7 @@ The format for quantitative trait data is similar to that for case/control data 
                         controls
   --adjust              adjust p-value for multiple testing
   --webserver           Internal use for webserver
-
+</pre>
 ###example
 
 ./SHEsisPlus --input-case case.txt --input-ctrl ctrl-txt --snp-line "rs1,rs2,rs3" --output out --ploidy 2 --hwe --assoc --permutation 1000 --haplo-EM --mask "1,1,0" --ld-in-case --adjust
