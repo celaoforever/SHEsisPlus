@@ -1,7 +1,7 @@
 SHEsisPlus
 ======
 ##Introduction
-SHEsisPlus is a open source software package for analysis of genetic association, Hardy-weinberg equilibrium, linkage disequilibrium and haplotype construction at multiallelic polymorphism loci, compatible for both diploid and polyploid species. The web-based version can be accessed via [SHEsisPlus](http://shesisplus.bio-x.cn/).
+SHEsisPlus is a open source software package for analysis of genetic association, Hardy-weinberg equilibrium, linkage disequilibrium and haplotype construction at multiallelic polymorphism loci, compatible for both diploid and polyploid species. The web-based version can be accessed via [SHEsisPlus web version](http://shesisplus.bio-x.cn/).
 
 ##What's new
 Compared to previous version of [SHEsis](http://analysis.bio-x.cn/myAnalysis.php), SHEsisPlus is compatitable for haploid, diploid and polyploid species. It can not only analyze case/control data, but also quantitative trait data. It provides various ways of P value adjustments, including Holm step-down, Sidak single-step, Sidak step-down, FDR and permutation tests. All these can be can be performed via the webui.  
@@ -55,4 +55,53 @@ The above shown is sample data for diploid and tripolid species. For diploid spe
 The format for quantitative trait data is similar to that for case/control data except that the second column is the quantitative trait. The quantitative trait should be numeric. 
 
 ##Arguments
+
+###Allowed options:
+  --help                produce help message
+  --input arg           path for the input file containing both cases and 
+                        controls, can be specified for multiple times
+  --input-case arg      path for the input file containing cases, can be 
+                        specified for multiple times
+  --input-ctrl arg      path for the input file containing controls, can be 
+                        specified for multiple times
+  --snpname-file arg    path for file that contains names of snps
+  --snpname-line arg    snp names are as arguments
+  --output arg          prefix of output files
+  --report-txt          report results in plain-text format. By default, 
+                        results will be reported in html.
+  --ploidy arg          number of ploidy
+  --hwe                 perform Hardy-Weinberg disequilibrium test
+  --assoc               perform association test, case/control analysis by 
+                        default. To perform quantitative trait loci analysis, 
+                        please specified together with --qtl.
+  --qtl                 input phenotype is quantitative traits. input file 
+                        should be specified with --input, the second column of 
+                        the input file is the quantitative trait
+  --permutation arg     times for permutation
+  --haplo-EM            perform haplotype analysis using expectation 
+                        maximization algorithm
+  --haplo-SAT           perform haplotype analysis using SAT-based algorithm
+  --mask arg            mask of snps for haplotype analysis, comma delimited. 
+                        eg. mask=1,0,1 to use 1st and 3rd SNPs when there are 3
+                        SNPs in all.
+  --lft arg             lowest frequency threshold for haplotype analysis
+  --ld-in-case          perform Linkage disequilibrium test in cases
+  --ld-in-ctrl          perform Linkage disequilibrium test in controls
+  --ld                  perform Linkage disequilibrium test in both cases and 
+                        controls
+  --adjust              adjust p-value for multiple testing
+  --webserver           Internal use for webserver
+
+###example
+
+./SHEsisPlus --input-case case.txt --input-ctrl ctrl-txt --snp-line "rs1,rs2,rs3" --output out --ploidy 2 --hwe --assoc --permutation 1000 --haplo-EM --mask "1,1,0" --ld-in-case --adjust
+./SHEsisPlus --input qtl.txt --qtl --ploidy 3 --hwe --assoc --ld --haplo-SAT --lft 0.01 --permutation 10000
+
+##Interpret output
+
+###Binary phenotype
+
+####Association test
+<img src="http://shesisplus.bio-x.cn/images/help-assoc-binary.PNG" >
+
 
