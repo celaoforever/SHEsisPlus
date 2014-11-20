@@ -145,6 +145,11 @@ double SHEsisData::getControlCallrate(int snp) {
 }
 
 void SHEsisData::statCount(){
+	for (int iSnp = 0; iSnp < this->SnpNum; iSnp++) {
+		this->missingalleles[iSnp].CaseAlleleNum=0;
+		this->missingalleles[iSnp].CtrlAlleleNum=0;
+		this->vLocusInfo[iSnp].AlleleCallrate=0;
+	}
 	  this->vLocusInfo.clear();
 	  this->vLocusInfo.resize(SnpNum);
 	  std::vector<short> geno;
@@ -195,6 +200,11 @@ void SHEsisData::statCount(){
 }
 
 void SHEsisData::statCount(std::vector<SampleStatus>& label) {
+	for (int iSnp = 0; iSnp < this->SnpNum; iSnp++) {
+		this->missingalleles[iSnp].CaseAlleleNum=0;
+		this->missingalleles[iSnp].CtrlAlleleNum=0;
+		this->vLocusInfo[iSnp].AlleleCallrate=0;
+	}
   this->vLocusInfo.clear();
   this->vLocusInfo.resize(SnpNum);
   std::vector<short> geno;

@@ -144,10 +144,6 @@ void HaplotypeBase::AssociationTestBinary() {
   double* contigency = new double[4];
   // single hapotype statistics
   for (int i = 0; i < haploNum; i++) {
-//    double freq = ((double)this->Results.ControlCount[i] +
-//                   (double)this->Results.CaseCount[i]) /
-//                  ((double)this->data->getSampleNum() *
-//                   (double)this->data->getNumOfChrSet());
     double freq = ((double)this->Results.ControlCount[i] +
                    (double)this->Results.CaseCount[i]) /
                   ((double)(this->NonmissingCase+this->NonmissingCtrl) *
@@ -192,12 +188,14 @@ void HaplotypeBase::AssociationTestBinary() {
   if (validHap == 0) return;
   contigency = new double[2 * validHap];
   int idx = 0;
+  int HapCount=0;
   for (int i = 0; i < haploNum; i++) {
-    double freq = ((double)this->Results.ControlCount[i] +
-                   (double)this->Results.CaseCount[i]) /
-                  ((double)this->data->getSampleNum() *
-                   (double)this->data->getNumOfChrSet());
+	    double freq = ((double)this->Results.ControlCount[i] +
+	                   (double)this->Results.CaseCount[i]) /
+	                  ((double)(this->NonmissingCase+this->NonmissingCtrl) *
+	                   (double)this->data->getNumOfChrSet());
     if (freq < this->freqthreshold) continue;
+    HapCount++;
     contigency[idx++] = this->Results.ControlCount[i];
     contigency[idx++] = this->Results.CaseCount[i];
   };
@@ -390,8 +388,8 @@ std::string HaplotypeBase::reporthtmltableBinary() {
                    ")";
     data.push_back(controlfreq);
     data.push_back(convert2string(this->Results.singleHap[i].chisquare));
-    data.push_back(convert2string(this->Results.singleHap[i].pearsonp));
     data.push_back(convert2string(this->Results.singleHap[i].fisherp));
+    data.push_back(convert2string(this->Results.singleHap[i].pearsonp));
 
     std::string OR;
     OR += convert2string(this->Results.singleHap[i].OR) + " [" +
