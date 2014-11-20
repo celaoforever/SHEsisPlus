@@ -96,6 +96,7 @@ The format for quantitative trait data is similar to that for case/control data 
 ###example
 
 ./SHEsisPlus --input-case case.txt --input-ctrl ctrl-txt --snp-line "rs1,rs2,rs3" --output out --ploidy 2 --hwe --assoc --permutation 1000 --haplo-EM --mask "1,1,0" --ld-in-case --adjust
+
 ./SHEsisPlus --input qtl.txt --qtl --ploidy 3 --hwe --assoc --ld --haplo-SAT --lft 0.01 --permutation 10000
 
 ##Interpret output
@@ -104,5 +105,55 @@ The format for quantitative trait data is similar to that for case/control data 
 
 ####Association test
 <img src="http://shesisplus.bio-x.cn/images/help-assoc-binary.PNG" >
+
+This is an exmple of output for case/control association analysis. The fileds are:
+
+<table>
+<tbody>
+<tr>
+<th>Header</th>
+<th>Explanation</th>
+</tr>
+<tr>
+<td>SNP</td><td>Names of SNPs. Your can specify the them in the textfiled <i>Marker names</i>. If you don't provide them, or your input is invalid, SNP names will default to site1, site2, site3 ...</td>
+</tr>
+<tr>
+<td>Call rate</td><td>The percentage of individuals with nonmissing genotypes</td>
+</tr>
+<tr>
+<td>Chi<sup>2</sup></td><td>χ<sup>2</sup> in Pearson's Chi square test</td>
+</tr>
+<tr>
+<td>Pearson's p</td><td>p value calculated from Pearson's Chi square test</td>
+</tr>
+<tr>
+<td>Fisher's p</td><td>p value calculated from Fisher's exact test</td>
+</tr>
+<tr>
+<td>Permutation p</td><td>p value acquired from permutation test</td>
+</tr>
+<tr>
+<td>OR [95% CI]</td><td>Odds ratio [95% confident interval]. Please note that this value is only presented when a site has two allele types.</td>
+</tr>
+<tr>
+<td>Holm</td><td>Holm (1979) step-down adjusted p-values for strong control of the family-wise Type I error rate (FWER)</td>
+</tr>
+<tr>
+<td>SidakSS</td><td>Sidak single-step adjusted p-values for strong control of the family-wise Type I error rate (FWER)</td>
+</tr>
+<tr>
+<td>SidakSD</td><td>Sidak step-down adjusted p-values for strong control of the family-wise Type I error rate (FWER)</td>
+</tr>
+<tr>
+<td>FDR_BH</td><td>adjusted p-values for the Benjamini & Hochberg (1995) step-up FDR controlling procedure</td>
+</tr>
+<tr>
+<td>FDR_BY</td><td>adjusted p-values for the Benjamini & Yekutieli (2001) step-up FDR controlling procedure</td>
+</tr>
+<tr>
+<td>Detail</td><td>The counts and frequencies of a specific genotype or alleles</td>
+</tr>
+</tbody>
+</table>
 
 
