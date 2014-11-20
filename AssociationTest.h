@@ -64,11 +64,11 @@ class AssociationTest {
   bool adjust;
   void SingleSnpTestAllele(int iSnp, double& FisherP, double& PearsonP,
                            double& ChiSquare, double& oddsRatio,
-                           double& ORLowLimit, double& ORUpLimit);
+                           double& ORLowLimit, double& ORUpLimit,bool);
   void SingleSnpTestGenotype(int iSnp, double& FisherP, double& PearsonP,
-                             double& ChiSquare);
-  void AssociationTestForAllSnpsAllele();
-  void AssociationTestForAllSnpsGenotype();
+                             double& ChiSquare,bool);
+  void AssociationTestForAllSnpsAllele(bool);
+  void AssociationTestForAllSnpsGenotype(bool);
   std::string reporthtmlAllele();
   std::string reporthtmlGenotype();
 };

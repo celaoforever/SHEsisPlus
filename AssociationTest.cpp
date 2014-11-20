@@ -384,12 +384,12 @@ void AssociationTest::association() {
 		this->data->statCount();
 	else if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()==0)
 		this->data->statCount(this->data->vLabel);
-  this->AssociationTestForAllSnpsAllele();
+  this->AssociationTestForAllSnpsAllele(false);
   if(this->data->getNumOfChrSet()>1)
-	  this->AssociationTestForAllSnpsGenotype();
+	  this->AssociationTestForAllSnpsGenotype(false);
 }
 
-void AssociationTest::AssociationTestForAllSnpsAllele() {
+void AssociationTest::AssociationTestForAllSnpsAllele(bool bPermutating=false) {
   for (int i = 0; i < this->vAssocationTestResult.size(); i++) {
     this->SingleSnpTestAllele(
         i, this->vAssocationTestResult[i].AlleleFisherP,
@@ -397,9 +397,11 @@ void AssociationTest::AssociationTestForAllSnpsAllele() {
         this->vAssocationTestResult[i].AlleleChiSquare,
         this->vAssocationTestResult[i].AlleleOddsRatio,
         this->vAssocationTestResult[i].AlleleOddsRatioLowLimit,
-        this->vAssocationTestResult[i].AlleleOddsRatioUpLimit);
+        this->vAssocationTestResult[i].AlleleOddsRatioUpLimit,bPermutating);
   }
   //adjust p
+  if(bPermutating)
+	  return;
    if(this->adjust){
  	  std::vector<MultiComp> originp;
  	  std::vector<double> adjusted;
@@ -433,14 +435,16 @@ void AssociationTest::AssociationTestForAllSnpsAllele() {
    }
 }
 
-void AssociationTest::AssociationTestForAllSnpsGenotype() {
+void AssociationTest::AssociationTestForAllSnpsGenotype(bool bPermutating=false) {
   for (int i = 0; i < this->vAssocationTestResult.size(); i++) {
     this->SingleSnpTestGenotype(
         i, this->vAssocationTestResult[i].GenotypeFisherP,
         this->vAssocationTestResult[i].GenoTypePearsonP,
-        this->vAssocationTestResult[i].GenotypeChiSquare);
+        this->vAssocationTestResult[i].GenotypeChiSquare,bPermutating);
   }
   //adjust p
+  if(bPermutating)
+	  return;
    if(this->adjust){
  	  //allele
  	  std::vector<MultiComp> originp;
@@ -506,9 +510,9 @@ void AssociationTest::permutation() {
     std::random_shuffle(this->vPermutateLabel.begin(),
                         this->vPermutateLabel.end());
     this->data->statCount(this->vPermutateLabel);
-    this->AssociationTestForAllSnpsAllele();
+    this->AssociationTestForAllSnpsAllele(true);
     if(this->data->getNumOfChrSet()>1)
-    	this->AssociationTestForAllSnpsGenotype();
+    	this->AssociationTestForAllSnpsGenotype(true);
     double ap, gp;
     getTheSmallestP(this->vAssocationTestResult, ap, gp);
     this->PermutationPAllele.push_back(ap);
@@ -565,7 +569,7 @@ void AssociationTest::printAssociationTestResults() {
 void AssociationTest::SingleSnpTestAllele(int iSnp, double& FisherP,
                                           double& PearsonP, double& ChiSquare,
                                           double& oddsRatio, double& ORLowLimit,
-                                          double& ORUpLimit) {
+                                          double& ORUpLimit,bool bPermutating=false) {
 
   BOOST_ASSERT(this->data->vLocusInfo[iSnp].CaseAlleleCount.size() ==
                this->data->vLocusInfo[iSnp].ControlAlleleCount.size());
@@ -586,43 +590,45 @@ void AssociationTest::SingleSnpTestAllele(int iSnp, double& FisherP,
     contigency[idx++] = map_it->second;
   };
 
-  // Fisher's exact test:
-  double expect = -1.0;
-  double percnt = 100.0;
-  double emin = 0;
-  double pre = 0, prt = 0;
-  int ws = 300000;
-  try{
-  fexact(&NumOfPhenotype, &NumOfAlleleType, contigency, &NumOfPhenotype,
-         &expect, &percnt, &emin, &prt, &pre, &ws);
-  FisherP = pre;
-  }catch(std::runtime_error&){
-	  FisherP=-999;
-  }
-
 
   // Pearson's ChiSquare test
   PearsonChiSquareTest(contigency, NumOfPhenotype, NumOfAlleleType, ChiSquare,
                        PearsonP);
 
-  // get odds ratio
-  if ((2 == NumOfAlleleType) && (0 != contigency[3] && 0 != contigency[0] &&
-                                 0 != contigency[1] && 0 != contigency[2])) {
-    oddsRatio =
-        (contigency[1] * contigency[2] / (contigency[0] * contigency[3]));
-    //output by maf
-    map_it=this->data->vLocusInfo[iSnp].ControlAlleleCount.begin();
-    double ctrlfreq=map_it->second/(double)this->data->getControlNum()/(double)this->data->getNumOfChrSet();
-    oddsRatio= ctrlfreq>0.5?1/oddsRatio:oddsRatio;
-    double v = 1 / contigency[1] + 1 / contigency[2] + 1 / contigency[3] +
-               1 / contigency[0];
+  if(!bPermutating){
+	  // Fisher's exact test:
+	  double expect = -1.0;
+	  double percnt = 100.0;
+	  double emin = 0;
+	  double pre = 0, prt = 0;
+	  int ws = 300000;
+	  try{
+	  fexact(&NumOfPhenotype, &NumOfAlleleType, contigency, &NumOfPhenotype,
+			 &expect, &percnt, &emin, &prt, &pre, &ws);
+	  FisherP = pre;
+	  }catch(std::runtime_error&){
+		  FisherP=-999;
+	  }
 
-    ORLowLimit = oddsRatio * exp(-1.96 * sqrt(v));
-    ORUpLimit = oddsRatio * exp(1.96 * sqrt(v));
-  } else {
-    oddsRatio = -999;
-    ORLowLimit = -999;
-    ORUpLimit = -999;
+	  // get odds ratio
+	  if ((2 == NumOfAlleleType) && (0 != contigency[3] && 0 != contigency[0] &&
+									 0 != contigency[1] && 0 != contigency[2])) {
+		oddsRatio =
+			(contigency[1] * contigency[2] / (contigency[0] * contigency[3]));
+		//output by maf
+		map_it=this->data->vLocusInfo[iSnp].ControlAlleleCount.begin();
+		double ctrlfreq=map_it->second/(double)this->data->getControlNum()/(double)this->data->getNumOfChrSet();
+		oddsRatio= ctrlfreq>0.5?1/oddsRatio:oddsRatio;
+		double v = 1 / contigency[1] + 1 / contigency[2] + 1 / contigency[3] +
+				   1 / contigency[0];
+
+		ORLowLimit = oddsRatio * exp(-1.96 * sqrt(v));
+		ORUpLimit = oddsRatio * exp(1.96 * sqrt(v));
+	  } else {
+		oddsRatio = -999;
+		ORLowLimit = -999;
+		ORUpLimit = -999;
+	  }
   }
   delete[] contigency;
   contigency = 0;
@@ -631,7 +637,7 @@ void AssociationTest::SingleSnpTestAllele(int iSnp, double& FisherP,
 
 void AssociationTest::SingleSnpTestGenotype(int iSnp, double& FisherP,
                                             double& PearsonP,
-                                            double& ChiSquare) {
+                                            double& ChiSquare,bool bPermutating=false) {
 
   BOOST_ASSERT(this->data->vLocusInfo[iSnp].CaseGenotypeCount.size() ==
                this->data->vLocusInfo[iSnp].ControlGenotypeCount.size());
@@ -653,22 +659,22 @@ void AssociationTest::SingleSnpTestGenotype(int iSnp, double& FisherP,
         this->data->vLocusInfo[iSnp].ControlGenotypeCount[map_it->first];
     contigency[idx++] = map_it->second;
   };
-
-  // Fisher's exact test:
-  double expect = -1.0;
-  double percnt = 100.0;
-  double emin = 0;
-  double pre = 0, prt = 0;
-  int ws = 300000;
-  try {
-    fexact(&NumOfPhenotype, &NumOfAlleleType, contigency, &NumOfPhenotype,
-           &expect, &percnt, &emin, &prt, &pre, &ws);
-    FisherP = pre;
+  if(!bPermutating){
+	  // Fisher's exact test:
+	  double expect = -1.0;
+	  double percnt = 100.0;
+	  double emin = 0;
+	  double pre = 0, prt = 0;
+	  int ws = 300000;
+	  try {
+		fexact(&NumOfPhenotype, &NumOfAlleleType, contigency, &NumOfPhenotype,
+			   &expect, &percnt, &emin, &prt, &pre, &ws);
+		FisherP = pre;
+	  }
+	  catch (std::runtime_error&) {
+		FisherP = -999;
+	  }
   }
-  catch (std::runtime_error&) {
-    FisherP = -999;
-  }
-
   // Pearson's ChiSquare test
   PearsonChiSquareTest(contigency, NumOfPhenotype, NumOfAlleleType, ChiSquare,
                        PearsonP);
