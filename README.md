@@ -156,4 +156,91 @@ This is an exmple of output for case/control association analysis. The fileds ar
 </tbody>
 </table>
 
+####Hardy-weinberg equilibrium test
+<img src="http://shesisplus.bio-x.cn/images/help-hwe-binary.PNG">
+
+The output is straightforward. Hardy-weinberg equilibrium is calculated in cases, in controls, and in both cases and controls. Both Pearson's chi square test and Fisher's exact test are performed. 
+
+####Haplotype analysis
+<img src="http://shesisplus.bio-x.cn/images/help-hap-binary.PNG">
+
+ In this example, haplotypes with frequency <0.03 are discarded. 0.03 is the default value. You can change this value by option --lft. The fields in the table are also easy to understand. Apart from association test for every single haplotype, a global result is also given. This result shows if the haplotype distribution is different between cases and controls.
+
+####Linkage disequilibrium analysis
+
+<img src="http://shesisplus.bio-x.cn/images/help_binary_D.jpg">
+<img src="http://shesisplus.bio-x.cn/images/help_binary_R2.jpg">
+
+For linkage disequilibrium analysis, pair-wise D' and R<sup>2</sup> are calculated. The higher two loci are in linkage disequilibrium, the darker the color will be. 
+
+###Quantitative trait
+
+####Association test
+
+<img src="http://shesisplus.bio-x.cn/images/help-assoc-qtl.PNG">
+
+This is an exmple of output for case/control association analysis. The fileds are: 
+
+<table>
+<tbody>
+<tr >
+<th>Header</th><th>Explanation</th>
+</tr>
+<tr>
+<td>SNP</td><td>Names of SNPs. Your can specify the them in the textfiled <i>Marker names</i>. If you don't provide them, or your input is invalid, SNP names will default to site1, site2, site3 ...</td>
+</tr>
+<tr>
+<td>Effect allele</td><td>Contributing allele. For biallelic species, the effect allele is the minor allele. For multiallelic species, the effect allele is the allele that gives the lowest p value.</td>
+</tr>
+<tr>
+<td>Nonmissing</td><td>Number of non-missing individuals included in analysis</td>
+</tr>
+<tr>
+<td>Beta</td><td>Regression coefficient</td>
+</tr>
+<tr>
+<td>SE</td><td>Standard error</td>
+</tr>
+<tr>
+<td>R<sup>2</sup></td><td>Regression r-squared</td>
+</tr>
+<tr>
+<td>T</td><td>Wald test (based on t-distribtion)</td>
+</tr>
+<tr>
+<td>p</td><td>Wald test asymptotic p-value</td>
+</tr>
+<tr>
+<td>permutation p</td><td>p value acquired from permutation test</td>
+</tr>
+</tbody>
+</table>
+
+The following fields have been described before. 
+
+####Hardy-weinberg equilibrium test
+
+<img src="http://shesisplus.bio-x.cn/images/help-hwe-qtl.PNG">
+
+For quantative trait, Hardy-weinberg equilibrium test in all samples are carried out. 
+
+####Haplotype analysis
+
+<img src="http://shesisplus.bio-x.cn/images/help-hap-qtl.PNG">
+
+For quantitative trait, linkage disequilibirum is calculated in all samples. The results are similar to that of case/control data.
+
+##References:
+
+[1] Neigenfind J1, Gyetvai G, Basekow R, Diehl S, Achenbach U, Gebhardt C, Selbig J, Kersten B.Haplotype inference from unphased SNP data in heterozygous polyploids based on SAT. <i>BMC Genomics</i> 2008 Jul 30;9:356. doi: 10.1186/1471-2164-9-356.
+
+[2] Purcell S1, Neale B, Todd-Brown K, Thomas L, Ferreira MA, Bender D, Maller J, Sklar P, de Bakker PI, Daly MJ, Sham PC.PLINK: a tool set for whole-genome association and population-based linkage analyses.<i> Am J Hum Genet</i> 2007 Sep;81(3):559-75. Epub 2007 Jul 25.
+
+[3] Hedrick PW. Gametic disequilibrium measures: proceed with caution. <i>Genetics</i> 1987 Oct;117(2):331-41.
+
+
+
+
+
+
 
