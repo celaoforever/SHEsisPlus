@@ -77,10 +77,12 @@ void Haplotype::startHaplotypeAnalysis() {
 }
 
 void Haplotype::statOccurence() {
-	if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()>0)
-		this->data->statCount();
-	else if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()==0)
-		this->data->statCount(this->data->vLabel);
+  if (this->data->vLocusInfo[0].BothAlleleCount.size() == 0 &&
+      this->data->vQuantitativeTrait.size() > 0)
+    this->data->statCount();
+  else if (this->data->vLocusInfo[0].BothAlleleCount.size() == 0 &&
+           this->data->vQuantitativeTrait.size() == 0)
+    this->data->statCount(this->data->vLabel);
 
   for (int iSample = 0; iSample < data->getSampleNum(); iSample++) {
     for (int iSnp = 0; iSnp < data->getSnpNum(); iSnp++) {
@@ -102,10 +104,12 @@ void Haplotype::statOccurence() {
 }
 
 void Haplotype::statOccurenceMask() {
-	if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()>0)
-		this->data->statCount();
-	else if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()==0)
-		this->data->statCount(this->data->vLabel);
+  if (this->data->vLocusInfo[0].BothAlleleCount.size() == 0 &&
+      this->data->vQuantitativeTrait.size() > 0)
+    this->data->statCount();
+  else if (this->data->vLocusInfo[0].BothAlleleCount.size() == 0 &&
+           this->data->vQuantitativeTrait.size() == 0)
+    this->data->statCount(this->data->vLabel);
   int subiSnp;
   for (int iSample = 0; iSample < data->getSampleNum(); iSample++) {
     subiSnp = 0;
@@ -165,10 +169,9 @@ void Haplotype::parseSolution(int assumed_haplotypes) {
     int var = boost::lexical_cast<int>(strs[i].c_str());
     BOOST_ASSERT(0 != var);
     int index = variables->enumeration[ABS(var)];
-//    std::cout<<"index="<<index<<",parities[0]="<<parities[0]<<"\n";
-//    BOOST_ASSERT(index <= parities[0]);
-    if(index <= parities[0])
-    	parities[index - 1] = var;
+    //    std::cout<<"index="<<index<<",parities[0]="<<parities[0]<<"\n";
+    //    BOOST_ASSERT(index <= parities[0]);
+    if (index <= parities[0]) parities[index - 1] = var;
   }
   variables->setParities(parities);
 
@@ -229,16 +232,16 @@ void Haplotype::parseSolution(int assumed_haplotypes) {
   for (int i = 0; i < this->data->getSampleNum(); i++) {
     for (int k = 0; k < this->data->getNumOfChrSet(); k++) {
       int idx = Results.genotypes[i][k];
-      if(this->data->vQuantitativeTrait.size() == 0){
-		  if (CASE == this->data->vLabel[i]) {
-			this->Results.CaseCount[idx]++;
-			this->Results.BothCount[idx]++;
-		  } else if (CONTROL == this->data->vLabel[i]) {
-			this->Results.ControlCount[idx]++;
-			this->Results.BothCount[idx]++;
-		  }
-      }else{
-    	  this->Results.BothCount[idx]++;
+      if (this->data->vQuantitativeTrait.size() == 0) {
+        if (CASE == this->data->vLabel[i]) {
+          this->Results.CaseCount[idx]++;
+          this->Results.BothCount[idx]++;
+        } else if (CONTROL == this->data->vLabel[i]) {
+          this->Results.ControlCount[idx]++;
+          this->Results.BothCount[idx]++;
+        }
+      } else {
+        this->Results.BothCount[idx]++;
       }
     }
   }

@@ -132,13 +132,13 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
   // Fisher's exact test:
   CaseChi = 0;
   for (int i = 0; i < NumOfCol * NumOfRow; i = i + 2) {
-    //if (contigency[i] <= 1) contigency[i] *= totalGenotype;
+    // if (contigency[i] <= 1) contigency[i] *= totalGenotype;
     if (contigency[i + 1] <= 1) contigency[i + 1] *= totalGenotype;
     if (contigency[i + 1] != 0)
       CaseChi += (contigency[i + 1] - contigency[i]) *
                  (contigency[i + 1] - contigency[i]) / contigency[i + 1];
   }
-  boost::math::chi_squared dist(NumOfCol<1?1:NumOfCol);
+  boost::math::chi_squared dist(NumOfCol < 1 ? 1 : NumOfCol);
   CasePearsonP = boost::math::cdf(boost::math::complement(dist, CaseChi));
 
   double expect = -1.0;
@@ -186,7 +186,7 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
   // Fisher's exact test:
   ControlChi = 0;
   for (int i = 0; i < NumOfCol * NumOfRow; i = i + 2) {
-   // if (contigency[i] < 1) contigency[i] *= totalGenotype;
+    // if (contigency[i] < 1) contigency[i] *= totalGenotype;
     if (contigency[i + 1] <= 1) contigency[i + 1] *= totalGenotype;
     if (contigency[i + 1] != 0)
       ControlChi += (contigency[i + 1] - contigency[i]) *
@@ -231,8 +231,8 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
   // Fisher's exact test:
   BothChi = 0;
   for (int i = 0; i < NumOfCol * NumOfRow; i = i + 2) {
-    //if (contigency[i] < 1) contigency[i] *= totalGenotype;
-    if (contigency[i + 1] <=1) contigency[i + 1] *= totalGenotype;
+    // if (contigency[i] < 1) contigency[i] *= totalGenotype;
+    if (contigency[i + 1] <= 1) contigency[i + 1] *= totalGenotype;
     if (contigency[i + 1] != 0)
       BothChi += (contigency[i + 1] - contigency[i]) *
                  (contigency[i + 1] - contigency[i]) / contigency[i + 1];
@@ -252,8 +252,8 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
 }
 
 void HWETest::AllSnpHWETestBinary() {
-  if(this->data->vLocusInfo[0].BothAlleleCount.size()==0)
-	  this->data->statCount(this->data->vLabel);
+  if (this->data->vLocusInfo[0].BothAlleleCount.size() == 0)
+    this->data->statCount(this->data->vLabel);
   for (int i = 0; i < this->data->getSnpNum(); i++) {
     this->SingleSnpHWETest(i, this->vHWETestResult[i].CaseChiSquare,
                            this->vHWETestResult[i].CasePearsonP,
@@ -268,25 +268,25 @@ void HWETest::AllSnpHWETestBinary() {
 };
 
 void HWETest::AllSnpHWETestQTL() {
-	if(this->data->vLocusInfo[0].BothAlleleCount.size()==0)
-		this->data->statCount();
-//  this->data->printLocusInfo();
+  if (this->data->vLocusInfo[0].BothAlleleCount.size() == 0)
+    this->data->statCount();
+  //  this->data->printLocusInfo();
   for (int i = 0; i < this->data->getSnpNum(); i++) {
-    this->SingleSnpHWETestBoth(i,this->vHWETestResult[i].BothChiSquare,
-                           this->vHWETestResult[i].BothPearsonP,
-                           this->vHWETestResult[i].BothFisherP);
+    this->SingleSnpHWETestBoth(i, this->vHWETestResult[i].BothChiSquare,
+                               this->vHWETestResult[i].BothPearsonP,
+                               this->vHWETestResult[i].BothFisherP);
   };
 };
 
-void HWETest::AllSnpHWETest(){
-	if(this->data->vQuantitativeTrait.size()!=0)
-		this->AllSnpHWETestQTL();
-	else
-		this->AllSnpHWETestBinary();
+void HWETest::AllSnpHWETest() {
+  if (this->data->vQuantitativeTrait.size() != 0)
+    this->AllSnpHWETestQTL();
+  else
+    this->AllSnpHWETestBinary();
 }
 
-void HWETest::SingleSnpHWETestBoth(int iSnp, double& BothChi, double& BothPearsonP,
-                               double& BothFisherP) {
+void HWETest::SingleSnpHWETestBoth(int iSnp, double& BothChi,
+                                   double& BothPearsonP, double& BothFisherP) {
 
   boost::unordered_map<short, size_t> AlleleType;
   boost::unordered_map<short, double>::iterator map_it;
@@ -321,10 +321,10 @@ void HWETest::SingleSnpHWETestBoth(int iSnp, double& BothChi, double& BothPearso
   // Fisher's exact test:
   BothChi = 0;
   for (int i = 0; i < NumOfCol * NumOfRow; i = i + 2) {
- //   if (contigency[i] < 1) contigency[i] *= totalGenotype;
+    //   if (contigency[i] < 1) contigency[i] *= totalGenotype;
     if (contigency[i + 1] <= 1) contigency[i + 1] *= totalGenotype;
     if (contigency[i + 1] != 0)
-    	BothChi += (contigency[i + 1] - contigency[i]) *
+      BothChi += (contigency[i + 1] - contigency[i]) *
                  (contigency[i + 1] - contigency[i]) / contigency[i + 1];
   }
   boost::math::chi_squared dist(NumOfCol);
@@ -349,20 +349,19 @@ void HWETest::SingleSnpHWETestBoth(int iSnp, double& BothChi, double& BothPearso
   contigency = 0;
 }
 
-
 std::string HWETest::reporthtml() {
-  std::string res="\n<h2> Hardy-Weinberg Equilibrium Test: </h2>\n";
+  std::string res = "\n<h2> Hardy-Weinberg Equilibrium Test: </h2>\n";
   boost::shared_ptr<SHEsis::CreatHtmlTable> html(new SHEsis::CreatHtmlTable());
   html->createTable("HWETest");
   std::vector<std::string> data;
   data.push_back("SNP");
-  if(this->data->vQuantitativeTrait.size()==0){
-	  data.push_back("Chi<sup>2</sup> in case");
-	  data.push_back("Pearson's p in case");
-	  data.push_back("Fisher's p in case");
-	  data.push_back("Chi<sup>2</sup> in ctrl");
-	  data.push_back("Pearson's p in ctrl");
-	  data.push_back("Fisher's p in ctrl");
+  if (this->data->vQuantitativeTrait.size() == 0) {
+    data.push_back("Chi<sup>2</sup> in case");
+    data.push_back("Pearson's p in case");
+    data.push_back("Fisher's p in case");
+    data.push_back("Chi<sup>2</sup> in ctrl");
+    data.push_back("Pearson's p in ctrl");
+    data.push_back("Fisher's p in ctrl");
   }
   data.push_back("Chi<sup>2</sup> in both");
   data.push_back("Pearson's p in both");
@@ -372,83 +371,83 @@ std::string HWETest::reporthtml() {
   for (int i = 0; i < this->vHWETestResult.size(); i++) {
     data.clear();
     data.push_back(this->data->vLocusName[i]);
-    if(this->data->vQuantitativeTrait.size()==0){
-		data.push_back(convert2string(this->vHWETestResult[i].CaseChiSquare));
-		data.push_back(convert2string(this->vHWETestResult[i].CasePearsonP));
-		data.push_back(convert2string(this->vHWETestResult[i].CaseFisherP));
-		data.push_back(convert2string(this->vHWETestResult[i].ControlChiSquare));
-		data.push_back(convert2string(this->vHWETestResult[i].ControlPearsonP));
-		data.push_back(convert2string(this->vHWETestResult[i].ControlFisherP));
+    if (this->data->vQuantitativeTrait.size() == 0) {
+      data.push_back(convert2string(this->vHWETestResult[i].CaseChiSquare));
+      data.push_back(convert2string(this->vHWETestResult[i].CasePearsonP));
+      data.push_back(convert2string(this->vHWETestResult[i].CaseFisherP));
+      data.push_back(convert2string(this->vHWETestResult[i].ControlChiSquare));
+      data.push_back(convert2string(this->vHWETestResult[i].ControlPearsonP));
+      data.push_back(convert2string(this->vHWETestResult[i].ControlFisherP));
     };
     data.push_back(convert2string(this->vHWETestResult[i].BothChiSquare));
     data.push_back(convert2string(this->vHWETestResult[i].BothPearsonP));
     data.push_back(convert2string(this->vHWETestResult[i].BothFisherP));
     html->addDataRow(data);
   };
-  res+=html->getTable();
+  res += html->getTable();
   return res;
 }
 
-std::string HWETest::reporttxt(){
-	std::stringstream res;
-	res.precision(3);
-	res<<"\n-------------------------------------------------------\n";
-	res<<"Hardy-Weinberg Equilibrium Test\n";
-	res<<"-------------------------------------------------------\n";
-	if(this->data->vQuantitativeTrait.size()==0){
-	res<<"In cases:\n-------------\n";
-	res<<"SNP\t\tChi2\t\tPearson's p\tFisher's p\n";
-	for (int i = 0; i < this->vHWETestResult.size(); i++) {
-		res<<this->data->vLocusName[i]<<"\t\t";
-		res<<this->vHWETestResult[i].CaseChiSquare<<"\t\t"<<
-				this->vHWETestResult[i].CasePearsonP<<"\t\t"<<
-				convert2string(this->vHWETestResult[i].CaseFisherP)<<"\n";
-	}
-	res<<"-------------\nIn controls:\n-------------\n";
-	res<<"SNP\t\tChi2\t\tPearson's p\tFisher's p\n";
-	for (int i = 0; i < this->vHWETestResult.size(); i++) {
-		res<<this->data->vLocusName[i]<<"\t\t";
-		res<<this->vHWETestResult[i].ControlChiSquare<<"\t\t"<<
-				this->vHWETestResult[i].ControlPearsonP<<"\t\t"<<
-				convert2string(this->vHWETestResult[i].ControlFisherP)<<"\n";
-	}
-	res<<"-------------\n";
-	};
-	res<<"In all samples:\n-------------\n";
-	res<<"SNP\t\tChi2\t\tPearson's p\tFisher's p\n";
-	for (int i = 0; i < this->vHWETestResult.size(); i++) {
-		res<<this->data->vLocusName[i]<<"\t\t";
-		res<<this->vHWETestResult[i].BothChiSquare<<"\t\t"<<
-				this->vHWETestResult[i].BothPearsonP<<"\t\t"<<
-				this->vHWETestResult[i].BothFisherP<<"\n";
-	}
+std::string HWETest::reporttxt() {
+  std::stringstream res;
+  res.precision(3);
+  res << "\n-------------------------------------------------------\n";
+  res << "Hardy-Weinberg Equilibrium Test\n";
+  res << "-------------------------------------------------------\n";
+  if (this->data->vQuantitativeTrait.size() == 0) {
+    res << "In cases:\n-------------\n";
+    res << "SNP\t\tChi2\t\tPearson's p\tFisher's p\n";
+    for (int i = 0; i < this->vHWETestResult.size(); i++) {
+      res << this->data->vLocusName[i] << "\t\t";
+      res << this->vHWETestResult[i].CaseChiSquare << "\t\t"
+          << this->vHWETestResult[i].CasePearsonP << "\t\t"
+          << convert2string(this->vHWETestResult[i].CaseFisherP) << "\n";
+    }
+    res << "-------------\nIn controls:\n-------------\n";
+    res << "SNP\t\tChi2\t\tPearson's p\tFisher's p\n";
+    for (int i = 0; i < this->vHWETestResult.size(); i++) {
+      res << this->data->vLocusName[i] << "\t\t";
+      res << this->vHWETestResult[i].ControlChiSquare << "\t\t"
+          << this->vHWETestResult[i].ControlPearsonP << "\t\t"
+          << convert2string(this->vHWETestResult[i].ControlFisherP) << "\n";
+    }
+    res << "-------------\n";
+  };
+  res << "In all samples:\n-------------\n";
+  res << "SNP\t\tChi2\t\tPearson's p\tFisher's p\n";
+  for (int i = 0; i < this->vHWETestResult.size(); i++) {
+    res << this->data->vLocusName[i] << "\t\t";
+    res << this->vHWETestResult[i].BothChiSquare << "\t\t"
+        << this->vHWETestResult[i].BothPearsonP << "\t\t"
+        << this->vHWETestResult[i].BothFisherP << "\n";
+  }
 
-//
-//	if(this->data->vQuantitativeTrait.size()==0){
-//		res<<"Case Chi2\tCase Pearson's p\tCase Fisher's p\t"<<
-//			"Ctrl Chi2\tCtrl Pearson's p\tCtrl Fisher's p\t";
-//	}
-//	res<<"All Chi2\tAll Pearson's p\tAll Fisher's p\n";
-//
-//
-//
-//	for (int i = 0; i < this->vHWETestResult.size(); i++) {
-//		res<<this->data->vLocusName[i]<<"\t";
-//	    if(this->data->vQuantitativeTrait.size()==0){
-//	    	res<<
-//	    		this->vHWETestResult[i].CaseChiSquare<<"\t"<<
-//				this->vHWETestResult[i].CasePearsonP<<"\t"<<
-//				this->vHWETestResult[i].CaseFisherP<<"\t"<<
-//				this->vHWETestResult[i].ControlChiSquare<<"\t"<<
-//				this->vHWETestResult[i].ControlPearsonP<<"\t"<<
-//				this->vHWETestResult[i].ControlFisherP<<"\t";
-//	    };
-//	    res<<this->vHWETestResult[i].BothChiSquare<<"\t"<<
-//	    		this->vHWETestResult[i].BothPearsonP<<"\t"<<
-//	    		this->vHWETestResult[i].BothFisherP<<"\n";
-//	}
-	res<<"-------------------------------------------------------\n";
-	return res.str();
+  //
+  //	if(this->data->vQuantitativeTrait.size()==0){
+  //		res<<"Case Chi2\tCase Pearson's p\tCase Fisher's p\t"<<
+  //			"Ctrl Chi2\tCtrl Pearson's p\tCtrl Fisher's p\t";
+  //	}
+  //	res<<"All Chi2\tAll Pearson's p\tAll Fisher's p\n";
+  //
+  //
+  //
+  //	for (int i = 0; i < this->vHWETestResult.size(); i++) {
+  //		res<<this->data->vLocusName[i]<<"\t";
+  //	    if(this->data->vQuantitativeTrait.size()==0){
+  //	    	res<<
+  //	    		this->vHWETestResult[i].CaseChiSquare<<"\t"<<
+  //				this->vHWETestResult[i].CasePearsonP<<"\t"<<
+  //				this->vHWETestResult[i].CaseFisherP<<"\t"<<
+  //				this->vHWETestResult[i].ControlChiSquare<<"\t"<<
+  //				this->vHWETestResult[i].ControlPearsonP<<"\t"<<
+  //				this->vHWETestResult[i].ControlFisherP<<"\t";
+  //	    };
+  //	    res<<this->vHWETestResult[i].BothChiSquare<<"\t"<<
+  //	    		this->vHWETestResult[i].BothPearsonP<<"\t"<<
+  //	    		this->vHWETestResult[i].BothFisherP<<"\n";
+  //	}
+  res << "-------------------------------------------------------\n";
+  return res.str();
 }
 
 void HWETest::printHWETestResults() {

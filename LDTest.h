@@ -13,9 +13,9 @@
 namespace SHEsis {
 
 typedef enum { LD_IN_CASE, LD_IN_CTRL, LD_IN_BOTH } LD_TYPE;
-struct NonmissingSampleAlleleCount{
-	boost::unordered_map<short, int > casecount;
-	boost::unordered_map<short, int > ctrlcount;
+struct NonmissingSampleAlleleCount {
+  boost::unordered_map<short, int> casecount;
+  boost::unordered_map<short, int> ctrlcount;
 };
 
 class LDTest {
@@ -25,7 +25,9 @@ class LDTest {
   void AllLociLDtest();
   void DrawLDMapDandR2();
   void printRes();
-  void setLDType(LD_TYPE t){this->ldtype=t;};
+  void setLDType(LD_TYPE t) {
+    this->ldtype = t;
+  };
   void setForceSAT(bool b) {
     this->bForceSAT = b;
   };
@@ -33,9 +35,10 @@ class LDTest {
   std::string reporttxt();
 
  private:
-  void TwoLociLDTest(int snp1, int snp2, LD_TYPE type,double& R2 ,double& D);
+  void TwoLociLDTest(int snp1, int snp2, LD_TYPE type, double& R2, double& D);
   void DrawLDMap(int type);
-  void StatAllelesInNonmissingSample(boost::shared_ptr<bool[]> missing, int snp1, int snp2);
+  void StatAllelesInNonmissingSample(boost::shared_ptr<bool[]> missing,
+                                     int snp1, int snp2);
   void resetMissing();
   NonmissingSampleAlleleCount Snp1AlleleCount;
   NonmissingSampleAlleleCount Snp2AlleleCount;

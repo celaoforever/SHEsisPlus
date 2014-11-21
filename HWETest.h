@@ -41,7 +41,7 @@ class HWETest {
                         double& BothChi, double& BothPearsonP,
                         double& BothFisherP);
   void SingleSnpHWETestBoth(int iSnp, double& BothChi, double& BothPearsonP,
-                                 double& BothFisherP);
+                            double& BothFisherP);
   void AllSnpHWETestQTL();
   void AllSnpHWETestBinary();
   boost::unordered_map<std::string, size_t> vCoefficient;

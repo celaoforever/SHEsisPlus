@@ -14,11 +14,10 @@ namespace SHEsis {
 struct HaploCombination {
   std::vector<int> hapIdx;
   bool operator==(const HaploCombination& p) {
-	  for(int i=0;i<p.hapIdx.size();i++){
-		  if(p.hapIdx[i]!=hapIdx[i])
-			  return false;
-	  }
-	  return true;
+    for (int i = 0; i < p.hapIdx.size(); i++) {
+      if (p.hapIdx[i] != hapIdx[i]) return false;
+    }
+    return true;
   }
 };
 
@@ -32,12 +31,13 @@ struct OneGenotypeExpandedHaplo {
 
 class HaplotypeEM : public HaplotypeBase {
  public:
-	HaplotypeEM(boost::shared_ptr<SHEsisData> data);
-	HaplotypeEM(boost::shared_ptr<SHEsisData> data, int Snp,
-                   std::vector<short> mask);
+  HaplotypeEM(boost::shared_ptr<SHEsisData> data);
+  HaplotypeEM(boost::shared_ptr<SHEsisData> data, int Snp,
+              std::vector<short> mask);
   virtual ~HaplotypeEM();
   virtual void startHaplotypeAnalysis();
   boost::shared_ptr<bool[]> missing;
+
  private:
   void sortGenotype();
   void sortInterMediate();
@@ -63,7 +63,7 @@ class HaplotypeEM : public HaplotypeBase {
   std::vector<int> CurGenotypeCount;
   boost::shared_ptr<int[]> Sample2Genotype;
   std::vector<OneGenotypeExpandedHaplo> Expanded;
-  std::vector< std::vector<int> > combination;
+  std::vector<std::vector<int> > combination;
   int phased;
   double err;
 };

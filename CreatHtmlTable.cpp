@@ -16,8 +16,9 @@ CreatHtmlTable::~CreatHtmlTable() {
 }
 
 void CreatHtmlTable::createTable(std::string id) {
-	//striped bordered hovered
-  res << "<table style=\"width:auto\" class=\"table  bordered hovered \" id=\"" << id << "\">\n";
+  // striped bordered hovered
+  res << "<table style=\"width:auto\" class=\"table  bordered hovered \" id=\""
+      << id << "\">\n";
 };
 void CreatHtmlTable::createTable() {
   res << "<table>\n";

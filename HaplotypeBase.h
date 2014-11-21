@@ -15,7 +15,12 @@ namespace SHEsis {
 
 struct singleHapRes {
   singleHapRes()
-      : chisquare(-999), fisherp(-999), pearsonp(-999), OR(-999), orlow(-999), orUp(-999) {}
+      : chisquare(-999),
+        fisherp(-999),
+        pearsonp(-999),
+        OR(-999),
+        orlow(-999),
+        orUp(-999) {}
   double chisquare;
   double fisherp;
   double pearsonp;
@@ -28,19 +33,19 @@ struct singleHapRes {
   double BHP;
   double BYP;
 };
-struct singHapQTLRes{
-	singHapQTLRes():p(1),ValidSampleNum(0),beta(0),se(0),R2(0),T(0){};
-	double ValidSampleNum;
-	double beta;
-	double se;
-	double R2;
-	double T;
-	double p;
-	double HolmP;
-	double SidakSSP;
-	double SidakSDP;
-	double BHP;
-	double BYP;
+struct singHapQTLRes {
+  singHapQTLRes() : p(1), ValidSampleNum(0), beta(0), se(0), R2(0), T(0) {};
+  double ValidSampleNum;
+  double beta;
+  double se;
+  double R2;
+  double T;
+  double p;
+  double HolmP;
+  double SidakSSP;
+  double SidakSDP;
+  double BHP;
+  double BYP;
 };
 struct HapTestResult {
   std::vector<boost::shared_ptr<short[]> > haplotypes;
@@ -72,8 +77,7 @@ class HaplotypeBase {
         freqthreshold(0.03),
         adjust(false),
         NonmissingCase(0),
-        NonmissingCtrl(0)
-  	  	{};
+        NonmissingCtrl(0) {};
   HaplotypeBase(boost::shared_ptr<SHEsisData> data)
       : data(data),
         Results(data->getSampleNum(), data->getNumOfChrSet()),
@@ -81,8 +85,7 @@ class HaplotypeBase {
         freqthreshold(0.03),
         adjust(false),
         NonmissingCase(0),
-        NonmissingCtrl(0)
-        {};
+        NonmissingCtrl(0) {};
   virtual ~HaplotypeBase() {
     this->mask.clear();
     this->SnpIdx.clear();
@@ -95,20 +98,19 @@ class HaplotypeBase {
   void setFreqThreshold(double t) {
     this->freqthreshold = t;
   };
-  void setAdjust(bool b){
-	  this->adjust=b;
-  }
+  void setAdjust(bool b) { this->adjust = b; }
 
   std::string reporthtml();
   std::string reporttxt();
   HapTestResult Results;
   int NonmissingCase;
   int NonmissingCtrl;
+
  protected:
   void AssociationTestBinary();
   void AssociationTestQTL();
   singHapQTLRes SingleHaploAssociationTestQTL(int hapIdx);
-  int getHaploCount(int sample,int hapIdx);
+  int getHaploCount(int sample, int hapIdx);
   bool IsHaploMissing(int sample);
 
   std::vector<short> mask;

@@ -9,7 +9,7 @@
 
 #include <limits>
 #define SINT_MAX INT_MAX
-int loopnum=0;
+int loopnum = 0;
 #undef min
 #undef max
 #define max(a, b) ((a) < (b) ? (b) : (a))
@@ -175,10 +175,10 @@ void fexact(int* nrow, int* ncol, double* table, int* ldtabl, double* expect,
   /* Workspace Allocation (freed at end) */
 
   double* equiv;
-  try{
-  iwkmax = 2 * (int)(*workspace / 2);
-  //    equiv = (double *) R_alloc(iwkmax / 2, sizeof(double));
-  equiv = (double*)calloc(iwkmax / 2, sizeof(double));
+  try {
+    iwkmax = 2 * (int)(*workspace / 2);
+    //    equiv = (double *) R_alloc(iwkmax / 2, sizeof(double));
+    equiv = (double*)calloc(iwkmax / 2, sizeof(double));
 
 /* The check could never happen with Calloc!
 equiv = Calloc(iwkmax / 2, double);
@@ -190,105 +190,107 @@ prterr(0, "Can not allocate specified workspace");
 #define iwrk ((int*)equiv)
 #define rwrk ((float*)equiv)
 
-  /* Parameter adjustments */
-  table -= *ldtabl + 1;
+    /* Parameter adjustments */
+    table -= *ldtabl + 1;
 
-  /* Function Body */
-  iwkpt = 0;
+    /* Function Body */
+    iwkpt = 0;
 
-  if (*nrow > *ldtabl) prterr(1, "NROW must be less than or equal to LDTABL.");
+    if (*nrow > *ldtabl)
+      prterr(1, "NROW must be less than or equal to LDTABL.");
 
-  ntot = 0;
-  for (i = 1; i <= *nrow; ++i) {
-    for (j = 1; j <= *ncol; ++j) {
-      if (table[i + j * *ldtabl] < 0.)
-        prterr(2, "All elements of TABLE must be positive.");
-      ntot = (int)(ntot + table[i + j * *ldtabl]);
+    ntot = 0;
+    for (i = 1; i <= *nrow; ++i) {
+      for (j = 1; j <= *ncol; ++j) {
+        if (table[i + j * *ldtabl] < 0.)
+          prterr(2, "All elements of TABLE must be positive.");
+        ntot = (int)(ntot + table[i + j * *ldtabl]);
+      }
     }
+    if (ntot == 0) {
+      prterr(3,
+             "All elements of TABLE are zero.\n"
+             "PRT and PRE are set to missing values.");
+      *prt = amiss;
+      *pre = amiss;
+      goto L_End;
+    }
+
+    nco = max(*nrow, *ncol);
+    nro = *nrow + *ncol - nco; /* = min(*nrow, *ncol) */
+    k = *nrow + *ncol + 1;
+    kk = k * nco;
+
+    ikh = ntot + 1;
+    i1 = iwork(iwkmax, &iwkpt, ikh, i_real);
+    i2 = iwork(iwkmax, &iwkpt, nco, i_int);
+    i3 = iwork(iwkmax, &iwkpt, nco, i_int);
+    i3a = iwork(iwkmax, &iwkpt, nco, i_int);
+    i3b = iwork(iwkmax, &iwkpt, nro, i_int);
+    i3c = iwork(iwkmax, &iwkpt, nro, i_int);
+    ikh = max(k * 5 + (kk << 1), nco * 7 + 800);
+    iiwk = iwork(iwkmax, &iwkpt, ikh, i_int);
+    ikh = max(nco + 401, k);
+    irwk = iwork(iwkmax, &iwkpt, ikh, i_real);
+
+    /* NOTE:
+       What follows below splits the remaining amount iwkmax - iwkpt of
+       (int) workspace into hash tables as follows.
+       type  size       index
+       INT   2 * ldkey  i4 i5 i11
+       REAL  2 * ldkey  i8 i9 i10
+       REAL  2 * ldstp  i6
+       INT   6 * ldstp  i7
+       Hence, we need ldkey times
+       3 * 2 + 3 * 2 * s + 2 * mult * s + 6 * mult
+       chunks of integer memory, where s = sizeof(REAL) / sizeof(INT).
+       If doubles are used and are twice as long as ints, this gives
+       18 + 10 * mult
+       so that the value of ldkey can be obtained by dividing available
+       (int) workspace by this number.
+
+       In fact, because iwork() can actually s * n + s - 1 int chunks
+       when allocating a REAL, we use ldkey = available / numb - 1.
+
+       FIXME:
+       Can we always assume that sizeof(double) / sizeof(int) is 2?
+    */
+
+    if (i_real == 4) { /* Double precision reals */
+      numb = 18 + 10 * mult;
+    } else { /* Single precision reals */
+      numb = (mult << 3) + 12;
+    }
+    ldkey = (iwkmax - iwkpt) / numb - 1;
+    ldstp = mult * ldkey;
+    ikh = ldkey << 1;
+    i4 = iwork(iwkmax, &iwkpt, ikh, i_int);
+    ikh = ldkey << 1;
+    i5 = iwork(iwkmax, &iwkpt, ikh, i_int);
+    ikh = ldstp << 1;
+    i6 = iwork(iwkmax, &iwkpt, ikh, i_real);
+    ikh = ldstp * 6;
+    i7 = iwork(iwkmax, &iwkpt, ikh, i_int);
+    ikh = ldkey << 1;
+    i8 = iwork(iwkmax, &iwkpt, ikh, i_real);
+    ikh = ldkey << 1;
+    i9 = iwork(iwkmax, &iwkpt, ikh, i_real);
+    ikh = ldkey << 1;
+    i9a = iwork(iwkmax, &iwkpt, ikh, i_real);
+    ikh = ldkey << 1;
+    i10 = iwork(iwkmax, &iwkpt, ikh, i_int);
+
+    /* To convert to double precision, change RWRK to DWRK in the next CALL.
+     */
+    f2xact(nrow, ncol, &table[*ldtabl + 1], ldtabl, expect, percnt, emin, prt,
+           pre, dwrk + i1, iwrk + i2, iwrk + i3, iwrk + i3a, iwrk + i3b,
+           iwrk + i3c, iwrk + i4, &ldkey, iwrk + i5, dwrk + i6, &ldstp,
+           iwrk + i7, dwrk + i8, dwrk + i9, dwrk + i9a, iwrk + i10, iwrk + iiwk,
+           dwrk + irwk);
   }
-  if (ntot == 0) {
-    prterr(3,
-           "All elements of TABLE are zero.\n"
-           "PRT and PRE are set to missing values.");
-    *prt = amiss;
-    *pre = amiss;
-    goto L_End;
-  }
-
-  nco = max(*nrow, *ncol);
-  nro = *nrow + *ncol - nco; /* = min(*nrow, *ncol) */
-  k = *nrow + *ncol + 1;
-  kk = k * nco;
-
-  ikh = ntot + 1;
-  i1 = iwork(iwkmax, &iwkpt, ikh, i_real);
-  i2 = iwork(iwkmax, &iwkpt, nco, i_int);
-  i3 = iwork(iwkmax, &iwkpt, nco, i_int);
-  i3a = iwork(iwkmax, &iwkpt, nco, i_int);
-  i3b = iwork(iwkmax, &iwkpt, nro, i_int);
-  i3c = iwork(iwkmax, &iwkpt, nro, i_int);
-  ikh = max(k * 5 + (kk << 1), nco * 7 + 800);
-  iiwk = iwork(iwkmax, &iwkpt, ikh, i_int);
-  ikh = max(nco + 401, k);
-  irwk = iwork(iwkmax, &iwkpt, ikh, i_real);
-
-  /* NOTE:
-     What follows below splits the remaining amount iwkmax - iwkpt of
-     (int) workspace into hash tables as follows.
-     type  size       index
-     INT   2 * ldkey  i4 i5 i11
-     REAL  2 * ldkey  i8 i9 i10
-     REAL  2 * ldstp  i6
-     INT   6 * ldstp  i7
-     Hence, we need ldkey times
-     3 * 2 + 3 * 2 * s + 2 * mult * s + 6 * mult
-     chunks of integer memory, where s = sizeof(REAL) / sizeof(INT).
-     If doubles are used and are twice as long as ints, this gives
-     18 + 10 * mult
-     so that the value of ldkey can be obtained by dividing available
-     (int) workspace by this number.
-
-     In fact, because iwork() can actually s * n + s - 1 int chunks
-     when allocating a REAL, we use ldkey = available / numb - 1.
-
-     FIXME:
-     Can we always assume that sizeof(double) / sizeof(int) is 2?
-  */
-
-  if (i_real == 4) { /* Double precision reals */
-    numb = 18 + 10 * mult;
-  } else { /* Single precision reals */
-    numb = (mult << 3) + 12;
-  }
-  ldkey = (iwkmax - iwkpt) / numb - 1;
-  ldstp = mult * ldkey;
-  ikh = ldkey << 1;
-  i4 = iwork(iwkmax, &iwkpt, ikh, i_int);
-  ikh = ldkey << 1;
-  i5 = iwork(iwkmax, &iwkpt, ikh, i_int);
-  ikh = ldstp << 1;
-  i6 = iwork(iwkmax, &iwkpt, ikh, i_real);
-  ikh = ldstp * 6;
-  i7 = iwork(iwkmax, &iwkpt, ikh, i_int);
-  ikh = ldkey << 1;
-  i8 = iwork(iwkmax, &iwkpt, ikh, i_real);
-  ikh = ldkey << 1;
-  i9 = iwork(iwkmax, &iwkpt, ikh, i_real);
-  ikh = ldkey << 1;
-  i9a = iwork(iwkmax, &iwkpt, ikh, i_real);
-  ikh = ldkey << 1;
-  i10 = iwork(iwkmax, &iwkpt, ikh, i_int);
-
-  /* To convert to double precision, change RWRK to DWRK in the next CALL.
-   */
-  f2xact(nrow, ncol, &table[*ldtabl + 1], ldtabl, expect, percnt, emin, prt,
-         pre, dwrk + i1, iwrk + i2, iwrk + i3, iwrk + i3a, iwrk + i3b,
-         iwrk + i3c, iwrk + i4, &ldkey, iwrk + i5, dwrk + i6, &ldstp, iwrk + i7,
-         dwrk + i8, dwrk + i9, dwrk + i9a, iwrk + i10, iwrk + iiwk,
-         dwrk + irwk);
-  }catch(...){
-	  free(equiv);
-	  throw std::runtime_error("error in fexact test");
+  catch (...) {
+    free(equiv);
+    throw std::runtime_error("error in fexact test");
   }
 L_End:
   /* Free(equiv); */
@@ -759,11 +761,10 @@ L300:
   /* Get next PASTP on chain */
   ipn = ifrq[ipn + ikstp2];
   if (ipn > 0) {
-	  loopnum++;
+    loopnum++;
     pastp = stp[ipn + ikstp];
     ifreq = ifrq[ipn + ikstp];
-    if(loopnum>5000)
-    	throw std::runtime_error("Timed out");
+    if (loopnum > 5000) throw std::runtime_error("Timed out");
     goto L300;
   }
   /* Generate a new daughter node */

@@ -21,7 +21,7 @@ LDTest::LDTest(boost::shared_ptr<SHEsisData> data, std::string path)
       path(path),
       bForceSAT(false),
       resD(boost::extents[this->data->getSnpNum()][this->data->getSnpNum()]),
-      resR2(boost::extents[this->data->getSnpNum()][this->data->getSnpNum()]){
+      resR2(boost::extents[this->data->getSnpNum()][this->data->getSnpNum()]) {
   // TODO Auto-generated constructor stub
 }
 
@@ -31,14 +31,14 @@ LDTest::~LDTest() {
 
 void LDTest::printRes() {
 
-  std::cout<<"D':\n";
+  std::cout << "D':\n";
   for (int i = 0; i < this->resD.shape()[0]; i++) {
     for (int j = 0; j < this->resD.shape()[1]; j++) {
       std::cout << this->resD[i][j] << "\t";
     }
     std::cout << "\n";
   }
-  std::cout<<"R2:\n";
+  std::cout << "R2:\n";
   for (int i = 0; i < this->resR2.shape()[0]; i++) {
     for (int j = 0; j < this->resR2.shape()[1]; j++) {
       std::cout << this->resR2[i][j] << "\t";
@@ -47,45 +47,47 @@ void LDTest::printRes() {
   }
 }
 
-std::string LDTest::reporttxt(){
-	std::stringstream res;
-	res.precision(3);
-	res<<"\n-------------------------------------------------------\n";
-	res<<"Linkage Disequilibrium Analysis\n";
-	res<<"-------------------------------------------------------\n";
-	res<<"D'\t";
-	for(int i=0;i<this->data->vLocusName.size();i++){
-		res<<this->data->vLocusName[i]<<"\t";
-	}
-	res<<"\n";
-	  for (int i = 0; i < this->resD.shape()[0]; i++) {
-		res<<this->data->vLocusName[i]<<"\t";
-	    for (int j = 0; j < this->resD.shape()[1]; j++) {
-	    	if(i<j)
-	    		res<< this->resD[i][j] << "\t";
-	    	else
-	    		res<<"-"<<"\t";
-	    }
-	    res << "\n";
-	  }
-	res<<"-------------------------------------------------------\n";
-	res<<"R2\t";
-	for(int i=0;i<this->data->vLocusName.size();i++){
-		res<<this->data->vLocusName[i]<<"\t";
-	}
-	res<<"\n";
-	  for (int i = 0; i < this->resR2.shape()[0]; i++) {
-		res<<this->data->vLocusName[i]<<"\t";
-	    for (int j = 0; j < this->resR2.shape()[1]; j++) {
-	    	if(i<j)
-	    		res<< this->resR2[i][j] << "\t";
-	    	else
-	    		res<<"-"<<"\t";
-	    }
-	    res << "\n";
-	  }
-	  res<<"-------------------------------------------------------\n";
-	  return res.str();
+std::string LDTest::reporttxt() {
+  std::stringstream res;
+  res.precision(3);
+  res << "\n-------------------------------------------------------\n";
+  res << "Linkage Disequilibrium Analysis\n";
+  res << "-------------------------------------------------------\n";
+  res << "D'\t";
+  for (int i = 0; i < this->data->vLocusName.size(); i++) {
+    res << this->data->vLocusName[i] << "\t";
+  }
+  res << "\n";
+  for (int i = 0; i < this->resD.shape()[0]; i++) {
+    res << this->data->vLocusName[i] << "\t";
+    for (int j = 0; j < this->resD.shape()[1]; j++) {
+      if (i < j)
+        res << this->resD[i][j] << "\t";
+      else
+        res << "-"
+            << "\t";
+    }
+    res << "\n";
+  }
+  res << "-------------------------------------------------------\n";
+  res << "R2\t";
+  for (int i = 0; i < this->data->vLocusName.size(); i++) {
+    res << this->data->vLocusName[i] << "\t";
+  }
+  res << "\n";
+  for (int i = 0; i < this->resR2.shape()[0]; i++) {
+    res << this->data->vLocusName[i] << "\t";
+    for (int j = 0; j < this->resR2.shape()[1]; j++) {
+      if (i < j)
+        res << this->resR2[i][j] << "\t";
+      else
+        res << "-"
+            << "\t";
+    }
+    res << "\n";
+  }
+  res << "-------------------------------------------------------\n";
+  return res.str();
 }
 
 int getHapIdx(std::vector<boost::shared_ptr<short[]> >& v, int a1, int a2) {
@@ -95,53 +97,56 @@ int getHapIdx(std::vector<boost::shared_ptr<short[]> >& v, int a1, int a2) {
   return -1;
 }
 
-void LDTest::resetMissing()
-{
-	this->Snp1AlleleCount.casecount.clear();
-	this->Snp1AlleleCount.ctrlcount.clear();
-	this->Snp2AlleleCount.casecount.clear();
-	this->Snp2AlleleCount.ctrlcount.clear();
+void LDTest::resetMissing() {
+  this->Snp1AlleleCount.casecount.clear();
+  this->Snp1AlleleCount.ctrlcount.clear();
+  this->Snp2AlleleCount.casecount.clear();
+  this->Snp2AlleleCount.ctrlcount.clear();
 };
 
-void LDTest::StatAllelesInNonmissingSample(boost::shared_ptr<bool[]> missing, int snp1, int snp2){
-	this->resetMissing();
-	int sampleNum=this->data->getSampleNum();
-	int ploidy=this->data->getNumOfChrSet();
-	for(int iSample=0;iSample<sampleNum;iSample++){
-		if(missing[iSample])
-			continue;
-		for(int p=0;p<ploidy;p++){
-			short curAllele1=this->data->mGenotype[iSample][snp1][p];
-			short curAllele2=this->data->mGenotype[iSample][snp2][p];
-		if(this->data->vQuantitativeTrait.size()>0 || CASE == this->data->vLabel[iSample]){
-				if(this->Snp1AlleleCount.casecount.find(curAllele1) == this->Snp1AlleleCount.casecount.end())
-					this->Snp1AlleleCount.casecount[curAllele1]=1;
-				else
-					this->Snp1AlleleCount.casecount[curAllele1]++;
-				if(this->Snp2AlleleCount.casecount.find(curAllele2) == this->Snp2AlleleCount.casecount.end())
-					this->Snp2AlleleCount.casecount[curAllele2]=1;
-				else
-					this->Snp2AlleleCount.casecount[curAllele2]++;
-		}else if (CONTROL == this->data->vLabel[iSample]){
-				if(this->Snp1AlleleCount.ctrlcount.find(curAllele1) == this->Snp1AlleleCount.ctrlcount.end())
-					this->Snp1AlleleCount.ctrlcount[curAllele1]=1;
-				else
-					this->Snp1AlleleCount.ctrlcount[curAllele1]++;
-				if(this->Snp2AlleleCount.ctrlcount.find(curAllele2) == this->Snp2AlleleCount.ctrlcount.end())
-					this->Snp2AlleleCount.ctrlcount[curAllele2]=1;
-				else
-					this->Snp2AlleleCount.ctrlcount[curAllele2]++;
-			}
-		}
-	}
-
-
+void LDTest::StatAllelesInNonmissingSample(boost::shared_ptr<bool[]> missing,
+                                           int snp1, int snp2) {
+  this->resetMissing();
+  int sampleNum = this->data->getSampleNum();
+  int ploidy = this->data->getNumOfChrSet();
+  for (int iSample = 0; iSample < sampleNum; iSample++) {
+    if (missing[iSample]) continue;
+    for (int p = 0; p < ploidy; p++) {
+      short curAllele1 = this->data->mGenotype[iSample][snp1][p];
+      short curAllele2 = this->data->mGenotype[iSample][snp2][p];
+      if (this->data->vQuantitativeTrait.size() > 0 ||
+          CASE == this->data->vLabel[iSample]) {
+        if (this->Snp1AlleleCount.casecount.find(curAllele1) ==
+            this->Snp1AlleleCount.casecount.end())
+          this->Snp1AlleleCount.casecount[curAllele1] = 1;
+        else
+          this->Snp1AlleleCount.casecount[curAllele1]++;
+        if (this->Snp2AlleleCount.casecount.find(curAllele2) ==
+            this->Snp2AlleleCount.casecount.end())
+          this->Snp2AlleleCount.casecount[curAllele2] = 1;
+        else
+          this->Snp2AlleleCount.casecount[curAllele2]++;
+      } else if (CONTROL == this->data->vLabel[iSample]) {
+        if (this->Snp1AlleleCount.ctrlcount.find(curAllele1) ==
+            this->Snp1AlleleCount.ctrlcount.end())
+          this->Snp1AlleleCount.ctrlcount[curAllele1] = 1;
+        else
+          this->Snp1AlleleCount.ctrlcount[curAllele1]++;
+        if (this->Snp2AlleleCount.ctrlcount.find(curAllele2) ==
+            this->Snp2AlleleCount.ctrlcount.end())
+          this->Snp2AlleleCount.ctrlcount[curAllele2] = 1;
+        else
+          this->Snp2AlleleCount.ctrlcount[curAllele2]++;
+      }
+    }
+  }
 }
 
-void LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type, double& R2, double& D) {
-//	std::cout<<"site "<<snp1<<"-site"<<snp2<<"\n";
-  D=0;
-  R2=0;
+void LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type, double& R2,
+                           double& D) {
+  //	std::cout<<"site "<<snp1<<"-site"<<snp2<<"\n";
+  D = 0;
+  R2 = 0;
   std::vector<short> mask;
   for (int i = 0; i < this->data->getSnpNum(); i++) {
     if (i == snp1 || i == snp2)
@@ -150,23 +155,23 @@ void LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type, double& R2, double&
       mask.push_back(0);
   }
   BOOST_ASSERT(mask.size() == this->data->getSnpNum());
-  if(this->bForceSAT){
-	  this->hp.reset(new Haplotype(this->data, 2, mask));
-  }else{
-	  this->hp.reset(new HaplotypeEM(this->data, 2, mask));
+  if (this->bForceSAT) {
+    this->hp.reset(new Haplotype(this->data, 2, mask));
+  } else {
+    this->hp.reset(new HaplotypeEM(this->data, 2, mask));
   }
-//  if (this->data->getNumOfChrSet() <= 2) {
-//    if (this->bForceSAT)
-//      this->hp.reset(new Haplotype(this->data, 2, mask));
-//    else
-//      this->hp.reset(new HaplotypeDiploid(this->data, 2, mask));
-//  } else {
-//    this->hp.reset(new Haplotype(this->data, 2, mask));
-//  }
+  //  if (this->data->getNumOfChrSet() <= 2) {
+  //    if (this->bForceSAT)
+  //      this->hp.reset(new Haplotype(this->data, 2, mask));
+  //    else
+  //      this->hp.reset(new HaplotypeDiploid(this->data, 2, mask));
+  //  } else {
+  //    this->hp.reset(new Haplotype(this->data, 2, mask));
+  //  }
   hp->startHaplotypeAnalysis();
-  boost::shared_ptr<HaplotypeEM> hp_em=boost::dynamic_pointer_cast<HaplotypeEM> (this->hp);
-  if(hp_em)
-	  StatAllelesInNonmissingSample(hp_em->missing,snp1,snp2);
+  boost::shared_ptr<HaplotypeEM> hp_em =
+      boost::dynamic_pointer_cast<HaplotypeEM>(this->hp);
+  if (hp_em) StatAllelesInNonmissingSample(hp_em->missing, snp1, snp2);
 
   boost::unordered_map<short, double>::iterator iter1;
   boost::unordered_map<short, double>::iterator iter2;
@@ -187,57 +192,92 @@ void LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type, double& R2, double&
 
           hapfreq = i == -1 ? 0 : (double)hp->Results.CaseCount[i] /
                                       (double)(this->data->getNumOfChrSet() *
-                                               /*this->data->getCaseNum()*/this->hp->NonmissingCase);
+                                               /*this->data->getCaseNum()*/ this
+                                                   ->hp->NonmissingCase);
           allele = iter1->first;
-          allelefreq1 = hp_em?
-        		  ((double)this->Snp1AlleleCount.casecount[allele]/(double)(this->hp->NonmissingCase*this->data->getNumOfChrSet()))
-        		  :((double)data->vLocusInfo[snp1].CaseAlleleCount[allele] /
-        			(double)(this->data->getNumOfChrSet() * this->data->getCaseCallrate(snp1)*this->data->getCaseNum()));
+          allelefreq1 =
+              hp_em ? ((double)this->Snp1AlleleCount.casecount[allele] /
+                       (double)(this->hp->NonmissingCase *
+                                this->data->getNumOfChrSet()))
+                    : ((double)data->vLocusInfo[snp1].CaseAlleleCount[allele] /
+                       (double)(this->data->getNumOfChrSet() *
+                                this->data->getCaseCallrate(snp1) *
+                                this->data->getCaseNum()));
           allele = iter2->first;
-          allelefreq2 =hp_em?
-        		  ((double)this->Snp2AlleleCount.casecount[allele]/(double)(this->hp->NonmissingCase*this->data->getNumOfChrSet()))
-        		  :((double)data->vLocusInfo[snp2].CaseAlleleCount[allele] /(
-        			(double)(this->data->getNumOfChrSet() * this->data->getCaseCallrate(snp2)*this->data->getCaseNum())));
+          allelefreq2 =
+              hp_em ? ((double)this->Snp2AlleleCount.casecount[allele] /
+                       (double)(this->hp->NonmissingCase *
+                                this->data->getNumOfChrSet()))
+                    : ((double)data->vLocusInfo[snp2].CaseAlleleCount[allele] /
+                       ((double)(this->data->getNumOfChrSet() *
+                                 this->data->getCaseCallrate(snp2) *
+                                 this->data->getCaseNum())));
           break;
 
         case LD_IN_CTRL:
-          hapfreq = i == -1 ? 0 : (double)hp->Results.ControlCount[i] /
-                                      (double)(this->data->getNumOfChrSet() *
-                                               /*this->data->getControlNum()*/ this->hp->NonmissingCtrl);
+          hapfreq =
+              i == -1 ? 0 : (double)hp->Results.ControlCount[i] /
+                                (double)(this->data->getNumOfChrSet() *
+                                         /*this->data->getControlNum()*/ this
+                                             ->hp->NonmissingCtrl);
           allele = iter1->first;
-          allelefreq1 =hp_em?
-        	 ((double)this->Snp1AlleleCount.ctrlcount[allele]/(double)(this->hp->NonmissingCtrl*this->data->getNumOfChrSet()))
-              :((double)data->vLocusInfo[snp1].ControlAlleleCount[allele] /
-              (double)(this->data->getNumOfChrSet() *
-                       this->data->getControlCallrate(snp1)*this->data->getControlNum()));
+          allelefreq1 =
+              hp_em
+                  ? ((double)this->Snp1AlleleCount.ctrlcount[allele] /
+                     (double)(this->hp->NonmissingCtrl *
+                              this->data->getNumOfChrSet()))
+                  : ((double)data->vLocusInfo[snp1].ControlAlleleCount[allele] /
+                     (double)(this->data->getNumOfChrSet() *
+                              this->data->getControlCallrate(snp1) *
+                              this->data->getControlNum()));
           allele = iter2->first;
-          allelefreq2 =hp_em?
-        	((double)this->Snp2AlleleCount.ctrlcount[allele]/(double)(this->hp->NonmissingCtrl*this->data->getNumOfChrSet()))
-             :((double)data->vLocusInfo[snp2].ControlAlleleCount[allele] /
-              (double)(this->data->getNumOfChrSet() * this->data->getControlCallrate(snp2)*this->data->getControlNum()));
+          allelefreq2 =
+              hp_em
+                  ? ((double)this->Snp2AlleleCount.ctrlcount[allele] /
+                     (double)(this->hp->NonmissingCtrl *
+                              this->data->getNumOfChrSet()))
+                  : ((double)data->vLocusInfo[snp2].ControlAlleleCount[allele] /
+                     (double)(this->data->getNumOfChrSet() *
+                              this->data->getControlCallrate(snp2) *
+                              this->data->getControlNum()));
           break;
         case LD_IN_BOTH:
           hapfreq = i == -1 ? 0 : (double)(hp->Results.BothCount[i]) /
                                       (double)(this->data->getNumOfChrSet() *
                                                /*this->data->getSampleNum()*/
-                                    		  (this->hp->NonmissingCase+this->hp->NonmissingCtrl));
+                                               (this->hp->NonmissingCase +
+                                                this->hp->NonmissingCtrl));
           allele = iter1->first;
-          allelefreq1 =hp_em?(this->Snp1AlleleCount.casecount[allele]+this->Snp1AlleleCount.ctrlcount[allele])/(double)((this->hp->NonmissingCtrl+this->hp->NonmissingCase)*this->data->getNumOfChrSet())
-        		  :((double)data->vLocusInfo[snp1].BothAlleleCount[allele] /
-                        (double)(this->data->getNumOfChrSet() *
-                                 this->data->getCallrate(snp1)*this->data->getSampleNum()));
+          allelefreq1 =
+              hp_em ? (this->Snp1AlleleCount.casecount[allele] +
+                       this->Snp1AlleleCount.ctrlcount[allele]) /
+                          (double)((this->hp->NonmissingCtrl +
+                                    this->hp->NonmissingCase) *
+                                   this->data->getNumOfChrSet())
+                    : ((double)data->vLocusInfo[snp1].BothAlleleCount[allele] /
+                       (double)(this->data->getNumOfChrSet() *
+                                this->data->getCallrate(snp1) *
+                                this->data->getSampleNum()));
           allele = iter2->first;
-          allelefreq2 = hp_em?(this->Snp2AlleleCount.casecount[allele]+this->Snp2AlleleCount.ctrlcount[allele])/(double)((this->hp->NonmissingCtrl+this->hp->NonmissingCase)*this->data->getNumOfChrSet())
-        		  :(double)data->vLocusInfo[snp2].BothAlleleCount[allele] /
-                        (double)(this->data->getNumOfChrSet() *
-                        		this->data->getCallrate(snp2)*this->data->getSampleNum());
-//          std::cout<<"hapfreq="<<hapfreq<<",a1="<<allelefreq1<<",a2="<<allelefreq2;
+          allelefreq2 =
+              hp_em ? (this->Snp2AlleleCount.casecount[allele] +
+                       this->Snp2AlleleCount.ctrlcount[allele]) /
+                          (double)((this->hp->NonmissingCtrl +
+                                    this->hp->NonmissingCase) *
+                                   this->data->getNumOfChrSet())
+                    : (double)data->vLocusInfo[snp2].BothAlleleCount[allele] /
+                          (double)(this->data->getNumOfChrSet() *
+                                   this->data->getCallrate(snp2) *
+                                   this->data->getSampleNum());
+          //          std::cout<<"hapfreq="<<hapfreq<<",a1="<<allelefreq1<<",a2="<<allelefreq2;
           break;
         default:
           std::cout << "***ERROR:no such ld analysis type\n";
           exit(-1);
       };
-//      std::cout<<"Nonmissing case="<<this->hp->NonmissingCase<<",Nonmissing ctrl="<<this->hp->NonmissingCtrl<<",allelfreq1="<<allelefreq1<<","<<"allelefreq2="<<allelefreq2<<",hapfreq="<<hapfreq<<"\n";
+      //      std::cout<<"Nonmissing
+      // case="<<this->hp->NonmissingCase<<",Nonmissing
+      // ctrl="<<this->hp->NonmissingCtrl<<",allelfreq1="<<allelefreq1<<","<<"allelefreq2="<<allelefreq2<<",hapfreq="<<hapfreq<<"\n";
       d = hapfreq - allelefreq1 * allelefreq2;
       double pq = allelefreq1 * allelefreq2;
       double p1q1 = (1 - allelefreq1) * (1 - allelefreq2);
@@ -245,44 +285,43 @@ void LDTest::TwoLociLDTest(int snp1, int snp2, LD_TYPE type, double& R2, double&
       double q1p = allelefreq2 * (1 - allelefreq1);
       if (d < 0) {
         dmax = pq < p1q1 ? pq : p1q1;
-      } else if (d >0) {
+      } else if (d > 0) {
         dmax = p1q < q1p ? p1q : q1p;
       }
-      if( dmax != 0 ){
-		  double absd = ABS(d / dmax);
-		  D += allelefreq1 * allelefreq2 * absd;
-		  R2+=d*d/(1-allelefreq1)/(1-allelefreq2);
+      if (dmax != 0) {
+        double absd = ABS(d / dmax);
+        D += allelefreq1 * allelefreq2 * absd;
+        R2 += d * d / (1 - allelefreq1) / (1 - allelefreq2);
       }
-//      std::cout<<",d="<<d<<",dmax="<<dmax<<",d/dmax="<<adsd<<",normalizedd="<<normalizedD<<"\n";
+      //      std::cout<<",d="<<d<<",dmax="<<dmax<<",d/dmax="<<adsd<<",normalizedd="<<normalizedD<<"\n";
     }
   }
-
 }
 
-
 void LDTest::AllLociLDtest() {
-	if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()>0){
-		this->data->statCount();
-		this->ldtype=LD_IN_BOTH;
-	}
-	else if(this->data->vLocusInfo[0].BothAlleleCount.size()==0 && this->data->vQuantitativeTrait.size()==0)
-		this->data->statCount(this->data->vLabel);
+  if (this->data->vLocusInfo[0].BothAlleleCount.size() == 0 &&
+      this->data->vQuantitativeTrait.size() > 0) {
+    this->data->statCount();
+    this->ldtype = LD_IN_BOTH;
+  } else if (this->data->vLocusInfo[0].BothAlleleCount.size() == 0 &&
+             this->data->vQuantitativeTrait.size() == 0)
+    this->data->statCount(this->data->vLabel);
 
-//  if(data->vQuantitativeTrait.size()>0){
-//
-//	  this->data->statCount();
-//	  this->ldtype=LD_IN_BOTH;
-//  }
-//  else
-//	  this->data->statCount(this->data->vLabel);
+  //  if(data->vQuantitativeTrait.size()>0){
+  //
+  //	  this->data->statCount();
+  //	  this->ldtype=LD_IN_BOTH;
+  //  }
+  //  else
+  //	  this->data->statCount(this->data->vLabel);
   int total = this->data->getSnpNum() * (this->data->getSnpNum() - 1) / 2;
   int count = 0;
   for (int i = 0; i < this->data->getSnpNum(); i++) {
     for (int j = i + 1; j < this->data->getSnpNum(); j++) {
-      double D,R2;
-      this->TwoLociLDTest(i, j, this->ldtype,R2,D);
-      this->resD[i][j] =D ;
-      this->resR2[i][j] =R2 ;
+      double D, R2;
+      this->TwoLociLDTest(i, j, this->ldtype, R2, D);
+      this->resD[i][j] = D;
+      this->resR2[i][j] = R2;
       printf("\rProgress:%d%%", (int)(100 * (double)count / (double)total));
       fflush(stdout);
       count++;
@@ -399,7 +438,7 @@ void DrawSquare(BMP* bmp, RGB rgb, int center_x, int center_y, double l) {
   }
 }
 
-void LDTest::DrawLDMap(int type) {// 0 for D', 1 for R2
+void LDTest::DrawLDMap(int type) {  // 0 for D', 1 for R2
   double snpnum = (double)this->data->getSnpNum();
   double height, width;
   int recnum;
@@ -437,7 +476,8 @@ void LDTest::DrawLDMap(int type) {// 0 for D', 1 for R2
       int step = i * sidelength;
       int begin_x = from_x + sidelength / 2 * j;
       int begin_y = 200 + sidelength / 2 * j;
-      double score =type==0? this->resD[count][count + j + 1]:this->resR2[count][count + j + 1];
+      double score = type == 0 ? this->resD[count][count + j + 1]
+                               : this->resR2[count][count + j + 1];
       RGB color = (1 - score) * 0xff;
       color = color << 8;
       color += (1 - score) * 0xff + 0xff0000;
@@ -452,37 +492,36 @@ void LDTest::DrawLDMap(int type) {// 0 for D', 1 for R2
       count++;
     }
   }
-  if(0==type){
-	  BMP_draw_string(this->ldmap,"D'", 30, height-50, RGB_BLACK, 0);
-  }else if(1==type){
-	  BMP_draw_string(this->ldmap,"R", 30, height-50, RGB_BLACK, 0);
-	  BMP_draw_mini_string(this->ldmap,"2", 45, height-55, RGB_BLACK);
-  }else
-	  BOOST_ASSERT(1==0);
-//  BMP_draw_string(this->ldmap,type==0? "D'":"R^2", 10, height-50, RGB_BLACK, 0);
-  std::string curPath=this->path+(type==0?"_D.bmp":"_R2.bmp");
+  if (0 == type) {
+    BMP_draw_string(this->ldmap, "D'", 30, height - 50, RGB_BLACK, 0);
+  } else if (1 == type) {
+    BMP_draw_string(this->ldmap, "R", 30, height - 50, RGB_BLACK, 0);
+    BMP_draw_mini_string(this->ldmap, "2", 45, height - 55, RGB_BLACK);
+  } else
+    BOOST_ASSERT(1 == 0);
+  //  BMP_draw_string(this->ldmap,type==0? "D'":"R^2", 10, height-50, RGB_BLACK,
+  // 0);
+  std::string curPath = this->path + (type == 0 ? "_D.bmp" : "_R2.bmp");
   BMP_write(this->ldmap, curPath.c_str());
   BMP_delete(this->ldmap);
-  std::cout<<"LD map "<<(type==0? "(D')":"(R2)" )<< "saved to "<<curPath<<"\n";
+  std::cout << "LD map " << (type == 0 ? "(D')" : "(R2)") << "saved to "
+            << curPath << "\n";
 }
-
-
 
 void LDTest::DrawLDMapDandR2() {
- this->DrawLDMap(0);
- this->DrawLDMap(1);
+  this->DrawLDMap(0);
+  this->DrawLDMap(1);
 }
-
-
 
 std::string LDTest::reporthtml() {
   std::string res;
-  std::string filename=get_file_name_from_full_path(this->path);
-  res+="\n<h2> Linkage Disequilibrium Analysis: </h2>\n";
-  res+="<h3>D'</h3>\n";
-  res+="<img src=\"" + filename + "_D.bmp"+"\"" + " alt=\"LD (D') map\">\n";
-  res+="<h3>R<sup>2</sup></h3>\n";
-  res+="<img src=\"" + filename + "_R2.bmp"+"\"" + " alt=\"LD (R2) map\">\n";
+  std::string filename = get_file_name_from_full_path(this->path);
+  res += "\n<h2> Linkage Disequilibrium Analysis: </h2>\n";
+  res += "<h3>D'</h3>\n";
+  res += "<img src=\"" + filename + "_D.bmp" + "\"" + " alt=\"LD (D') map\">\n";
+  res += "<h3>R<sup>2</sup></h3>\n";
+  res +=
+      "<img src=\"" + filename + "_R2.bmp" + "\"" + " alt=\"LD (R2) map\">\n";
   return res;
 }
 

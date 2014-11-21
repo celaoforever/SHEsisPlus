@@ -96,7 +96,7 @@ void testHp() {
   std::vector<int> hapcount;
   boost::shared_ptr<SHEsis::SHEsisData> data =
       GenerateHaploData(sampleNum, snpNum, chrSetNum, haps, hapcount);
-//  data->statCount(data->vLabel);
+  //  data->statCount(data->vLabel);
   SHEsis::Haplotype hp(data);
   hp.setSilent(false);
   hp.startHaplotypeAnalysis();

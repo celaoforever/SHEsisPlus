@@ -56,13 +56,13 @@ boost::shared_ptr<SHEsis::SHEsisData> GenerateHaploData(
       data->mGenotype[i][n][1 - p] = hap[idx2][n];
     }
   }
-  	std::cout<<"haplotype:\n";
-  	for(int i=0;i<hap.size();i++){
-  		for(int j=0;j<snpNum;j++){
-  			std::cout<<hap[i][j];
-  		};
-  		std::cout<<"\t"<<hapcount[i]<<"\n";
-  	};
+  std::cout << "haplotype:\n";
+  for (int i = 0; i < hap.size(); i++) {
+    for (int j = 0; j < snpNum; j++) {
+      std::cout << hap[i][j];
+    };
+    std::cout << "\t" << hapcount[i] << "\n";
+  };
   return data;
 }
 

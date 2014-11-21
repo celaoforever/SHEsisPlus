@@ -294,7 +294,7 @@ bool containsHap(HaploPair s, int hapidx) {
 void HaplotypeDiploid::CalculateFreq() {
   int hapcount = OneGenotypeExpandedHaplo::haploType.size();
   OneGenotypeExpandedHaplo::hapfreq.clear();
-  //std::cout<<"hapfreq.size():"<<OneGenotypeExpandedHaplo::hapfreq.size()<<"\n";
+  // std::cout<<"hapfreq.size():"<<OneGenotypeExpandedHaplo::hapfreq.size()<<"\n";
   for (int i = 0; i < hapcount; i++) {
     OneGenotypeExpandedHaplo::hapfreq.push_back(1.0 / (double)hapcount);
   };
@@ -445,33 +445,34 @@ void HaplotypeDiploid::getResults() {
 
   for (int sample = 0; sample < this->data->getSampleNum(); sample++) {
     if (this->missing[sample]) continue;
-    if(this->data->vQuantitativeTrait.size() == 0){
-		if (CASE == this->data->vLabel[sample]) {
-		  int h1 = this->Results.genotypes[sample][0];
-		  int h2 = this->Results.genotypes[sample][1];
-		  this->Results.CaseCount[h1]++;
-		  this->Results.CaseCount[h2]++;
-		} else if (CONTROL == this->data->vLabel[sample]) {
-		  int h1 = this->Results.genotypes[sample][0];
-		  int h2 = this->Results.genotypes[sample][1];
-		  this->Results.ControlCount[h1]++;
-		  this->Results.ControlCount[h2]++;
-		}
-    }else
-    {
-		for(int ploidy=0;ploidy<this->data->getNumOfChrSet();ploidy++){
-			int h=this->Results.genotypes[sample][ploidy];
-			this->Results.BothCount[h]++;
-		}
+    if (this->data->vQuantitativeTrait.size() == 0) {
+      if (CASE == this->data->vLabel[sample]) {
+        int h1 = this->Results.genotypes[sample][0];
+        int h2 = this->Results.genotypes[sample][1];
+        this->Results.CaseCount[h1]++;
+        this->Results.CaseCount[h2]++;
+      } else if (CONTROL == this->data->vLabel[sample]) {
+        int h1 = this->Results.genotypes[sample][0];
+        int h2 = this->Results.genotypes[sample][1];
+        this->Results.ControlCount[h1]++;
+        this->Results.ControlCount[h2]++;
+      }
+    } else {
+      for (int ploidy = 0; ploidy < this->data->getNumOfChrSet(); ploidy++) {
+        int h = this->Results.genotypes[sample][ploidy];
+        this->Results.BothCount[h]++;
+      }
     }
   };
-	std::cout<<"\nHaplotypes:\n";
-	for(int k=0;k<this->Results.haplotypes.size();k++){
-		for(int i=0;i<this->SnpIdx.size();i++){
-	    	std::cout<<this->Results.haplotypes[k][i];
-		}
-		std::cout<<":"<< (this->Results.ControlCount[k]+this->Results.CaseCount[k])<<"\n";
-	}
+  std::cout << "\nHaplotypes:\n";
+  for (int k = 0; k < this->Results.haplotypes.size(); k++) {
+    for (int i = 0; i < this->SnpIdx.size(); i++) {
+      std::cout << this->Results.haplotypes[k][i];
+    }
+    std::cout << ":"
+              << (this->Results.ControlCount[k] + this->Results.CaseCount[k])
+              << "\n";
+  }
 }
 
 void HaplotypeDiploid::startHaplotypeAnalysis() {

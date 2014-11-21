@@ -73,16 +73,16 @@ void testHp() {
   boost::shared_ptr<SHEsis::SHEsisData> data =
       GenerateHaploData(sampleNum, snpNum, chrSetNum, haps, hapcount);
   data->statCount(data->vLabel);
-//  std::cout<<"Genotype matrix:\n";
-//  for(int i=0;i<data->getSampleNum();i++){
-//	  for(int j=0;j< data->getSnpNum();j++){
-//		  for(int p=0;p<data->getNumOfChrSet();p++){
-//			  std::cout<<data->mGenotype[i][j][p]<<"/";
-//		  }
-//		  std::cout<<" ";
-//	  }
-//	  std::cout<<"\n";
-//  }
+  //  std::cout<<"Genotype matrix:\n";
+  //  for(int i=0;i<data->getSampleNum();i++){
+  //	  for(int j=0;j< data->getSnpNum();j++){
+  //		  for(int p=0;p<data->getNumOfChrSet();p++){
+  //			  std::cout<<data->mGenotype[i][j][p]<<"/";
+  //		  }
+  //		  std::cout<<" ";
+  //	  }
+  //	  std::cout<<"\n";
+  //  }
   std::vector<short> mask(3);
   mask[0] = 0;
   mask[1] = 1;

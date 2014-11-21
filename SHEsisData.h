@@ -16,14 +16,14 @@
 #define GENOTYPE_MISSING 0
 namespace SHEsis {
 
-struct Missing{
-	Missing():CaseAlleleNum(0),CtrlAlleleNum(0){}
-	int CaseAlleleNum;
-	int CtrlAlleleNum;
+struct Missing {
+  Missing() : CaseAlleleNum(0), CtrlAlleleNum(0) {}
+  int CaseAlleleNum;
+  int CtrlAlleleNum;
 };
 
 struct LocusInfo {
-	LocusInfo():AlleleCallrate(0),GenoCallrate(0){};
+  LocusInfo() : AlleleCallrate(0), GenoCallrate(0) {};
   boost::unordered_map<short, double> CaseAlleleCount;
   boost::unordered_map<short, double> ControlAlleleCount;
   boost::unordered_map<std::string, double> CaseGenotypeCount;
@@ -78,7 +78,7 @@ class SHEsisData {
   std::vector<LocusInfo> vLocusInfo;
   std::vector<std::string> vLocusName;
   void statCount(std::vector<SampleStatus>& label);
-  void statCount();//for qtl
+  void statCount();  // for qtl
   void printLocusInfo();
   int getCaseNum();
   int getControlNum();
@@ -89,9 +89,8 @@ class SHEsisData {
   double getCallrate(int snp);
   std::string getStrFromSortedGenotype(std::vector<short> v);
   std::string getallele(short a) {
-	  if(code2allele.find(a) != code2allele.end())
-		  return code2allele[a];
-	  return "NA";
+    if (code2allele.find(a) != code2allele.end()) return code2allele[a];
+    return "NA";
   };
   std::string getOriginGenotype(std::string geno);
 
