@@ -6,6 +6,17 @@ SHEsisPlus is a open source software package for analysis of genetic association
 ##What's new
 Compared to previous version of [SHEsis](http://analysis.bio-x.cn/myAnalysis.php), SHEsisPlus is compatitable for haploid, diploid and polyploid species. It can not only analyze case/control data, but also quantitative trait data. It provides various ways of P value adjustments, including Holm step-down, Sidak single-step, Sidak step-down, FDR and permutation tests. All these can be can be performed via the webui.  
 
+##Compile
+To build SHEsisPlus from source code, please first install [Boost C++ Library](http://www.boost.org). 
+###Linux
+Modify makefile to specify the locations of Boost include files and libs. Then type "make" in the souce code directory.
+###Windows:
+Create a project in Microsoft visual studio. Add all the source files and header files EXCEPT unit test source files (\*\_test.cpp) to the current project. Modify the project properties and specify the path of Boost includefiles and libs. Then build it. 
+
+
+<strong>Note:</strong> SHEsisPlus is developed and tested under Linux. Its behaviour under Windows is not guaranteed. If you want to compile it under Windows, we recommand you to build it within [Cygwin](https://www.cygwin.com/). 
+
+
 ##Input format
 
 ###Case/control data
