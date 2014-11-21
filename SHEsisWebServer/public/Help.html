@@ -11,21 +11,21 @@
 
 <div class="navigation-bar">
   <div class="navigation-bar-content container">
-    <a class="element" href="http://analysis2.bio-x.cn/SHEsisMain.htm" title="Back to SHEsis main page">
+    <a class="element" href="http://analysis.bio-x.cn/SHEsisMain.htm" title="Back to SHEsis main page">
     <span class="icon-home"></span>
 	SHEsis
 	<sup>2.0</sup>
      </a>
     <span class="element-divider"></span>
-    <a class="element">
+    <a class="element" href="#">
       Help
     </a>
     <span class="element-divider"></span>
-    <a class="element">
+    <a class="element" href="CiteUs.html">
       Cite Us 
     </a>   
     <span class="element-divider"></span>
-    <a class="element">
+    <a class="element" href="ContactUs.html">
       Contact Us 
     </a> 
     <span class="element-divider"></span>
@@ -48,6 +48,8 @@
 <ul >
 <font size="4">
 <li><a href="#intro"  style="color:black">Introduction</a></li>
+<br>
+<li><a href="#new"  style="color:black">What's new</a></li>
 <br>
 <li><a href="#brow"  style="color:black">Browser Support</a></li>
 <br>
@@ -79,15 +81,21 @@
 <li><a href="#ref"  style="color:black">References </a></li>
 </font>
 </ul>
-
-
 <br>
 <br>
+
 <h2 id="intro">Introduction</h2>
 <br>
 <font size="4">
 <div style="text-indent:2em;padding:0px 0px 0px 0px">
-SHEsis is a web-based platform for analysis of genetic association, Hardy-weinberg equilibrium, linkage disequilibrium and haplotype construction at multiallelic polymorphism loci, compatitable for both diploid and polyploid species. The web-based version provides most of the functions. The stand-alone version is also available. You can download it from <a href=#>here</a>.
+SHEsisPlus is a web-based platform for analysis of genetic association, Hardy-weinberg equilibrium, linkage disequilibrium and haplotype construction at multiallelic polymorphism loci, compatible for both diploid and polyploid species. The web-based version provides most of the functions. The stand-alone version is also available. You can download it from <a href=#>here</a>.
+</div>
+<br>
+<h2 id="new"> What's new </h2>
+<br>
+<font size="4">
+<div style="text-indent:2em;padding:0px 0px 0px 0px">
+Compared to previous version of SHEsis, SHEsisPlus is compatitable for haploid, diploid and polyploid species. It can not only analyze case/control data, but also quantitative trait data. It provides various ways of P value adjustments, including Holm step-down, Sidak single-step, Sidak step-down, FDR and permutation tests. All these can be can be performed via the webui.
 </div>
 <br>
 <h2 id="brow">Browser Support</h2>
@@ -114,7 +122,7 @@ SHEsis is a web-based platform for analysis of genetic association, Hardy-weinbe
 </tr>
 </table>
 <div style="text-indent:2em"> 
-SHEsis supports all of the modern browers, including Chrome, Firefox, Safari, Opera and IE. If you are using IE, please use IE9 or higher. 
+SHEsisPlus supports all of the modern browers, including Chrome, Firefox, Safari, Opera and IE. If you are using IE, please use IE9 or higher. 
 </div>
 
 <br>
@@ -176,7 +184,7 @@ The above shown is sample data for diploid and tripolid species. For diploid spe
 <div class="span6" style="padding:10px 0px 0px 50px">
 <div class="panel">
   <div class="panel-header">
-    sample data for diploidy species
+    sample data for diploid species
   </div>
   <div class="content" style="padding:0px 0px 0px 0px">
     <pre>
@@ -194,7 +202,7 @@ The above shown is sample data for diploid and tripolid species. For diploid spe
 <div class="span6" style="padding:10px 0px 0px 50px">
 <div class="panel">
   <div class="panel-header">
-    sample data for triploidy species
+    sample data for triploid species
   </div>
   <div class="content" style="padding:0px 0px 0px 0px">
     <pre>
@@ -224,7 +232,7 @@ There are 4 type of analysis available: <i>association test, Hardy-Weinberg Equi
 <br>
 <h3 id="dataset">2. Specify the dataset </h3>
 <div style="text-indent:2em">
-SHEsis supports analysis of polyploid species. You should specify <i>ploidy</i> of your dataset. Currently, web-based SHEsis supports up to dodecaploid (12 sets). If the ploidy of your data is higher than 12, please download the stand-alone version.  
+SHEsisPlus supports analysis of polyploid species. You should specify <i>ploidy</i> of your dataset. Currently, web-based SHEsisPlus supports up to dodecaploid (12 sets). If the ploidy of your data is higher than 12, please download the stand-alone version.  
 </div>
 <br>
 <div style="text-indent:2em">
@@ -238,7 +246,7 @@ You could enter your maker names into the <i>Marker name</i> textfiled. Please u
 
 <h3 id="hap">3. Extra options for Haplotype analysis</h3>
 <div style="text-indent:2em">
-If <i>Haplotype analysis</i> is choosen, you could define the <i>lowest frequency threshold (LFT)</i> of analysis. The default value of LFT is 0.03, all single haplotypes with a frequency less than this value will be discarded in the association analysis. The range of LFT is [0,1). This step is optional. Invalid input will default the value to 0.03.
+If <i>Haplotype analysis</i> is choosen, you could define the <i>lowest frequency threshold (LFT)</i> of analysis. The default value of LFT is 0.03. Every single haplotype with a frequency less than this value will be discarded in the association analysis. The range of LFT is [0,1). This step is optional. Invalid input will default the value to 0.03.
 </div>
 <br>
 <div style="text-indent:2em">
@@ -252,7 +260,7 @@ For case/control data, linkage disequilibrium analysis can be carried out either
 <br>
 <h3 id="multi">5. Multiple comparision</h3>
 <div style="text-indent:2em">
-We provided the methods to adjust for multiple testing. Two types of methods are available. One is p-value based methods including Holm's step down procedure, Sidal single-step procedure, Sidak step-down procedure, Benjamini & Hocheberg step-up FDR control and Benjamini & Yekutieli step-up FDR control. The other is permutation test, which is a data-level method and is much slower. If you want to perform p-value based adjustment, clicking the checkbox <i>Sidak, FDR, Holm's correction</i> after the label <i>Multiple comparision</i>. If you want to perform permutation test, enter the number of permutations in the textfiled <i>Number of permutations</i>. Currently, SHEsis webserver accepts number of permutations <10000.
+We provided the methods to adjust for multiple testing. Two types of methods are available. One is p-value based methods including Holm's step down procedure, Sidal single-step procedure, Sidak step-down procedure, Benjamini & Hocheberg step-up FDR control and Benjamini & Yekutieli step-up FDR control. The other is permutation test, which is a data-level method and is much slower. If you want to perform p-value based adjustment, clicking the checkbox <i>Sidak, FDR, Holm's correction</i> after the label <i>Multiple comparision</i>. If you want to perform permutation test, enter the number of permutations in the textfiled <i>Number of permutations</i>. Currently, SHEsisPlus webserver accepts number of permutations <10000.
 </div>
 <br>
 <h3 id="mail">6. Send a mail when completed</h3>
@@ -329,7 +337,7 @@ The output is straightforward. Hardy-weinberg equilibrium is calculated in cases
 <br>
 <h4>c. Haplotype analysis</h4>
 <div style="text-indent:2em">
-For web-based SHEsis, the algorithm used for haplotype interfernce is expectation maximization (EM). Another algorithm based on <a href="http://www.ncbi.nlm.nih.gov/pubmed/18667059">SAT</a> is available for stand-alone version. The SAT-based algorithm is much more slower than EM algorithm.The output for haplotype analysis looks like: 
+For web-based SHEsisPlus, the algorithm used for haplotype interfernce is expectation maximization (EM). Another algorithm based on <a href="http://www.ncbi.nlm.nih.gov/pubmed/18667059">SAT</a> is available for stand-alone version. The SAT-based algorithm is much more slower than EM algorithm.The output for haplotype analysis looks like: 
 </div>
 <img src="images/help-hap-binary.PNG" style="padding:10px 20px 10px 10px">
 <br>

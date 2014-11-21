@@ -8,11 +8,13 @@
         <script src="javascripts/metro.min.js"></script>
 	<script src="javascripts/checkform.js"></script>
 	<script src="javascripts/onchange.js"></script>
+	<link rel="icon" href="images/logo.PNG" type="image/x-icon"/>
+	<title>SHEsisPlus</title>
     </head>
     <body class="metro">
 <div style="background: url(images/dna5-corp.jpg) top left no-repeat;background-size:cover;height:200px;">
    <div class="container"  style="padding:50px 20px">
-      <h1 class="fg-white"><strong>SHEsis</strong> <sup><font size="3"> v2.0 </font></sup></h1>
+      <h1 class="fg-white"><strong>SHEsisPlus</strong></h1>
       <a class="fg-white" style="font-family:Verdana">
 	<font size="4">A web-based platform for association test on polyploid and multiallelic species.</font>
       </a>
@@ -21,7 +23,7 @@
 
 <div class="navigation-bar">
   <div class="navigation-bar-content container">
-    <a class="element" href="http://analysis2.bio-x.cn/SHEsisMain.htm" title="Back to SHEsis main page">
+    <a class="element" href="http://analysis.bio-x.cn/SHEsisMain.htm" title="Back to SHEsis main page">
     <span class="icon-home"  ></span>
     <font size="5">
 	Home
@@ -100,7 +102,7 @@
 		<div class="input-control checkbox" data-role="input-control">
 		<input name="CheckBoxAnalysisTypeHap"   type="checkbox"></input>
 		<span class="check"></span>
-		Haplptype Analysis
+		Haplotype Analysis
 		</div>
 	      </label>	 
 	      </td>
@@ -123,17 +125,11 @@
 	         <div class="input-control select">
 		 <select name="SelectPloidy" style="width:85%; text-align:center">
 		   <option value="1">1</option>
-		   <option value="2">2</option>
+		   <option selected="selected" value="2">2</option>
 		   <option value="3">3</option>
 		   <option value="4">4</option>
 		   <option value="5">5</option>
 		   <option value="6">6</option>
-		   <option value="7">7</option>
-		   <option value="8">8</option>
-		   <option value="9">9</option>
-		   <option value="10">10</option>
-		   <option value="11">11</option>
-		   <option value="12">12</option>
 		  </select>  
 		  </div>
 	     </td>
@@ -164,7 +160,7 @@
 	     </td>
 	     <td colspan=2>
 	       <div class="input-control text">
-	       <input name="TextMask" style="width:100%" type="text" placeholder="eg. 1,0,1,1 to choose 1st,2nd&4th sites when there are 4 sites."></input>
+	       <input name="TextMask" style="width:100%" type="text" placeholder="eg. 1,1,0,1 to choose 1st,2nd&4th sites when there are 4 sites."></input>
 	       </div>
 	     </td> 
 
