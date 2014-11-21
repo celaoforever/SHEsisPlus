@@ -87,15 +87,15 @@ static std::string HtmlHeaderServer =
 			<sup>2.0</sup>\n\
 		     </a>\n\
 		    <span class=\"element-divider\"></span>\n\
-		    <a class=\"element\" href=\"Help.html\">\n\
+		    <a class=\"element\" href=\"../Help.html\">\n\
 		      Help\n\
 		    </a>\n\
 		    <span class=\"element-divider\"></span>\n\
-		    <a class=\"element\" href=\"CiteUs.html\">\n\
+		    <a class=\"element\" href=\"../CiteUs.html\">\n\
 		      Cite Us \n\
 		    </a>   \n\
 		    <span class=\"element-divider\"></span>\n\
-		    <a class=\"element\" href=\"ContactUs.html\">\n\
+		    <a class=\"element\" href=\"../ContactUs.html\">\n\
 		      Contact Us \n\
 		    </a> \n\
 		    <span class=\"element-divider\"></span>\n\
