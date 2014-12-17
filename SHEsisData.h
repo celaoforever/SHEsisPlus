@@ -12,7 +12,7 @@
 #include <boost/assert.hpp>
 #include <vector>
 #include <string>
-
+#include <fstream>
 #define GENOTYPE_MISSING 0
 namespace SHEsis {
 
@@ -77,6 +77,7 @@ class SHEsisData {
   std::vector<SampleStatus> vLabel;
   std::vector<LocusInfo> vLocusInfo;
   std::vector<std::string> vLocusName;
+  std::vector<std::string> sampleName;
   void statCount(std::vector<SampleStatus>& label);
   void statCount();  // for qtl
   void printLocusInfo();

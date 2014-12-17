@@ -180,6 +180,7 @@ int main(int argc, char* argv[]) {
         HapHandle.reset(new SHEsis::HaplotypeEM(data));
       else
         HapHandle.reset(new SHEsis::HaplotypeEM(data, snpnum, SHEsisArgs.mask));
+      HapHandle->setoutput(SHEsisArgs.output);
     }
 
     if (SAT == SHEsisArgs.hapmethod) {
@@ -329,6 +330,7 @@ boost::shared_ptr<SHEsis::SHEsisData> parseDataWithPhenotype(
   boost::shared_ptr<SHEsis::SHEsisData> pdata(
       new SHEsis::SHEsisData(samplenum, snpnum, ploidy));
   for (int sample = 0; sample < samplenum; sample++) {
+	  pdata->sampleName.push_back(content[sample][0].c_str());
     if (SHEsisArgs.qtl) {
       pdata->vQuantitativeTrait.push_back(atof(content[sample][1].c_str()));
     } else {

@@ -105,7 +105,7 @@ class HaplotypeBase {
   HapTestResult Results;
   int NonmissingCase;
   int NonmissingCtrl;
-
+  void setoutput(std::string t){};
  protected:
   void AssociationTestBinary();
   void AssociationTestQTL();
