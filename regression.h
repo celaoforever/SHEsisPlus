@@ -7,11 +7,10 @@
 
 #ifndef REGRESSION_H_
 #define REGRESSION_H_
-
-namespace SHEsis {
 #include <mlpack/core.hpp>
-
 using namespace mlpack;
+namespace SHEsis {
+
 
 class regression {
 public:
@@ -20,6 +19,7 @@ public:
 	void resetResponse(std::vector<double>& response);
 	void resetSnp(std::vector<double>& snp);
 	void setLambda(double l){this->lambda=l;};
+	void addCovar(std::vector<double> c);
 	virtual void regress()=0;
 	arma::vec coef;
 	arma::vec p;

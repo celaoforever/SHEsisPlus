@@ -8,8 +8,10 @@
 #ifndef LINEAR_H_
 #define LINEAR_H_
 #include <mlpack/core.hpp>
-#include "<mlpack/methods/linear_regression/linear_regression.hpp>"
+#include <mlpack/methods/linear_regression/linear_regression.hpp>
 #include "regression.h"
+using namespace mlpack;
+using namespace mlpack::regression;
 namespace SHEsis {
 
 class linear:public regression {

@@ -27,7 +27,7 @@ int main(){
 					{23,1,3},
 					{11,2,1.2}
 					};
-	double res[6]={4,1,1,2,2,2};
+	double res[6]={4,2,0,2,0,0};
 	for(int i=0;i<6;i++){
 		snp.push_back(_snp[i]);
 		response.push_back(res[i]);
