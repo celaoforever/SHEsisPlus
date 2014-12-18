@@ -9,7 +9,7 @@
 #define LOGISTIC_H_
 #include "SHEsisData.h"
 #include <mlpack/core.hpp>
-#include "logistic_regression.hpp"
+#include <mlpack/methods/logistic_regression/logistic_regression.hpp>
 #include <mlpack/core/optimizers/sgd/sgd.hpp>
 
 using namespace std;
@@ -17,11 +17,11 @@ using namespace mlpack;
 using namespace mlpack::regression;
 using namespace mlpack::optimization;
 namespace SHEsis {
-typedef enum{
-	DOMINANT,
-	ADDICTIVE,
-	RECESSIVE
-} Disease_model;
+//typedef enum{
+//	DOMINANT,
+//	ADDICTIVE,
+//	RECESSIVE
+//} Disease_model;
 
 struct logisticRes{
 
@@ -29,32 +29,36 @@ struct logisticRes{
 
 class logistic {
 public:
-	boost::shared_ptr<SHEsisData> data;
-	logistic(boost::shared_ptr<SHEsisData> data, std::vector< std::vector<double> > _covar):data(data),model(ADDICTIVE),
-			covar(_covar.size(),_covar[0].size()),
-			covar(_covar.size()){
-		BOOST_ASSERT(_covar.size() == this->data->getSampleNum());
-		BOOST_ASSERT(_covar[0].size()!=0);
-		for(int i=0;i<_covar.size();i++){
-			BOOST_ASSERT(_covar[0].size() == _covar[i].size());
-			for(int j=0;j<_covar[0].size();j++){
-				covar(i,j)=_covar[i][j];
-			}
-		}
-	};
+	logistic(std::vector<double>& response, std::vector< std::vector<double> >& _covar,std::vector<double>& snp);
 	virtual ~logistic();
-	void setDiseaseModel(Disease_model m){this->model=m;}
-	logisticRes singleSnpLogisticRegression(int snpIdx,short testAllele);
-	arma::mat& logisticRegression(arma::mat& reg,arma::mat &res);//return the cofficient
-	double getPvalue(arma::mat& reg,arma::mat& para);
-
+//	void setDiseaseModel(Disease_model m){this->model=m;}
+	void resetResponse(std::vector<double>& response);
+	void resetSnp(std::vector<double>& snp);
+	void logisticRegression();//return the cofficient
+	void setClass(double pos,double neg){this->positive=pos;this->negative=neg;}
+	void setLambda(double l){this->lambda=l;};
+	void setTolerance(double t){this->tolerance=t;}
+	void setMaxInterations(int v){this->maxIterations=v;}
+	void setOptimizerType(std::string& t){
+//		std::string t1="sgd";
+//		std::string t2="lbfgs";
+		BOOST_ASSERT(t=="sgd" || t == "lbfgs");
+//		BOOST_ASSERT(std::strcmp(t.c_str(),t1.c_str()) || std::strcmp(t.c_str(),t2.c_str()));
+		this->optimizerType=t;}
 
 private:
 	arma::mat regressors;
-	arma::mat covar;
-	arma::mat responses;
-	Disease_model model;
-
+	arma::vec responses;
+	arma::vec coef;
+	arma::vec p;
+	arma::vec se;
+	std::string optimizerType;
+	double lambda;
+	int positive;
+	int negative;
+	int maxIterations;
+	double tolerance;
+	void getPvalue();
 
 
 };
