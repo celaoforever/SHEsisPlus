@@ -16,9 +16,10 @@ namespace SHEsis {
 
 class linear:public regression {
 public:
-	linear(std::vector<double>& response, std::vector< std::vector<double> >& _covar,std::vector<double>& snp);
+	linear();
 	virtual void regress();
 	virtual ~linear();
+	virtual void setReponse(std::vector<double>& response);
 	virtual void getPvalue();
 private:
 	arma::vec predictions;

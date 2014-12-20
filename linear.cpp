@@ -10,58 +10,65 @@
 #include <boost/math/distributions/students_t.hpp>
 namespace SHEsis {
 
-linear::linear(std::vector<double>& response, std::vector< std::vector<double> >& _covar,std::vector<double>& snp):
-		regression(response,_covar,snp){
+linear::linear():
+		regression(){};
+
+void linear::setReponse(std::vector<double>& response){
+	this->responses.resize(response.size());
 	for(int i=0;i<response.size();i++){
 		this->responses(i)=response[i];
 	}
 }
 void linear::regress(){
+//	std::cout<<"regressors:\n";
+//	regressors.print();
+//	std::cout<<"responses:\n";
+//	responses.print();
+	BOOST_ASSERT(this->regressors.n_cols>0 && this->regressors.n_rows>0 && this->responses.size()>0);
+	BOOST_ASSERT(this->regressors.n_cols==this->responses.size());
 	LinearRegression lr;
 	lr.Lambda()=this->lambda;
 	lr=LinearRegression(this->regressors,this->responses);
 	this->coef=lr.Parameters();
-	std::cout<<"coeff:\n";this->coef.print();
 	lr.Predict(this->regressors,this->predictions);
 	this->getPvalue();
+//	std::cout<<"coef:\n";coef.print();
 }
 void linear::getPvalue(){
 	BOOST_ASSERT(this->predictions.size() == this->responses.size());
-	this->p.resize(this->regressors.n_rows);
-	this->se.resize(this->regressors.n_rows);
+	this->p.resize(this->regressors.n_rows+1);
+	this->se.resize(this->regressors.n_rows+1);
 	double numerator=0;
 	for(int i=0;i<this->responses.size();i++){
 		numerator+=(this->responses(i)-this->predictions(i))*
 				(this->responses(i)-this->predictions(i));
 	}
-	std::cout<<"prediction:\n";this->predictions.print();
-	std::cout<<"response:\n";this->responses.print();
-	numerator=sqrt(numerator/(double)(this->predictions.size()-2));
-	arma::vec ave(this->coef.size()-1,arma::fill::zeros);
-	for(int i=0;i<this->coef.size()-1;i++){
+	numerator=sqrt(numerator/(double)(this->predictions.size()-this->regressors.n_rows));
+	arma::vec ave(this->coef.size(),arma::fill::zeros);
+	for(int i=1;i<this->coef.size();i++){
 		for(int j=0;j<this->responses.size();j++){
-			ave(i)+=this->regressors(i,j);
+			ave(i)+=this->regressors(i-1,j);
 		};
 		ave(i)=ave(i)/(double)this->responses.size();
 	}
-	for(int i=0;i<this->coef.size()-1;i++){//skip the intercept
+	this->p(0) = 1;
+	for(int i=1;i<this->coef.size();i++){
 		double denominator=0;
 		int df=0;
 		double t=0;
 		for(int j=0;j<this->responses.size();j++){
-			denominator+=(this->regressors(i,j)-ave(i))*(this->regressors(i,j)-ave(i));
+			denominator+=(this->regressors(i-1,j)-ave(i))*(this->regressors(i-1,j)-ave(i));
 		}
 		denominator=sqrt(denominator);
 		this->se[i]=numerator/denominator;
 		df=this->responses.size()-this->regressors.n_rows;
-		t=this->coef[i+1]/this->se[i];
-		std::cout<<t<<",";
+		t=this->coef[i]/this->se[i];
 		try {
 		    boost::math::students_t dist(df);
-		    this->p[i] = boost::math::cdf(boost::math::complement(dist, t));
+		    this->p(i) = boost::math::cdf(boost::math::complement(dist, t));
 		}
 		catch (...) {
-			this->p[i] = -999;
+			this->p(i) = -999;
 		}
 
 	}
