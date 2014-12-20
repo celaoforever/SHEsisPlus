@@ -78,6 +78,7 @@ class SHEsisData {
   std::vector<LocusInfo> vLocusInfo;
   std::vector<std::string> vLocusName;
   std::vector<std::string> sampleName;
+  std::vector< std::vector<double> > covar;
   void statCount(std::vector<SampleStatus>& label);
   void statCount();  // for qtl
   void printLocusInfo();

@@ -23,8 +23,8 @@ SHEsis::SHEsisData GenerateRandomData(int sampleNum, int snpNum,
   boost::random::discrete_distribution<> dist2(probabilities2);
   SHEsis::SHEsisData data(sampleNum, snpNum, chrSetNum);
   for (int iSample = 0; iSample < sampleNum; iSample++) {
-    BOOST_ASSERT(iSample < data.vLabel.size());
-    data.vLabel[iSample] = ((SHEsis::SampleStatus)dist(boost_rng));
+    //BOOST_ASSERT(iSample < data.vLabel.size());
+    data.vLabel.push_back((SHEsis::SampleStatus)dist(boost_rng));
     for (int iSnp = 0; iSnp < snpNum; iSnp++) {
       for (int iChrset = 0; iChrset < chrSetNum; iChrset++) {
         data.mGenotype[iSample][iSnp][iChrset] = dist2(boost_rng);

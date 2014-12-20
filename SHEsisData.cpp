@@ -22,7 +22,7 @@ SHEsisData::SHEsisData(int SampleNum, int SnpNum, int NumOfChrSet)
       CaseNum(-1),
       ControlNum(-1),
       codeIdx(1),
-      vLabel(SampleNum),
+    //  vLabel(SampleNum),
       vLocusName(SnpNum),
       missingalleles(SnpNum) {
   for (int i = 0; i < this->vLocusInfo.size(); i++) {
