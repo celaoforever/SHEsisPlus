@@ -9,12 +9,22 @@
 #include <boost/math/distributions/chi_squared.hpp>
 namespace SHEsis {
 
-logistic::logistic(std::vector<double>& response, std::vector< std::vector<double> >& _covar,std::vector<double>& snp):
-		regression(response,_covar,snp),
+logistic::logistic():
+		regression(),
 	    optimizerType("lbfgs"),
 		positive(2),negative(1),maxIterations(0),tolerance(0.00000001)
 {
-	for(int i=0;i<_covar.size();i++){
+
+
+};
+
+
+logistic::~logistic() {
+	// TODO Auto-generated destructor stub
+}
+void logistic::setReponse(std::vector<double>& response){
+	this->responses.resize(response.size());
+	for(int i=0;i<response.size();i++){
 		if(response[i]==this->positive)
 			this->responses(i)=2;
 		else if (response[i] == this->negative)
@@ -23,11 +33,6 @@ logistic::logistic(std::vector<double>& response, std::vector< std::vector<doubl
 			BOOST_ASSERT(1 == 0);
 	}
 
-};
-
-
-logistic::~logistic() {
-	// TODO Auto-generated destructor stub
 }
 
 void logistic::getPvalue(){
@@ -59,7 +64,7 @@ void logistic::getPvalue(){
 		double Z=this->coef(i)/this->se(i);
 		try {
 		   boost::math::chi_squared dist(1);
-		    this->p(i) = boost::math::cdf(boost::math::complement(dist, Z));
+		    this->p(i) = boost::math::cdf(boost::math::complement(dist, Z*Z));
 		}catch (...) {
 		    this->p(i) = -999;
 		  }
@@ -67,6 +72,12 @@ void logistic::getPvalue(){
 }
 
 void logistic::regress(){
+//	std::cout<<"regressors:\n";
+//	regressors.print();
+//	std::cout<<"responses:\n";
+//	responses.print();
+	BOOST_ASSERT(this->regressors.n_cols>0 && this->regressors.n_rows>0 && this->responses.size()>0);
+	BOOST_ASSERT(this->regressors.n_cols==this->responses.size());
 	LogisticRegressionFunction lrf(this->regressors,this->responses,this->lambda);
 	if(this->optimizerType == "lbfgs"){
 		L_BFGS<LogisticRegressionFunction> lbfgsOpt(lrf);
@@ -83,6 +94,9 @@ void logistic::regress(){
 		this->coef=lr.Parameters();
 	}
 	this->getPvalue();
+//	std::cout<<"coef:\n";
+//	coef.print();
+
 }
 
 

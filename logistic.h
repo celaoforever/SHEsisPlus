@@ -14,11 +14,7 @@ using namespace mlpack;
 using namespace mlpack::regression;
 using namespace mlpack::optimization;
 namespace SHEsis {
-//typedef enum{
-//	DOMINANT,
-//	ADDICTIVE,
-//	RECESSIVE
-//} Disease_model;
+
 
 struct logisticRes{
 
@@ -26,9 +22,10 @@ struct logisticRes{
 
 class logistic:public regression {
 public:
-	logistic(std::vector<double>& response, std::vector< std::vector<double> >& _covar,std::vector<double>& snp);
+	logistic();
 	virtual ~logistic();
 	virtual void regress();
+	void setReponse(std::vector<double>& response);
 	void setClass(double pos,double neg){this->positive=pos;this->negative=neg;}
 	void setTolerance(double t){this->tolerance=t;}
 	void setMaxInterations(int v){this->maxIterations=v;}
