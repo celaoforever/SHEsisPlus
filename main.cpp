@@ -10,11 +10,13 @@
 //#include "HaplotypeDiploid.h"
 #include "AssociationTest.h"
 #include "LDTest.h"
+#include "MarkerRegression.h"
 #include "HWETest.h"
 #include "QTL.h"
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/erase.hpp>
+#include <boost/lexical_cast.hpp>
 #include <fstream>
 #ifdef _WIN32
 #include <windows.h>
@@ -36,12 +38,16 @@ struct arguments {
         qtl(false),
         lft(0.03),
         adjust(false),
+        forceRegress(false),
+        covar(""),
+        model(SHEsis::ADDICTIVE),
         hapmethod(EM) {};
   std::vector<std::string> inputfiles;
   std::vector<std::string> inputcases;
   std::vector<std::string> inputctrls;
   std::vector<std::string> snpnames;
   std::string output;
+  std::string covar;
   int ploidy;
   int permutation;
   bool containsPhenotype;
@@ -52,10 +58,12 @@ struct arguments {
   bool ldAnalysis;
   bool webserver;
   bool adjust;
+  bool forceRegress;
   double lft;
   std::vector<short> mask;
   SHEsis::LD_TYPE ldtype;
   HapMethod hapmethod;
+  SHEsis::DiseaseModel model;
   bool html;
 } SHEsisArgs;
 
@@ -70,16 +78,19 @@ boost::shared_ptr<SHEsis::SHEsisData> parseDataNoPhenotype(
     int snpnum, int ploidy, std::vector<std::vector<std::string> >& casecontent,
     std::vector<std::vector<std::string> >& ctrlcontent);
 boost::shared_ptr<SHEsis::SHEsisData> parseInput();
+std::vector< std::vector<double> > ReadCovar(std::string filepath);
 void getSnpNamefile(std::string& path, std::vector<std::string>& snp);
 void getSnpNameline(std::string& names, std::vector<std::string>& snp);
 void reportHtml(std::stringstream& report,
                 boost::shared_ptr<SHEsis::AssociationTest> AssocHandle,
+                boost::shared_ptr<SHEsis::MarkerRegression> RegressHandle,
                 boost::shared_ptr<SHEsis::QTL> QTLHandle,
                 boost::shared_ptr<SHEsis::HWETest> HWEHandle,
                 boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
                 boost::shared_ptr<SHEsis::LDTest> LDHandle);
 void reporttxt(std::stringstream& report,
                boost::shared_ptr<SHEsis::AssociationTest> AssocHandle,
+               boost::shared_ptr<SHEsis::MarkerRegression> RegressHandle,
                boost::shared_ptr<SHEsis::QTL> QTLHandle,
                boost::shared_ptr<SHEsis::HWETest> HWEHandle,
                boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
@@ -88,17 +99,17 @@ void writePendingPage(std::ofstream& report);
 
 int main(int argc, char* argv[]) {
 
-  po::options_description desc("Allowed options");
+  po::options_description desc_("Allowed options");
   po::variables_map vm;
   boost::shared_ptr<SHEsis::SHEsisData> data;
-  addOptions(argc, argv, desc, vm);
+  addOptions(argc, argv, desc_, vm);
   try {
-    checkOptions(desc, vm);
+    checkOptions(desc_, vm);
     data = parseInput();
   }
   catch (std::runtime_error& e) {
     std::cout << "***ERROR: " << e.what() << "\n";
-    std::cout << desc << "\n";
+    std::cout << desc_ << "\n";
     exit(-1);
   };
 
@@ -126,6 +137,7 @@ int main(int argc, char* argv[]) {
   }
 
   boost::shared_ptr<SHEsis::AssociationTest> AssocHandle;
+  boost::shared_ptr<SHEsis::MarkerRegression> RegressHandle;
   boost::shared_ptr<SHEsis::QTL> QTLHandle;
   boost::shared_ptr<SHEsis::HWETest> HWEHandle;
   boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle;
@@ -133,7 +145,12 @@ int main(int argc, char* argv[]) {
 
   if (SHEsisArgs.assocAnalysis) {
     std::cout << "Starting association test...\n";
-    if (data->vQuantitativeTrait.size() == 0) {
+    if(SHEsisArgs.forceRegress || SHEsisArgs.covar != ""){
+    	RegressHandle.reset(new SHEsis::MarkerRegression(data));
+    	if(SHEsisArgs.adjust)
+    		RegressHandle->setAdjust(true);
+    	RegressHandle->regressAll();
+    }else if(data->vQuantitativeTrait.size() == 0) {
       AssocHandle.reset(new SHEsis::AssociationTest(data));
       if (SHEsisArgs.adjust) AssocHandle->setAdjust(true);
       if (SHEsisArgs.permutation != -1) {
@@ -142,7 +159,6 @@ int main(int argc, char* argv[]) {
       } else {
         AssocHandle->association();
       }
-      std::cout << "done\n";
     } else {
       QTLHandle.reset(new SHEsis::QTL(data));
       if (SHEsisArgs.adjust) QTLHandle->setAdjust(true);
@@ -152,8 +168,8 @@ int main(int argc, char* argv[]) {
       } else {
         QTLHandle->QTLTest();
       }
-      std::cout << "done\n";
     }
+    std::cout << "done\n";
   };
 
   if (SHEsisArgs.hweAnalysis && SHEsisArgs.ploidy > 1) {
@@ -211,9 +227,9 @@ int main(int argc, char* argv[]) {
   };
 
   if (SHEsisArgs.html)
-    reportHtml(report, AssocHandle, QTLHandle, HWEHandle, HapHandle, LDHandle);
+    reportHtml(report, AssocHandle, RegressHandle,QTLHandle, HWEHandle, HapHandle, LDHandle);
   else
-    reporttxt(report, AssocHandle, QTLHandle, HWEHandle, HapHandle, LDHandle);
+    reporttxt(report, AssocHandle,RegressHandle, QTLHandle, HWEHandle, HapHandle, LDHandle);
   ofile.open(filename.c_str());
   ofile << report.str();
   ofile.close();
@@ -239,6 +255,7 @@ void writePendingPage(std::ofstream& report) {
 
 void reporttxt(std::stringstream& report,
                boost::shared_ptr<SHEsis::AssociationTest> AssocHandle,
+               boost::shared_ptr<SHEsis::MarkerRegression> RegressHandle,
                boost::shared_ptr<SHEsis::QTL> QTLHandle,
                boost::shared_ptr<SHEsis::HWETest> HWEHandle,
                boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
@@ -248,6 +265,9 @@ void reporttxt(std::stringstream& report,
   }
   if (QTLHandle) {
     report << QTLHandle->reporttxt();
+  }
+  if(RegressHandle){
+	  report << RegressHandle->reporttxt();
   }
   if (HWEHandle) {
     report << HWEHandle->reporttxt();
@@ -262,6 +282,7 @@ void reporttxt(std::stringstream& report,
 
 void reportHtml(std::stringstream& report,
                 boost::shared_ptr<SHEsis::AssociationTest> AssocHandle,
+                boost::shared_ptr<SHEsis::MarkerRegression> RegressHandle,
                 boost::shared_ptr<SHEsis::QTL> QTLHandle,
                 boost::shared_ptr<SHEsis::HWETest> HWEHandle,
                 boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
@@ -277,6 +298,9 @@ void reportHtml(std::stringstream& report,
   }
   if (QTLHandle) {
     report << QTLHandle->reporthtml();
+  }
+  if( RegressHandle){
+	  report<< RegressHandle->reporthtml();
   }
   if (HWEHandle) {
     report << HWEHandle->reporthtml();
@@ -320,6 +344,9 @@ boost::shared_ptr<SHEsis::SHEsisData> parseInput() {
   } else {
     throw std::runtime_error("Please check the input files.");
   };
+  if(SHEsisArgs.covar!=""){
+	  data->covar=ReadCovar(SHEsisArgs.covar);
+  }
 
   return data;
 }
@@ -334,8 +361,8 @@ boost::shared_ptr<SHEsis::SHEsisData> parseDataWithPhenotype(
     if (SHEsisArgs.qtl) {
       pdata->vQuantitativeTrait.push_back(atof(content[sample][1].c_str()));
     } else {
-      pdata->vLabel[sample] =
-          (SHEsis::SampleStatus)std::atoi(content[sample][1].c_str());
+      pdata->vLabel.push_back(
+          (SHEsis::SampleStatus)std::atoi(content[sample][1].c_str()));
     }
     for (int snp = 0; snp < snpnum; snp++) {
       for (int p = 0; p < ploidy; p++) {
@@ -355,7 +382,7 @@ boost::shared_ptr<SHEsis::SHEsisData> parseDataNoPhenotype(
   boost::shared_ptr<SHEsis::SHEsisData> pdata(
       new SHEsis::SHEsisData(casenum + ctrlnum, snpnum, ploidy));
   for (int sample = 0; sample < casecontent.size(); sample++) {
-    pdata->vLabel[sample] = SHEsis::CASE;
+    pdata->vLabel.push_back(SHEsis::CASE);
     for (int snp = 0; snp < snpnum; snp++) {
       for (int p = 0; p < ploidy; p++) {
         pdata->mGenotype[sample][snp][p] =
@@ -364,7 +391,7 @@ boost::shared_ptr<SHEsis::SHEsisData> parseDataNoPhenotype(
     }
   };
   for (int sample = 0; sample < ctrlcontent.size(); sample++) {
-    pdata->vLabel[sample + casenum] = SHEsis::CONTROL;
+    pdata->vLabel.push_back(SHEsis::CONTROL);
     for (int snp = 0; snp < snpnum; snp++) {
       for (int p = 0; p < ploidy; p++) {
         pdata->mGenotype[sample + casenum][snp][p] =
@@ -386,6 +413,7 @@ void addOptions(int argc, char* argv[], po::options_description& desc,
       "times")("input-ctrl", po::value<std::vector<std::string> >(),
                "path for the input file containing controls, can be specified "
                "for multiple times")(
+      "covar",po::value<std::string>(),"path for covariates")(
       "snpname-file", po::value<std::string>(),
       "path for file that contains names of snps")(
       "snpname-line", po::value<std::string>(), "snp names are as arguments")(
@@ -402,6 +430,9 @@ void addOptions(int argc, char* argv[], po::options_description& desc,
                 "specified with --input, the second column of the input file "
                 "is the quantitative trait")("permutation", po::value<int>(),
                                              "times for permutation")(
+      "regress","force regression, even if no covariates provided.")(
+       "model",po::value<std::string>(),"diseas model for regression analysis. possible value:dominant|reccesive|addictive,"
+    		   "default:addictive")(
       "haplo-EM",
       "perform haplotype analysis using expectation maximization algorithm")(
       "haplo-SAT", "perform haplotype analysis using SAT-based algorithm")(
@@ -488,7 +519,8 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
   } else if (vm.count("snpname-line")) {
     getSnpNameline(vm["snpname-line"].as<std::string>(), SHEsisArgs.snpnames);
   }
-
+  if( 0 != vm.count("covar"))
+	SHEsisArgs.covar=vm["covar"].as<std::string>();
   if (0 == vm.count("output"))
     SHEsisArgs.output = "SHEsis";
   else
@@ -531,6 +563,20 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
   };
   if (vm.count("qtl")) {
     SHEsisArgs.qtl = true;
+  }
+  if (vm.count("model")) {
+    std::string m = vm["model"].as<std::string>();
+    if(m == "addictive")
+    	SHEsisArgs.model=SHEsis::ADDICTIVE;
+    else if (m == "dominant")
+    	SHEsisArgs.model=SHEsis::DOMINANT;
+    else if (m== "recessive")
+    	SHEsisArgs.model=SHEsis::RECESSIVE;
+    else
+    	throw std::runtime_error("disease model should be addictive|dominant|recessive.");
+  }
+  if (vm.count("regress")) {
+    SHEsisArgs.forceRegress = true;
   }
 
   if (vm.count("hwe")) {
@@ -579,6 +625,47 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
         "at least one type of analysis should be specified.");
 }
 
+std::vector< std::vector<double> > ReadCovar(std::string filepath){
+	std::vector< std::vector<double> > res;
+	std::string line;
+	std::ifstream file(filepath.c_str());
+	if (!file.is_open())
+	   throw std::runtime_error("Cannot open input file: " + filepath);
+	int lineidx=1;
+	while (getline(file,line)){
+		std::vector<std::string> strs;
+		boost::erase_all(line,"\r");
+		boost::trim_if(line,boost::is_any_of("\t ,"));
+		if(line.empty()){
+			lineidx++;
+			continue;
+		}
+		boost::split(strs,line,boost::is_any_of("\t ,"),boost::token_compress_on);
+		std::vector<double> aCovar;
+		for(int i=0;i<strs.size();i++){
+			double c;
+			try{
+				c=boost::lexical_cast<double>(strs[i]);
+			}catch(const boost::bad_lexical_cast &){
+				std::stringstream ss;
+				ss<<"Error in line "<<lineidx<<", file:"<<filepath<<
+						",covariates should be numerical, but found "<<strs[i]<<".";
+				throw std::runtime_error(ss.str());
+
+			}
+			aCovar.push_back(c);
+		}
+		if(res.size()!=0 && res[0].size()!=aCovar.size()){
+			std::stringstream ss;
+			ss<<"Error in line "<<lineidx<<", file:"<<filepath<<
+					","<<res[0].size()<<" fileds expected, but found "<<aCovar.size()<<".";
+			throw std::runtime_error(ss.str());
+		}
+		res.push_back(aCovar);
+	}
+	return res;
+}
+
 int ReadInput(int ploidy, bool containsPhenotype, std::string filepath,
               std::vector<std::vector<std::string> >& filecontent) {
   std::string line;
@@ -600,6 +687,23 @@ int ReadInput(int ploidy, bool containsPhenotype, std::string filepath,
                  boost::token_compress_on);
 
     if (containsPhenotype) {
+    	if(!SHEsisArgs.qtl){
+			try{
+				int pheno=boost::lexical_cast<int>(strs[1]);
+			}catch(const boost::bad_lexical_cast &){
+				std::stringstream ss;
+				ss<<"Error in line "<<lineidx<<", file:"<<filepath<<",phenotype should be integer, but found "<<strs[1]<<".";
+				throw std::runtime_error(ss.str());
+			}
+    	}else{
+			try{
+				int pheno=boost::lexical_cast<float>(strs[1]);
+			}catch(const boost::bad_lexical_cast &){
+				std::stringstream ss;
+				ss<<"Error in line "<<lineidx<<", file:"<<filepath<<",phenotype should be numerical, but found "<<strs[1]<<".";
+				throw std::runtime_error(ss.str());
+			}
+    	}
       if (!SHEsisArgs.qtl &&
           (SHEsis::SampleStatus)(std::atoi(strs[1].c_str()) != SHEsis::CASE &&
                                  (SHEsis::SampleStatus)(std::atoi(
