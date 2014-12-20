@@ -41,19 +41,13 @@ int main(){
 		covar.push_back(t);
 	}
 
-	SHEsis::linear l(response,covar,snp);
+	SHEsis::linear l;
+	l.setCovar(covar);
+	l.resetSNP(snp);
+	l.setReponse(response);
 	l.regress();
-	std::cout<<"coef:";
-	for(int i=0;i<l.coef.size();i++){
-		std::cout<<l.coef(i)<<",";
-	}
-	std::cout<<"\nse:";
-	for(int i=0;i<l.se.size();i++){
-		std::cout<<l.se(i)<<",";
-	}
-	std::cout<<"\np:";
-	for(int i=0;i<l.p.size();i++){
-		std::cout<<l.p(i)<<",";
-	}
+	std::cout<<"coef:";l.coef.print();
+	std::cout<<"\nse:";l.se.print();
+	std::cout<<"\np:";l.p.print();
 	return 0;
 }

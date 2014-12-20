@@ -10,7 +10,8 @@ int main(){
 	std::vector<double> snp;
 	std::vector< std::vector<double> >covar;
 	std::vector<double> response;
-	double _snp[6]={2,1,0,1,0,0};
+	//double _snp[6]={2,1,0,1,0,0};
+	double _snp[6]={1,1,1,0,0,0};
 	double reg[6][3]={
 					{39,1,3.2},
 					{42,2,3},
@@ -34,19 +35,13 @@ int main(){
 		covar.push_back(t);
 	}
 
-	SHEsis::logistic l(response,covar,snp);
+	SHEsis::logistic l;
+	l.setCovar(covar);
+	l.resetSNP(snp);
+	l.setReponse(response);
 	l.regress();
-	std::cout<<"coef:";
-	for(int i=0;i<l.coef.size();i++){
-		std::cout<<l.coef(i)<<",";
-	}
-	std::cout<<"\nse:";
-	for(int i=0;i<l.se.size();i++){
-		std::cout<<l.se(i)<<",";
-	}
-	std::cout<<"\np:";
-	for(int i=0;i<l.p.size();i++){
-		std::cout<<l.p(i)<<",";
-	}
+	std::cout<<"coef:\n";l.coef.print();
+	std::cout<<"se:\n";l.se.print();
+	std::cout<<"p:\n";l.p.print();
 	return 0;
 }
