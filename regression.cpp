@@ -9,48 +9,58 @@
 
 namespace SHEsis {
 
-regression::regression(std::vector<double>& response, std::vector< std::vector<double> >& _covar,std::vector<double>& snp):
-		regressors(_covar[0].size(),_covar.size()),lambda(0),
-		p(1),coef(1),
-		se(1),
-		responses(_covar.size())
-		{
+regression::regression():
+		lambda(0),SNPAdded(false)
+{
 	// TODO Auto-generated constructor stub
-	BOOST_ASSERT(_covar.size() == response.size());
+
+	//this->pushCovar(snp);
+}
+void regression::setCovar(std::vector< std::vector<double> >& _covar){
 	BOOST_ASSERT(_covar[0].size()!=0);
+	this->regressors.resize(_covar[0].size(),_covar.size());
 	for(int i=0;i<_covar.size();i++){
 		BOOST_ASSERT(_covar[0].size() == _covar[i].size());
 		for(int j=0;j<_covar[0].size();j++){
 			regressors(j,i)=_covar[i][j];
 		}
-		//regressors(i,this->regressors.n_cols-1)=snp[i];
 	}
-	this->addCovar(snp);
-
 }
 
-void regression::addCovar(std::vector<double> c){
-	this->regressors.insert_rows(0,1);
-	BOOST_ASSERT(c.size() == this->regressors.n_cols);
+void regression::resetSNP(std::vector<double>& c){
+	if(this->SNPAdded){
+		this->modifyCovar(c,0);
+	}else{
+		this->SNPAdded=true;
+		this->pushCovar(c);
+	}
+}
+
+void regression::pushCovar(std::vector<double>& c){
+	if(this->regressors.n_cols!= 0){
+		BOOST_ASSERT(c.size() == this->regressors.n_cols);
+		this->regressors.insert_rows(0,1);
+	}else{
+		this->regressors.resize(1,c.size());
+	}
 	for(int i=0;i<c.size();i++){
 		this->regressors(0,i)=c[i];
 	}
-
 }
 
 regression::~regression() {
 	// TODO Auto-generated destructor stub
 }
 
-void regression::resetSnp(std::vector<double>& snp){
+void regression::modifyCovar(std::vector<double>& snp,int row){
 	BOOST_ASSERT(snp.size() == this->responses.size());
 	for(int i=0;i<this->responses.size();i++){
-		this->regressors(i,this->regressors.n_cols-1)=snp[i];
+		this->regressors(row,i)=snp[i];
 	};
 }
 
 void regression::resetResponse(std::vector<double>& response){
-	BOOST_ASSERT(this->responses.size() == response.size());
+	this->responses.resize(response.size());
 	for(int i=0;i<response.size();i++)
 		this->responses[i]=response[i];
 }

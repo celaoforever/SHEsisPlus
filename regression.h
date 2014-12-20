@@ -14,22 +14,25 @@ namespace SHEsis {
 
 class regression {
 public:
-	regression(std::vector<double>& response, std::vector< std::vector<double> >& _covar,std::vector<double>& snp);
+	regression();
 	virtual ~regression();
 	void resetResponse(std::vector<double>& response);
-	void resetSnp(std::vector<double>& snp);
+	void modifyCovar(std::vector<double>& snp,int row);
 	void setLambda(double l){this->lambda=l;};
-	void addCovar(std::vector<double> c);
-	virtual void regress()=0;
+	void pushCovar(std::vector<double>& c);
+	void resetSNP(std::vector<double>& c);
+	virtual void regress(){};
+	void setCovar(std::vector< std::vector<double> >& _covar);
+	virtual void setReponse(std::vector<double>& response){};
 	arma::vec coef;
 	arma::vec p;
 	arma::vec se;
 protected:
 	arma::mat regressors;
 	arma::vec responses;
-
+	bool SNPAdded;
 	double lambda;
-	virtual void getPvalue()=0;
+	virtual void getPvalue(){};
 };
 
 } /* namespace SHEsis */
