@@ -4,8 +4,12 @@
 LIB= -L/results/software/boost_1_55_0/stage/lib -L/results/software/mlpack-1.0.11/built/lib -L/results/software/armadillo-4.500.1
 INC= -I/results/software/boost_1_55_0/ -I/results/software/mlpack-1.0.11/built/include -I/results/software/armadillo-4.500.1/include -I/results/software/libxml2-2.9.2/include
 #CXXFLAGS =	 -O0 -g  -std=c++11 -fmessage-length=0   -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS  -Wno-parentheses -L$(LIB) -I$(INC)
-CXXFLAGS =-O0 -g  -fmessage-length=0   -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS  -Wno-parentheses $(LIB) $(INC)
- 
+CXXFLAGS = -fmessage-length=0   -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS  -Wno-parentheses $(LIB) $(INC)
+ ifdef RELEASE
+ CXXFLAGS += -O3 
+ else
+ CXXFLAGS += -O0 -g
+ endif
 
 TARGET = SHEsis SHEsisData_test AssociationTest_test HWETest_test HaplotypeDiploid_test LDTest_test QTL_test DataGenerator
 OBJS = SHEsisData.o main.o SHEsisData_test.o utility.o fisher.o AssociationTest.o AssociationTest_test.o \
