@@ -28,6 +28,52 @@ function selectQTL(){
 	elementInputDataQTL[0].style.display="none";
 }
 }
+function loadSampleDataBinary(){
+    var data="id1 case 2 2 A G G C C T\nid2 case 1 1 A A 0 0 C C\nid3 ctrl 1 1 A A G G C T\nid4 ctrl 1 1 G G G G T C\nid5 case 2 2 A G G C T T\nid6 ctrl 3 3 A G G C C C\nid7 ctrl 2 2 A A G G C C\nid8 ctrl 0 0 G G C G C C\nid9 case 2 2 A A C G T T";
+    var covar="1.2 40 1\n2.1 34 2\n1.5 32 2\n3.2 12 1\n2.5 43 2\n4.3 23 1\n4.5 32 1\n5.6 54 2\n4.1 67 2";
+    document.getElementsByName("TextareaInputData")[0].value=data;
+    document.getElementsByName("TextareaCovar")[0].value=covar;
+    document.getElementsByName('CheckBoxAnalysisTypeAssoc')[0].checked=true;
+    document.getElementsByName('CheckBoxAnalysisTypeHWE')[0].checked=true;
+    document.getElementsByName('CheckBoxAnalysisTypeHap')[0].checked=true;
+    document.getElementsByName('CheckBoxAnalysisTypeLD')[0].checked=true;
+    document.getElementsByName("SelectPhenotype")[0].value="Case/Control";
+    document.getElementsByName("SelectPloidy")[0].value="2";
+    document.getElementsByName("SelectLDType")[0].value="Both case and control";
+    document.getElementsByName("TextMarkername")[0].value="rs11,rs22,rs33,rs44";
+    document.getElementsByName("TextLFT")[0].value="0.03";
+    document.getElementsByName("TextMask")[0].value="1,1,0,1";    
+};
+function loadSampleDataQTL(){
+    var data="id1 1.2 2 2 A G G C C T\nid2 2.1 1 1 A A 0 0 C C\nid3 3.0 1 1 A A G G C T\nid4 1.9 1 1 G G G G T C\nid5 8.7 2 2 A G G C T T\nid6 6.5 3 3 A G G C C C\nid7 4.3 2 2 A A G G C C\nid8 5.6 0 0 G G C G C C\nid9 7.9 2 2 A A C G T T";
+    var covar="1.2 40 1\n2.1 34 2\n1.5 32 2\n3.2 12 1\n2.5 43 2\n4.3 23 1\n4.5 32 1\n5.6 54 2\n4.1 67 2";
+    document.getElementsByName("TextareaInputData")[0].value=data;
+    document.getElementsByName("TextareaCovar")[0].value=covar;
+    document.getElementsByName('CheckBoxAnalysisTypeAssoc')[0].checked=true;
+    document.getElementsByName('CheckBoxAnalysisTypeHWE')[0].checked=true;
+    document.getElementsByName('CheckBoxAnalysisTypeHap')[0].checked=true;
+    document.getElementsByName('CheckBoxAnalysisTypeLD')[0].checked=true;
+    document.getElementsByName("SelectPhenotype")[0].value="Quantitative Trait";
+    document.getElementsByName("SelectPloidy")[0].value="2";
+    document.getElementsByName("SelectLDType")[0].value="Both case and control";
+    document.getElementsByName("TextMarkername")[0].value="rs11,rs22,rs33,rs44";
+    document.getElementsByName("TextLFT")[0].value="0.03";
+    document.getElementsByName("TextMask")[0].value="1,1,0,1";    
+};
+
+function loadSample(){
+ var elementPheno = document.getElementsByName("SelectPhenotype");
+ var elementLD    = document.getElementsByName("SelectLDType");  
+ if(elementPheno[0].value == "Quantitative Trait"){
+     elementLD[0].value="Both case and control";
+     elementLD[0].disabled=true;
+     loadSampleDataQTL();
+ }else{
+     elementLD[0].disabled=false;
+     loadSampleDataBinary()
+}    
+}
+
 
 function loadSampleBinary(){
 var casedata="id1 2 2 A G G C C T\nid2 1 1 A A 0 0 C C\nid3 1 1 A A G G C T\nid4 1 1 G G G G T C\nid5 2 2 A G G C T T\nid6 3 3 A G G C C C\nid7 2 2 A A G G C C\nid8 0 0 G G C G C C\nid9 2 2 A A C G T T";
