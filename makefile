@@ -47,10 +47,10 @@ LDTest_test: SHEsisData.o LDTest_test.o HaplotypeEM.o LDTest.o HaplotypeBase.o B
 QTL_test: SHEsisData.o  utility.o QTL.o QTL_test.o CreatHtmlTable.o
 	$(CXX) -o QTL_test SHEsisData.o utility.o QTL.o QTL_test.o CreatHtmlTable.o
 logistic: logistic.o logistic_test.o regression.o 
-	$(CXX)  $(LIB) -lmlpack -larmadillo -o logistic_test logistic.o logistic_test.o regression.o 
+	$(CXX)  $(LIB) -lmlpack  -o logistic_test logistic.o logistic_test.o regression.o 
 linear: linear.o linear_test.o regression.o 
-	$(CXX)  $(LIB) -lmlpack -larmadillo -o linear_test linear.o linear_test.o regression.o 
+	$(CXX)  $(LIB) -lmlpack  -o linear_test linear.o linear_test.o regression.o 
 MarkerRegression_test: linear.o regression.o logistic.o SHEsisData.o MarkerRegression_test.o MarkerRegression.o utility.o CreatHtmlTable.o
-	$(CXX)  $(LIB) -lmlpack -larmadillo -o MarkerRegression_test linear.o regression.o logistic.o SHEsisData.o MarkerRegression_test.o MarkerRegression.o utility.o CreatHtmlTable.o
+	$(CXX)  $(LIB) -lmlpack  -o MarkerRegression_test linear.o regression.o logistic.o SHEsisData.o MarkerRegression_test.o MarkerRegression.o utility.o CreatHtmlTable.o
 clean:
 	rm -f *.o $(TARGET)
