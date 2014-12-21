@@ -26,9 +26,9 @@ void logistic::setReponse(std::vector<double>& response){
 	this->responses.resize(response.size());
 	for(int i=0;i<response.size();i++){
 		if(response[i]==this->positive)
-			this->responses(i)=2;
-		else if (response[i] == this->negative)
 			this->responses(i)=1;
+		else if (response[i] == this->negative)
+			this->responses(i)=0;
 		else
 			BOOST_ASSERT(1 == 0);
 	}
