@@ -125,9 +125,9 @@ void HaplotypeEM::statMissing() {
       for (int p = 0; p < data->getNumOfChrSet(); p++) {
         if (0 == this->data->mGenotype[sample][this->SnpIdx[snp]][p]) {
           this->missing[sample] = true;
-          if (CASE == this->data->vLabel[sample])
+          if (this->data->vLabel.size()>0 && CASE == this->data->vLabel[sample])
             this->NonmissingCase++;
-          else if (CONTROL == this->data->vLabel[sample])
+          else if (this->data->vLabel.size()>0  && CONTROL == this->data->vLabel[sample])
             this->NonmissingCtrl++;
           else if (this->data->vQuantitativeTrait.size())
             this->NonmissingCase++;
