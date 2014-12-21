@@ -56,6 +56,8 @@ void logistic::getPvalue(){
 	}catch(...){
 		for(int i=0;i<p.size();i++){
 			this->p(i) = -999;
+			this->se(i) = -999;
+			this->coef(i) = -999;
 		}
 		return;
 	}
