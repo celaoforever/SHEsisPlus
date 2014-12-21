@@ -688,13 +688,24 @@ int ReadInput(int ploidy, bool containsPhenotype, std::string filepath,
 
     if (containsPhenotype) {
     	if(!SHEsisArgs.qtl){
-			try{
-				int pheno=boost::lexical_cast<int>(strs[1]);
-			}catch(const boost::bad_lexical_cast &){
-				std::stringstream ss;
-				ss<<"Error in line "<<lineidx<<", file:"<<filepath<<",phenotype should be integer, but found "<<strs[1]<<".";
-				throw std::runtime_error(ss.str());
-			}
+    		if(strs[1] != "case"&& strs[1] != "ctrl"){
+    			int pheno;
+				try{
+					pheno=boost::lexical_cast<int>(strs[1]);
+				}catch(const boost::bad_lexical_cast &){
+					std::stringstream ss;
+					ss<<"Error in line "<<lineidx<<", file:"<<filepath<<",phenotype should be 1 or ctrl for controls, 2 or case for cases, but found "<<strs[1]<<".";
+					throw std::runtime_error(ss.str());
+				}
+				if(pheno!=1 && pheno!=2){
+					std::stringstream ss;
+					ss<<"Error in line "<<lineidx<<", file:"<<filepath<<",phenotype should be 1 or ctrl for controls, 2 or case for cases, but found "<<strs[1]<<".";
+					throw std::runtime_error(ss.str());
+				}
+    		}else{
+
+    			strs[1]=(strs[1]=="case"?"2":"1");
+    		}
     	}else{
 			try{
 				int pheno=boost::lexical_cast<float>(strs[1]);
@@ -718,7 +729,7 @@ int ReadInput(int ploidy, bool containsPhenotype, std::string filepath,
       };
     };
 
-    if (lineidx == 1) {
+    if (expectedfileds == 0) {
       if ((strs.size() - 1 - (int)containsPhenotype) % ploidy != 0)
         throw std::runtime_error("Error in line 1, file:" + filepath +
                                  ". Either snp num or ploidy num is wrong");
