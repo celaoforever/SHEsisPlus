@@ -8,7 +8,7 @@
 #include "MarkerRegression.h"
 #include "utility.h"
 namespace SHEsis {
-MarkerRegression::MarkerRegression(boost::shared_ptr<SHEsisData> d):data(d),model(ADDICTIVE),adjust(false)
+MarkerRegression::MarkerRegression(boost::shared_ptr<SHEsisData> d):data(d),model(ADDICTIVE),adjust(false),permutation(-1)
 {
 	// TODO Auto-generated constructor stub
 
@@ -38,25 +38,77 @@ double MarkerRegression::codeAllele(int sample, int snp, short allele){
 	return code;
 }
 
+double getTheSmallestP(std::vector<RegressionRes> res) {
+  double p = 1;
+  for (int i = 0; i < res.size(); i++) {
+	  if(res[i].p == -999)
+		  continue;
+    p = res[i].p < p ? res[i].p : p;
+  }
+  return p;
+}
+void MarkerRegression::RegressPermutation(std::vector<double>& v){
+	std::vector<double> permutatedp;
+	  for (int i = 0; i < this->permutation; i++) {
+	    printf("\rPermutating...%d%%",
+	           (int)(100 * (double)i / (double)this->permutation));
+	    fflush(stdout);
+	    std::random_shuffle(v.begin(), v.end());
+	    this->lr->setReponse(v);
+		std::vector<RegressionRes> PermutateRes;
+		for(int i=0;i<this->data->getSnpNum();i++){
+			 std::vector<short> allelesToTest = this->FindAllele(i);
+			 RegressionRes Res;
+			 if(allelesToTest.size()==0){
+				 Res.p=-999;
+				 PermutateRes.push_back(Res);
+				 continue;
+			 }
+		      for (int a = 0; a < allelesToTest.size(); a++) {
+		    	  RegressionRes CurAlleleRes = this->OneLocusRegression(i, allelesToTest[a]);
+		        Res = CurAlleleRes < Res ? CurAlleleRes : Res;
+		      };
+		      PermutateRes.push_back(Res);
+		}
+
+	    double smallestp = getTheSmallestP(PermutateRes);
+	    permutatedp.push_back(smallestp);
+	  }
+	  printf("\rPermutating...%d%%\n", 100);
+	  fflush(stdout);
+
+	  std::sort(permutatedp.begin(), permutatedp.end());
+	  for (int i = 0; i < this->vResults.size(); i++) {
+	    int rank = getRank(this->vResults[i].p, permutatedp);
+	    this->vResults[i].permutationP =
+	        this->vResults[i].p > 0 ? (double)rank / (double)this->permutation
+	                                : -999;
+	  }
+
+}
+
 void MarkerRegression::regressAll(){
 	//reset regression handler
+	std::vector<double> resp;
 	if(this->data->vLabel.size()==0 && this->data->vQuantitativeTrait.size()>0){
 		this->lr.reset(new linear);
-		this->lr->setReponse(this->data->vQuantitativeTrait);
+		resp=this->data->vQuantitativeTrait;
+//		this->lr->setReponse(this->data->vQuantitativeTrait);
 		this->data->statCount();
 	}else if (this->data->vLabel.size()>0 && this->data->vQuantitativeTrait.size()==0){
 		this->lr.reset(new logistic);
 		this->data->statCount(this->data->vLabel);
-		std::vector<double> binary;
+//		std::vector<double> binary;
 		for(int i=0;i<this->data->vLabel.size();i++){
 			if(this->data->vLabel[i] == CASE)
-				binary.push_back(2);
+				resp.push_back(2);
 			else
-				binary.push_back(1);
+				resp.push_back(1);
 		}
-		this->lr->setReponse(binary);
+//		this->lr->setReponse(binary);
 	}else
 		BOOST_ASSERT(1==0);
+	this->lr->setReponse(resp);
 	//set covar
 	if(this->data->covar.size()!=0)
 		lr->setCovar(this->data->covar);
@@ -76,6 +128,10 @@ void MarkerRegression::regressAll(){
 	      };
 	      this->vResults.push_back(Res);
 	}
+	if(this->permutation!=-1){
+		this->RegressPermutation(resp);
+	}
+
 	 if (this->adjust) {
 	    std::vector<MultiComp> originp;
 	    std::vector<double> adjusted;
@@ -186,6 +242,9 @@ std::string MarkerRegression::reporthtml(){
 	  data.push_back("coeff");
 	  data.push_back("SE");
 	  data.push_back("p");
+	  if(this->permutation!=-1){
+		  data.push_back("Permutation P");
+	  }
 	  if (this->adjust) {
 	    data.push_back("Holm");
 	    data.push_back("SidakSS");
@@ -202,6 +261,9 @@ std::string MarkerRegression::reporthtml(){
 	    data.push_back(convert2string(this->vResults[i].coef));
 	    data.push_back(convert2string(this->vResults[i].se));
 	    data.push_back(convert2string(this->vResults[i].p));
+		if(this->permutation!=-1){
+			  data.push_back(convert2string(this->vResults[i].permutationP));
+		}
 	    if (this->adjust) {
 	      data.push_back(convert2string(this->vResults[i].HolmP));
 	      data.push_back(convert2string(this->vResults[i].SidakSSP));

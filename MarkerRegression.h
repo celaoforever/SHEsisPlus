@@ -19,7 +19,7 @@ typedef enum{
 } DiseaseModel;
 struct RegressionRes{
 	RegressionRes():p(2),coef(-999),se(-999),allele(-999),nonmissing(-999),HolmP(-999),SidakSSP(-999),
-			SidakSDP(-999),BHP(-999),BYP(-999){}
+			SidakSDP(-999),BHP(-999),BYP(-999),permutationP(-999){}
 	double p;
 	double coef;
 	double se;
@@ -30,6 +30,7 @@ struct RegressionRes{
 	double SidakSDP;
 	double BHP;
 	double BYP;
+	double permutationP;
 	bool operator<(const RegressionRes& res) {
 	    if (p < res.p)
 	      return true;
@@ -52,9 +53,12 @@ public:
 	void regressAll();
 	void setAdjust(bool b){this->adjust=b;};
 	virtual ~MarkerRegression();
+	void RegressPermutation(std::vector<double>& phenotype);
 	std::string reporttxt();
 	std::string reporthtml();
+	void setPermutation(int p){this->permutation=p;};
 private:
+	int permutation;
 	double codeAllele(int sample,int snp,short allele);
 	RegressionRes OneLocusRegression(int snpIdx,short allele);
 	int getAlleleCount(int sample, int snp, short allele);

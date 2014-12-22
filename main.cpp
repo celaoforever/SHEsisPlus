@@ -149,6 +149,8 @@ int main(int argc, char* argv[]) {
     	RegressHandle.reset(new SHEsis::MarkerRegression(data));
     	if(SHEsisArgs.adjust)
     		RegressHandle->setAdjust(true);
+        if (SHEsisArgs.permutation != -1)
+        	RegressHandle->setPermutation(SHEsisArgs.permutation);
     	RegressHandle->regressAll();
     }else if(data->vQuantitativeTrait.size() == 0) {
       AssocHandle.reset(new SHEsis::AssociationTest(data));
