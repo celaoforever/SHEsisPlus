@@ -66,8 +66,8 @@ void linear::getPvalue(){
 		try {
 			t=t>0?t:(-1*t);
 		    boost::math::students_t dist(df);
-		    if(i == 1)
-		    	std::cout<<"t="<<t<<"\n";
+//		    if(i == 1)
+//		    	std::cout<<"t="<<t<<"\n";
 		    this->p(i) = boost::math::cdf(boost::math::complement(dist, t));
 		}
 		catch (...) {
