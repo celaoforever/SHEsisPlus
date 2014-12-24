@@ -649,10 +649,14 @@ std::vector< std::vector<double> > ReadCovar(std::string filepath){
 			try{
 				c=boost::lexical_cast<double>(strs[i]);
 			}catch(const boost::bad_lexical_cast &){
-				std::stringstream ss;
-				ss<<"Error in line "<<lineidx<<", file:"<<filepath<<
-						",covariates should be numerical, but found "<<strs[i]<<".";
-				throw std::runtime_error(ss.str());
+				if(strs[i]=="NA"){
+					c=DBL_MAX;
+				}else{
+					std::stringstream ss;
+					ss<<"Error in line "<<lineidx<<", file:"<<filepath<<
+							",covariates should be numerical. For missing data, please use 'NA'. Found "<<strs[i]<<".";
+					throw std::runtime_error(ss.str());
+				};
 
 			}
 			aCovar.push_back(c);

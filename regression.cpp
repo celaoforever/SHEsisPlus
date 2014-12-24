@@ -19,10 +19,30 @@ regression::regression():
 void regression::setCovar(std::vector< std::vector<double> >& _covar){
 	BOOST_ASSERT(_covar[0].size()!=0);
 	this->regressors.resize(_covar[0].size(),_covar.size());
+	//calculate average
+	std::vector<double> ave(_covar[0].size(),0);
+	std::vector<double> count(_covar[0].size(),0);
 	for(int i=0;i<_covar.size();i++){
 		BOOST_ASSERT(_covar[0].size() == _covar[i].size());
 		for(int j=0;j<_covar[0].size();j++){
-			regressors(j,i)=_covar[i][j];
+			if(_covar[i][j] != DBL_MAX){
+				count[j]++;
+				ave[j]+=_covar[i][j];
+			}
+		}
+	}
+	for(int j=0;j<_covar[0].size();j++){
+		ave[j]/=(double)count[j];
+	}
+	//fill missing data with average
+	for(int i=0;i<_covar.size();i++){
+		BOOST_ASSERT(_covar[0].size() == _covar[i].size());
+		for(int j=0;j<_covar[0].size();j++){
+			if(_covar[i][j] == DBL_MAX){
+				regressors(j,i)=ave[j];
+			}else{
+				regressors(j,i)=_covar[i][j];
+			}
 		}
 	}
 }
