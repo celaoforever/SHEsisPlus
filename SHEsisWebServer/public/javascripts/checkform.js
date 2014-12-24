@@ -197,8 +197,8 @@ function validateCovar(lineNumber){
 	    }
 	};
 	for(j=0;j<fields.length;j++){
-	    if(!isNumber(fields[j])){
-		setLegend("Covariate data error, in line "+(i+1)+", column"+(j+1)+". Covariates should be numeric, but "+fields[j]+" found.");
+	    if(fields[j] != "NA" && !isNumber(fields[j])){
+		setLegend("Covariate data error, in line "+(i+1)+", column"+(j+1)+". Covariates should be numeric. For missing data, please use NA. "+fields[j]+" found.");
 		return false;
 	    }
 
