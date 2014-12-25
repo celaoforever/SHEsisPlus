@@ -243,6 +243,11 @@ function validateForm(){
 	if(validateEmail()==false){
 	    return false;
 	}
+	var lft=document.getElementsByName("TextLFT")[0].value;
+	if(!isNumber(lft)){
+		setLegend("lft should be numeric, but found "+lft+".");
+		return false;
+	}
 	var line=validateInputData();
 	if(line == false){
 	    return false;
