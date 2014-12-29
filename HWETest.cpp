@@ -45,7 +45,7 @@ double GetExpectedGenotypeFreq(
     boost::unordered_map<short, size_t>& AlleleType,
     boost::unordered_map<std::string, size_t>& coefficient, int SampleNum,
     int NumOfChrSet) {
-
+//  std::cout<<"SampleNum="<<SampleNum<<"\n";
   ResetMapValue(AlleleType);
   std::vector<std::string> splitted;
   boost::split(splitted, genotype, boost::is_any_of("/"));
@@ -64,6 +64,7 @@ double GetExpectedGenotypeFreq(
   };
   std::sort(exponent.begin(), exponent.end());
   std::string AlleleTypeStatus = getStrFromSortedShort(exponent);
+//  std::cout<<"exponent:"<<AlleleTypeStatus<<"\n";
 
   boost::unordered_map<std::string, size_t>::iterator iter2 =
       coefficient.find(AlleleTypeStatus);
@@ -74,7 +75,7 @@ double GetExpectedGenotypeFreq(
     CurCoefficient = multi<size_t>(exponent);
     coefficient[AlleleTypeStatus] = CurCoefficient;
   };
-
+//  std::cout<<"CurCoefficient:"<<CurCoefficient<<"\n";
   double res = CurCoefficient;
   for (iter = AlleleType.begin(); iter != AlleleType.end(); iter++) {
     short CurAllele = iter->first;
@@ -116,29 +117,35 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
   for (genotype_iter = this->data->vLocusInfo[iSnp].CaseGenotypeCount.begin();
        genotype_iter != this->data->vLocusInfo[iSnp].CaseGenotypeCount.end();
        genotype_iter++) {
+//	  std::cout<<"casenum="<<this->data->getCaseNum()<<",genotypeCallrate="<<this->data->vLocusInfo[iSnp].AlleleCallrate<<"\n";
     double expectedFreq = GetExpectedGenotypeFreq(
         genotype_iter->first, this->data->vLocusInfo[iSnp].CaseAlleleCount,
-        AlleleType, this->vCoefficient, this->data->getCaseNum(),
+        AlleleType, this->vCoefficient, this->data->getCaseNum()*this->data->getCaseCallrate(iSnp)/*this->data->vLocusInfo[iSnp].AlleleCallrate*/,
         this->data->getNumOfChrSet());
     BOOST_ASSERT(idx < NumOfRow * NumOfCol);
+
     contigency[idx++] =
         genotype_iter
             ->second;  //(this->data->getCaseNum()*this->data->getNumOfChrSet());
     BOOST_ASSERT(idx < NumOfRow * NumOfCol);
     contigency[idx++] = expectedFreq;
+
     totalGenotype += genotype_iter->second;
   };
 
   // Fisher's exact test:
   CaseChi = 0;
+// std::cout<<"snp"<<iSnp<<"\n";
   for (int i = 0; i < NumOfCol * NumOfRow; i = i + 2) {
+//	  std::cout<<"expected prob:"<<contigency[i+1];
     // if (contigency[i] <= 1) contigency[i] *= totalGenotype;
     if (contigency[i + 1] <= 1) contigency[i + 1] *= totalGenotype;
     if (contigency[i + 1] != 0)
       CaseChi += (contigency[i + 1] - contigency[i]) *
                  (contigency[i + 1] - contigency[i]) / contigency[i + 1];
+//    std::cout<<",expected count:"<<contigency[i + 1]<<",obs:"<<contigency[i]<<"\n";
   }
-  boost::math::chi_squared dist(NumOfCol < 1 ? 1 : NumOfCol);
+  boost::math::chi_squared dist(NumOfCol < 1 ? 1 : (NumOfCol-1));
   CasePearsonP = boost::math::cdf(boost::math::complement(dist, CaseChi));
 
   double expect = -1.0;
@@ -172,7 +179,7 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
        genotype_iter++) {
     double expectedFreq = GetExpectedGenotypeFreq(
         genotype_iter->first, this->data->vLocusInfo[iSnp].ControlAlleleCount,
-        AlleleType, this->vCoefficient, this->data->getControlNum(),
+        AlleleType, this->vCoefficient, this->data->getControlNum()*this->data->getControlCallrate(iSnp)/*this->data->vLocusInfo[iSnp].AlleleCallrate*/,
         this->data->getNumOfChrSet());
     BOOST_ASSERT(idx < NumOfRow * NumOfCol);
     contigency[idx++] =
@@ -219,7 +226,7 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
        genotype_iter++) {
     double expectedFreq = GetExpectedGenotypeFreq(
         genotype_iter->first, this->data->vLocusInfo[iSnp].BothAlleleCount,
-        AlleleType, this->vCoefficient, this->data->getSampleNum(),
+        AlleleType, this->vCoefficient, this->data->getSampleNum()*this->data->getCallrate(iSnp),
         this->data->getNumOfChrSet());
     BOOST_ASSERT(idx < NumOfRow * NumOfCol);
     contigency[idx++] = genotype_iter->second;
