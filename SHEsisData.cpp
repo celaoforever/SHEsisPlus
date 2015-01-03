@@ -158,6 +158,16 @@ void SHEsisData::statCount() {
   std::vector<short> geno;
   for (int iSample = 0; iSample < this->SampleNum; iSample++) {
     for (int iSnp = 0; iSnp < this->SnpNum; iSnp++) {
+    	//for every genotype, sort alleles
+    	std::vector<short> tmp;
+    	for(int tmpidx=0;tmpidx<this->NumOfChrSet;tmpidx++){
+    		tmp.push_back(this->mGenotype[iSample][iSnp][tmpidx]);
+    	}
+    	std::sort(tmp.begin(),tmp.end());
+    	for(int tmpidx=0;tmpidx<this->NumOfChrSet;tmpidx++){
+    		this->mGenotype[iSample][iSnp][tmpidx]=tmp[tmpidx];
+    	}
+
       geno.clear();
       for (int iChrset = 0; iChrset < this->NumOfChrSet; iChrset++) {
         BOOST_ASSERT(iSample < this->mGenotype.shape()[0] &&
@@ -219,6 +229,15 @@ void SHEsisData::statCount(std::vector<SampleStatus>& label) {
   std::vector<short> geno;
   for (int iSample = 0; iSample < this->SampleNum; iSample++) {
     for (int iSnp = 0; iSnp < this->SnpNum; iSnp++) {
+    	//for every genotype, sort alleles
+    	std::vector<short> tmp;
+    	for(int tmpidx=0;tmpidx<this->NumOfChrSet;tmpidx++){
+    		tmp.push_back(this->mGenotype[iSample][iSnp][tmpidx]);
+    	}
+    	std::sort(tmp.begin(),tmp.end());
+    	for(int tmpidx=0;tmpidx<this->NumOfChrSet;tmpidx++){
+    		this->mGenotype[iSample][iSnp][tmpidx]=tmp[tmpidx];
+    	}
       geno.clear();
       for (int iChrset = 0; iChrset < this->NumOfChrSet; iChrset++) {
         BOOST_ASSERT(iSample < this->mGenotype.shape()[0] &&

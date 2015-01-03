@@ -15,6 +15,34 @@
 #define SHEsisABS(x) x < 0 ? (-1) * x : x
 
 typedef enum HaploMethod { EM, SAT } HapMethod;
+typedef std::vector<std::string> Vi;
+typedef std::vector<Vi> Vvi;
+
+//std::ostream&
+//operator<<(std::ostream& os, const Vi& vi)
+//{
+//  os << "(";
+//  std::copy(vi.begin(), vi.end(), std::ostream_iterator<std::string>(os, ", "));
+//  os << ")";
+//  return os;
+//}
+
+//std::ostream&
+//operator<<(std::ostream& os, const Vvi& vvi)
+//{
+//  os << "(\n";
+//  for(Vvi::const_iterator it = vvi.begin();
+//      it != vvi.end();
+//      it++) {
+//      os << "  " << *it << "\n";
+//  }
+//  os << ")";
+//  return os;
+//}
+
+void cart_product(
+    Vvi& out,  // final result
+    Vvi& in);  // final result
 
 static std::string HtmlHeader =
     "<!DOCTYPE html> \n\
