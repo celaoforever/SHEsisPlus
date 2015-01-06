@@ -14,12 +14,18 @@ namespace SHEsis {
 
 
 struct gxgBinaryRes{
+	gxgBinaryRes():permutatedDiffMean(0),permutatedDiffVar(0){};
 	std::string snpset;
 	double caseEntropy;
 	double ctrlEntropy;
 	double diff;
 	double caseLambda;
 	double ctrlLambda;
+	std::vector<double> permutatedCaseEntropy;
+	std::vector<double> permutatedCtrlEntropy;
+	double permutatedDiffMean;
+	double permutatedDiffVar;
+	double p;
 };
 
 class GeneInteractionBinary: public GeneInteraction {
@@ -28,16 +34,16 @@ public:
 	virtual ~GeneInteractionBinary();
 	virtual void CalGeneInteraction();
 	void print();
-
+	void setPermutation(int p){this->permutation=p;};
 private:
+	int permutation;
 	std::vector<gxgBinaryRes> res;
+	gxgBinaryRes GetOneSNPCombinationInformationGain2(std::vector<int>& Snp);
 	void getNonmissingSample(std::vector<int>& Snp,std::vector<int>& validCase,std::vector<int>& validCtrl);
+	//below not used in new version
 	void getSingleEntropySum(std::vector<int>& Snp,std::vector<int>& validCase,std::vector<int>& validCtrl,double& CaseSum, double& CtrlSum);
 	gxgBinaryRes GetOneSNPCombinationInformationGain(std::vector<int>& Snp);
-	void GenerateSNPCombination(int snpnum,std::vector<std::vector<int> >& ret);
-	virtual void GetInformationGain(std::vector<int>& Snp,std::vector<std::vector<std::string> >& cp,double& caseGain,double& ctrlGain);
-	virtual void GenerateGenotypeCombination(std::vector<int>& Snp,std::vector<std::vector<std::string> > & ret );
-
+	void GetInformationGain(std::vector<int>& Snp,std::vector<std::vector<std::string> >& cp,double& caseGain,double& ctrlGain);
 };
 
 } /* namespace SHEsis */

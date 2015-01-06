@@ -7,27 +7,48 @@
 
 #include "GeneInteractionBinary.h"
 #include <algorithm>
+#include <boost/math/distributions/normal.hpp>
 
 namespace SHEsis {
 
-
-
-
-
-GeneInteractionBinary::GeneInteractionBinary(boost::shared_ptr<SHEsisData> data):GeneInteraction(data) {
+GeneInteractionBinary::GeneInteractionBinary(boost::shared_ptr<SHEsisData> data):GeneInteraction(data),permutation(10) {
 	// TODO Auto-generated constructor stub
 }
 
 GeneInteractionBinary::~GeneInteractionBinary() {
 	// TODO Auto-generated destructor stub
 }
-
-void GeneInteractionBinary::print(){
-	for(int i=0;i<this->res.size();i++){
-		std::cout<<res[i].snpset<<"\tcontrol:"<<res[i].ctrlEntropy<<"\tcase:"<<res[i].caseEntropy<<"\tdiff:"<<res[i].diff
-				<<"\tcaseLambda:"<<res[i].caseLambda<<"\tcontrolLmabda:"<<res[i].ctrlLambda<<"\n";
+void GeneInteractionBinary::getNonmissingSample(std::vector<int>& Snp,std::vector<int>& validCase,std::vector<int>& validCtrl){
+	validCase.clear();
+	validCtrl.clear();
+	for(int sample=0;sample<this->data->getSampleNum();sample++){
+		bool valid=true;
+		for(int i=0;i<Snp.size();i++){
+			if(this->data->mGenotype[sample][Snp[i]][0]==0){
+				valid=false;
+				break;
+			}
+		}
+		if(valid){
+			if(this->data->vLabel[sample] == CASE)
+				validCase.push_back(sample);
+			else if (this->data->vLabel[sample] == CONTROL)
+				validCtrl.push_back(sample);
+		}
 	}
 }
+void GeneInteractionBinary::print(){
+	std::cout<<"snp\tctrlII\tcaseII\tdiff\tmean\tvar\tp\tdetail\n";
+	for(int i=0;i<this->res.size();i++){
+		std::cout<<res[i].snpset<<"\t"<<res[i].ctrlEntropy<<"\t"<<res[i].caseEntropy<<"\t"<<res[i].diff<<"\t"
+				<<res[i].permutatedDiffMean<<"\t"<<res[i].permutatedDiffVar<<"\t"<<res[i].p<<"\t";
+		for(int j=0;j<res[i].permutatedCaseEntropy.size();j++){
+				std::cout<<(res[j].permutatedCaseEntropy-res[j].permutatedCtrlEntropy)<<",";
+		}
+		std::cout<<"\n";
+	}
+}
+
 void printvector2D(std::vector<std::vector<int> > snp){
 	for(int i=0;i<snp.size();i++){
 		for(int j=0;j<snp[i].size();j++){
@@ -55,6 +76,51 @@ void GeneInteractionBinary::CalGeneInteraction(){
 	}
 }
 
+
+gxgBinaryRes GeneInteractionBinary::GetOneSNPCombinationInformationGain2(std::vector<int>& Snp){
+	gxgBinaryRes ret;
+	std::string snpset="";
+	for(int i=0;i<Snp.size()-1;i++){
+		snpset+=this->data->vLocusName[Snp[i]]+",";
+	}
+	snpset+=this->data->vLocusName[Snp[Snp.size()-1]];
+	ret.snpset=snpset;
+	std::cout<<"calculating "<<snpset<<"\n";
+	std::vector<int> validCase;
+	std::vector<int> validCtrl;
+	this->getNonmissingSample(Snp,validCase,validCtrl);
+	ret.caseEntropy =this->getInformationInteraction(validCase,Snp);
+	ret.ctrlEntropy=this->getInformationInteraction(validCtrl,Snp);
+	ret.diff=ret.caseEntropy-ret.ctrlEntropy;
+	ret.caseLambda=sqrt(1-exp((-2)*(ret.caseEntropy)));
+	ret.ctrlLambda=sqrt(1-exp((-2)*(ret.ctrlEntropy)));
+	if(this->permutation>0){
+		std::vector<int> allSamples=validCase;
+		allSamples.insert(allSamples.end(),validCtrl.begin(),validCtrl.end());
+		for(int p=0;p<this->permutation;p++){
+			std::random_shuffle(allSamples.begin(),allSamples.end());
+			std::vector<int> PermutatedCase(allSamples.begin(),allSamples.begin()+validCase.size());
+			std::vector<int> PermutatedCtrl(allSamples.begin()+validCase.size()+1,allSamples.end());
+			ret.permutatedCaseEntropy.push_back(this->getInformationInteraction(PermutatedCase,Snp));
+			ret.permutatedCtrlEntropy.push_back(this->getInformationInteraction(PermutatedCtrl,Snp));
+		}
+	}
+	//stat mean
+	for(int i=0;i<this->permutation;i++){
+		ret.permutatedDiffMean+=(ret.permutatedCaseEntropy[i]-ret.permutatedCtrlEntropy[i]);
+	}
+	ret.permutatedDiffMean/=(double)this->permutation;
+	//stat variance
+	for(int i=0;i<this->permutation;i++){
+		ret.permutatedDiffVar+=pow((ret.permutatedDiffMean-(ret.permutatedCaseEntropy[i]-ret.permutatedCtrlEntropy[i])),2.0);
+	}
+	ret.permutatedDiffVar/=(double)(this->permutation-1);
+	boost::math::normal s(ret.permutatedDiffMean,sqrt(ret.permutatedDiffVar));
+	ret.p=boost::math::cdf(boost::math::complement(s,ret.diff));
+	return ret;
+}
+
+//not used
 gxgBinaryRes GeneInteractionBinary::GetOneSNPCombinationInformationGain(std::vector<int>& Snp){
 	gxgBinaryRes ret;
 	std::string snpset="";
@@ -74,25 +140,9 @@ gxgBinaryRes GeneInteractionBinary::GetOneSNPCombinationInformationGain(std::vec
 	return ret;
 }
 
-void GeneInteractionBinary::GenerateSNPCombination(int snpnum,std::vector<std::vector<int> >& ret){
-	ret.clear();
-	std::vector<int> r;
-	std::vector<int> c;
-
-	BOOST_ASSERT(snpnum<=this->data->getSnpNum());
-	for(int i=0; i <snpnum;i++)
-		r.push_back(i);
-//	std::cout<<"snpnum:"<<this->data->getSnpNum()<<"\n";
-	for(int i=0;i<this->data->getSnpNum();i++)
-		c.push_back(i);
-
-	  do {
-	    std::vector<int> tmp = r;
-	    ret.push_back(tmp);
-	  } while (next_combination(c.begin(), c.end(), r.begin(), r.end()));
-}
-
 void GeneInteractionBinary::GetInformationGain(std::vector<int>& Snp,std::vector<std::vector<std::string> >& cp,double& caseGain,double& ctrlGain)
+
+
 {
 	caseGain=0;
 	ctrlGain=0;
@@ -115,7 +165,7 @@ void GeneInteractionBinary::GetInformationGain(std::vector<int>& Snp,std::vector
 		for(int sample=0;sample<validCase.size();sample++){
 			bool equal=true;
 			for(int i=0;i<cp[cpIdx].size();i++){
-				if(EQUAL != this->genotypeEqual(cp[cpIdx][i],validCase[sample],Snp[i])){
+				if(!this->genotypeEqual(cp[cpIdx][i],validCase[sample],Snp[i])){
 					equal = false;
 					break;
 				}
@@ -140,7 +190,7 @@ void GeneInteractionBinary::GetInformationGain(std::vector<int>& Snp,std::vector
 		for(int sample=0;sample<validCtrl.size();sample++){
 			bool equal=true;
 			for(int i=0;i<cp[cpIdx].size();i++){
-				if(EQUAL != this->genotypeEqual(cp[cpIdx][i],validCtrl[sample],Snp[i])){
+				if(! this->genotypeEqual(cp[cpIdx][i],validCtrl[sample],Snp[i])){
 					equal = false;
 					break;
 				}
@@ -166,26 +216,10 @@ void GeneInteractionBinary::GetInformationGain(std::vector<int>& Snp,std::vector
 	ctrlGain=ctrlSum-ctrlMutual;
 }
 
-void GeneInteractionBinary::getNonmissingSample(std::vector<int>& Snp,std::vector<int>& validCase,std::vector<int>& validCtrl){
-	validCase.clear();
-	validCtrl.clear();
-	for(int sample=0;sample<this->data->getSampleNum();sample++){
-		bool valid=true;
-		for(int i=0;i<Snp.size();i++){
-			if(this->data->mGenotype[sample][Snp[i]][0]==0){
-				valid=false;
-				break;
-			}
-		}
-		if(valid){
-			if(this->data->vLabel[sample] == CASE)
-				validCase.push_back(sample);
-			else if (this->data->vLabel[sample] == CONTROL)
-				validCtrl.push_back(sample);
-		}
-	}
-}
 
+
+
+//not used
 void GeneInteractionBinary::getSingleEntropySum(std::vector<int>& Snp,std::vector<int>& validCase,std::vector<int>& validCtrl,double& CaseSum, double& CtrlSum)
 {
 	CaseSum=0;
@@ -228,20 +262,6 @@ void GeneInteractionBinary::getSingleEntropySum(std::vector<int>& Snp,std::vecto
 	}
 	CaseSum*=(-1);
 	CtrlSum*=(-1);
-}
-
-void GeneInteractionBinary::GenerateGenotypeCombination(std::vector<int> &Snp,std::vector<std::vector<std::string> >& ret){
-	std::vector<std::vector<std::string> > idx;
-	ret.clear();
-	for(int i=0;i<Snp.size();i++){
-		std::vector<std::string> _idx;
-		boost::unordered_map<std::string, double>::iterator iter;
-		for(iter=this->data->vLocusInfo[Snp[i]].BothGenotypeCount.begin();iter!=this->data->vLocusInfo[Snp[i]].BothGenotypeCount.end();iter++){
-			_idx.push_back(iter->first);
-		}
-		idx.push_back(_idx);
-	}
-	cart_product(ret,idx);
 }
 
 

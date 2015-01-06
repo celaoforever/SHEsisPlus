@@ -12,15 +12,8 @@
 namespace SHEsis {
 
 
-genotypeRetCode GeneInteraction::genotypeEqual(std::string geno,int sample,int snp){
-	 if(this->data->mGenotype[sample][snp][0]==0)
-		 return MISS;
-	 std::stringstream str("");//=this->mGenotypeStr[sample][snp];
-	 str<<this->data->mGenotype[sample][snp][0];
-	 for(int p=1;p<this->data->getNumOfChrSet();p++){
-		 str<<"/"<<this->data->mGenotype[sample][snp][p];
-	 }
-	 return (!std::strcmp(str.str().data(), geno.data())?EQUAL:NOT_EQUAL);
+bool GeneInteraction::genotypeEqual(std::string geno,int sample,int snp){
+	 return (this->mGenotypeStr[sample][snp]==geno);
 }
 
 GeneInteraction::GeneInteraction(boost::shared_ptr<SHEsisData> data):lowbound(2),upperbound(2),data(data),
@@ -38,8 +31,95 @@ GeneInteraction::GeneInteraction(boost::shared_ptr<SHEsisData> data):lowbound(2)
 			this->mGenotypeStr[sample][snp]=geno.str();
 		}
 	}
+}
 
+void GeneInteraction::GenerateSNPCombination(int snpnum,std::vector<int> snpidx,std::vector<std::vector<int> >& ret){
+	ret.clear();
+	std::vector<int> r;
 
+	BOOST_ASSERT(snpnum<=snpidx.size());
+	for(int i=0; i <snpnum;i++)
+		r.push_back(i);
+	  do {
+	    std::vector<int> tmp = r;
+	    ret.push_back(tmp);
+	  } while (next_combination(snpidx.begin(), snpidx.end(), r.begin(), r.end()));
+}
+
+void GeneInteraction::GenerateSNPCombination(int snpnum,std::vector<std::vector<int> >& ret){
+	ret.clear();
+	std::vector<int> r;
+	std::vector<int> c;
+
+	BOOST_ASSERT(snpnum<=this->data->getSnpNum());
+//	BOOST_ASSERT(snpnum<=total);
+	for(int i=0; i <snpnum;i++)
+		r.push_back(i);
+//	std::cout<<"snpnum:"<<this->data->getSnpNum()<<"\n";
+	for(int i=0;i<this->data->getSnpNum();i++)
+//	for(int i=0;i<total;i++)
+		c.push_back(i);
+
+	  do {
+	    std::vector<int> tmp = r;
+	    ret.push_back(tmp);
+	  } while (next_combination(c.begin(), c.end(), r.begin(), r.end()));
+}
+
+double GeneInteraction::getInformationInteraction(std::vector<int> samples,std::vector<int> snps){
+	double ret=0;
+	for(int i=1;i<=snps.size();i++){
+		std::vector<std::vector<int> > combination;
+		this->GenerateSNPCombination(i,snps,combination);
+		for(int j =0;j<combination.size();j++){
+			ret+=pow(-1.0,(double)i)*(this->getEntropy(samples,combination[j]));
+		}
+	}
+	return ret;
+}
+
+double GeneInteraction::getEntropy(std::vector<int> samples, std::vector<int> snps){
+	double ret=0;
+	std::vector<std::vector<std::string> > cp;
+	this->GenerateGenotypeCombination(snps,cp);
+	for(int cpIdx=0;cpIdx<cp.size();cpIdx++){
+		int count=0;
+		for(int sample=0;sample<samples.size();sample++){
+			bool equal=true;
+			for(int i=0;i<cp[cpIdx].size();i++){
+				if(!this->genotypeEqual(cp[cpIdx][i],samples[sample],snps[i])){
+					equal = false;
+					break;
+				}
+			}
+			if(equal)
+				count++;
+		}
+//		std::cout<<"genotype combination for case:\n";
+//		for(int i=0;i<cp[cpIdx].size();i++){
+//			std::cout<<cp[cpIdx][i]<<",";
+//		}
+
+		double rate=(double)count/(double)samples.size();
+//		std::cout<<"\nrate="<<rate<<"\n";
+		if(rate!=0)
+			ret+=rate*log(rate);
+	}
+	return ret*(-1);
+}
+
+void GeneInteraction::GenerateGenotypeCombination(std::vector<int> &Snp,std::vector<std::vector<std::string> >& ret){
+	std::vector<std::vector<std::string> > idx;
+	ret.clear();
+	for(int i=0;i<Snp.size();i++){
+		std::vector<std::string> _idx;
+		boost::unordered_map<std::string, double>::iterator iter;
+		for(iter=this->data->vLocusInfo[Snp[i]].BothGenotypeCount.begin();iter!=this->data->vLocusInfo[Snp[i]].BothGenotypeCount.end();iter++){
+			_idx.push_back(iter->first);
+		}
+		idx.push_back(_idx);
+	}
+	cart_product(ret,idx);
 }
 
 GeneInteraction::~GeneInteraction() {
