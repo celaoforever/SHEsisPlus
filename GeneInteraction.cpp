@@ -11,10 +11,16 @@
 #include <boost/assert.hpp>
 namespace SHEsis {
 
+
 genotypeRetCode GeneInteraction::genotypeEqual(std::string geno,int sample,int snp){
 	 if(this->data->mGenotype[sample][snp][0]==0)
 		 return MISS;
-	 return (this->mGenotypeStr[sample][snp] == geno?EQUAL:NOT_EQUAL);
+	 std::stringstream str("");//=this->mGenotypeStr[sample][snp];
+	 str<<this->data->mGenotype[sample][snp][0];
+	 for(int p=1;p<this->data->getNumOfChrSet();p++){
+		 str<<"/"<<this->data->mGenotype[sample][snp][p];
+	 }
+	 return (!std::strcmp(str.str().data(), geno.data())?EQUAL:NOT_EQUAL);
 }
 
 GeneInteraction::GeneInteraction(boost::shared_ptr<SHEsisData> data):lowbound(2),upperbound(2),data(data),

@@ -8,7 +8,6 @@
 #include "GeneInteractionBinary.h"
 #include <algorithm>
 
-
 namespace SHEsis {
 
 
@@ -17,7 +16,6 @@ namespace SHEsis {
 
 GeneInteractionBinary::GeneInteractionBinary(boost::shared_ptr<SHEsisData> data):GeneInteraction(data) {
 	// TODO Auto-generated constructor stub
-
 }
 
 GeneInteractionBinary::~GeneInteractionBinary() {
@@ -26,7 +24,8 @@ GeneInteractionBinary::~GeneInteractionBinary() {
 
 void GeneInteractionBinary::print(){
 	for(int i=0;i<this->res.size();i++){
-		std::cout<<res[i].snpset<<"\tcontrol:"<<res[i].ctrlEntropy<<"\tcase:"<<res[i].caseEntropy<<"\tdiff:"<<res[i].diff<<"\n";
+		std::cout<<res[i].snpset<<"\tcontrol:"<<res[i].ctrlEntropy<<"\tcase:"<<res[i].caseEntropy<<"\tdiff:"<<res[i].diff
+				<<"\tcaseLambda:"<<res[i].caseLambda<<"\tcontrolLmabda:"<<res[i].ctrlLambda<<"\n";
 	}
 }
 void printvector2D(std::vector<std::vector<int> > snp){
@@ -51,6 +50,7 @@ void GeneInteractionBinary::CalGeneInteraction(){
 		GenerateSNPCombination(i,Snp);
 		for(int j=0;j<Snp.size();j++){
 			this->res.push_back(this->GetOneSNPCombinationInformationGain(Snp[j]));
+//			this->ThreadPool.enqueue(boost::bind(&GeneInteractionBinary::GetOneSNPCombinationInformationGain,this,Snp[j]));
 		}
 	}
 }
@@ -63,12 +63,14 @@ gxgBinaryRes GeneInteractionBinary::GetOneSNPCombinationInformationGain(std::vec
 	}
 	snpset+=this->data->vLocusName[Snp[Snp.size()-1]];
 	ret.snpset=snpset;
-//	std::cout<<"calculating "<<snpset<<"\n";
+	std::cout<<"calculating "<<snpset<<"\n";
 	double caseEntropy=0,controlEntropy=0;
 	std::vector<std::vector<std::string> > cp;
 	this->GenerateGenotypeCombination(Snp,cp);
 	this->GetInformationGain(Snp,cp,ret.caseEntropy,ret.ctrlEntropy);
 	ret.diff=ret.caseEntropy-ret.ctrlEntropy;
+	ret.caseLambda=sqrt(1-exp((-2)*(ret.caseEntropy)));
+	ret.ctrlLambda=sqrt(1-exp((-2)*(ret.ctrlEntropy)));
 	return ret;
 }
 
@@ -103,8 +105,8 @@ void GeneInteractionBinary::GetInformationGain(std::vector<int>& Snp,std::vector
 //	std::cout<<"valid control:";
 //	printvector1D(validCtrl);
 	this->getSingleEntropySum(Snp,validCase,validCtrl,caseSum,ctrlSum);
-//	std::cout<<"case Entropy sum="<<caseSum<<"\n";
-//	std::cout<<"ctrl Entropy sum="<<ctrlSum<<"\n";
+	std::cout<<"case Entropy sum="<<caseSum<<"\n";
+	std::cout<<"ctrl Entropy sum="<<ctrlSum<<"\n";
 	//calculate case information gain
 	double caseMutual=0;
 	double ctrlMutual=0;
@@ -121,7 +123,13 @@ void GeneInteractionBinary::GetInformationGain(std::vector<int>& Snp,std::vector
 			if(equal)
 				count++;
 		}
+		std::cout<<"genotype combination for case:\n";
+		for(int i=0;i<cp[cpIdx].size();i++){
+			std::cout<<cp[cpIdx][i]<<",";
+		}
+
 		double rate=(double)count/(double)validCase.size();
+		std::cout<<"\nrate="<<rate<<"\n";
 		if(rate!=0)
 			caseMutual+=rate*log(rate);
 	}
@@ -140,14 +148,20 @@ void GeneInteractionBinary::GetInformationGain(std::vector<int>& Snp,std::vector
 			if(equal)
 				count++;
 		}
+		std::cout<<"genotype combination for control:\n";
+		for(int i=0;i<cp[cpIdx].size();i++){
+			std::cout<<cp[cpIdx][i]<<",";
+		}
+
 		double rate=(double)count/(double)validCtrl.size();
+		std::cout<<"\nrate="<<rate<<"\n";
 		if(rate!=0)
 			ctrlMutual+=rate*log(rate);
 	}
 	caseMutual*=(-1);
 	ctrlMutual*=(-1);
-//	std::cout<<"case Mutual entropy="<<caseMutual<<"\n";
-//	std::cout<<"ctrl Mutual entropy="<<ctrlMutual<<"\n";
+	std::cout<<"case Mutual entropy="<<caseMutual<<"\n";
+	std::cout<<"ctrl Mutual entropy="<<ctrlMutual<<"\n";
 	caseGain=caseSum-caseMutual;
 	ctrlGain=ctrlSum-ctrlMutual;
 }
@@ -202,14 +216,14 @@ void GeneInteractionBinary::getSingleEntropySum(std::vector<int>& Snp,std::vecto
 			if(0 != rate){
 				CaseSum+=rate*log(rate);
 			}
-//			std::cout<<"case, genotype:"<<iter->first<<",count:"<<iter->second<<",rate="<<rate<<"\n";
+			std::cout<<"case, genotype:"<<iter->first<<",count:"<<iter->second<<",rate="<<rate<<"\n";
 		}
 		for(iter=ctrlCount.begin();iter!=ctrlCount.end();iter++){
 			double rate=(double)iter->second/(double)validCtrl.size();
 			if(0 != rate){
 				CtrlSum+=rate*log(rate);
 			}
-//			std::cout<<"ctrl, genotype:"<<iter->first<<",count:"<<iter->second<<",rate="<<rate<<"\n";
+			std::cout<<"ctrl, genotype:"<<iter->first<<",count:"<<iter->second<<",rate="<<rate<<"\n";
 		}
 	}
 	CaseSum*=(-1);

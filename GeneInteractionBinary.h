@@ -18,6 +18,8 @@ struct gxgBinaryRes{
 	double caseEntropy;
 	double ctrlEntropy;
 	double diff;
+	double caseLambda;
+	double ctrlLambda;
 };
 
 class GeneInteractionBinary: public GeneInteraction {

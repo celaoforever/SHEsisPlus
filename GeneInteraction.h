@@ -10,6 +10,7 @@
 #include "SHEsisData.h"
 #include "boost/shared_ptr.hpp"
 #include "utility.h"
+
 template bool next_combination(std::vector<int>::iterator n_begin,
                                std::vector<int>::iterator n_end,
                                std::vector<int>::iterator r_begin,
