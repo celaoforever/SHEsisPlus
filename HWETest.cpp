@@ -145,8 +145,12 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
                  (contigency[i + 1] - contigency[i]) / contigency[i + 1];
 //    std::cout<<",expected count:"<<contigency[i + 1]<<",obs:"<<contigency[i]<<"\n";
   }
-  boost::math::chi_squared dist(NumOfCol < 1 ? 1 : (NumOfCol-1));
+  boost::math::chi_squared dist(NumOfCol <= 1 ? 1 : (NumOfCol-1));
+  try{
   CasePearsonP = boost::math::cdf(boost::math::complement(dist, CaseChi));
+  }catch(...){
+  CasePearsonP=-999; 
+ }
 
   double expect = -1.0;
   double percnt = 100.0;
@@ -199,7 +203,11 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
       ControlChi += (contigency[i + 1] - contigency[i]) *
                     (contigency[i + 1] - contigency[i]) / contigency[i + 1];
   }
+  try{
   ControlPearsonP = boost::math::cdf(boost::math::complement(dist, ControlChi));
+  }catch(...){
+  ControlPearsonP = -999;
+  }
   try {
     fexact(&NumOfRow, &NumOfCol, contigency, &NumOfRow, &expect, &percnt, &emin,
            &prt, &pre, &ws);
@@ -244,7 +252,11 @@ void HWETest::SingleSnpHWETest(int iSnp, double& CaseChi, double& CasePearsonP,
       BothChi += (contigency[i + 1] - contigency[i]) *
                  (contigency[i + 1] - contigency[i]) / contigency[i + 1];
   }
+  try{
   BothPearsonP = boost::math::cdf(boost::math::complement(dist, BothChi));
+  }catch(...){
+  BothPearsonP = -999;
+  }
   try {
     fexact(&NumOfRow, &NumOfCol, contigency, &NumOfRow, &expect, &percnt, &emin,
            &prt, &pre, &ws);
@@ -334,8 +346,12 @@ void HWETest::SingleSnpHWETestBoth(int iSnp, double& BothChi,
       BothChi += (contigency[i + 1] - contigency[i]) *
                  (contigency[i + 1] - contigency[i]) / contigency[i + 1];
   }
-  boost::math::chi_squared dist(NumOfCol);
+  boost::math::chi_squared dist(NumOfCol<=1?1:NumOfCol-1);
+  try{
   BothPearsonP = boost::math::cdf(boost::math::complement(dist, BothChi));
+  }catch(...){
+	BothPearsonP=-999;
+  }
 
   double expect = -1.0;
   double percnt = 100.0;
