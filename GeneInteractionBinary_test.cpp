@@ -31,9 +31,60 @@ void SetGXG(boost::shared_ptr<SHEsis::SHEsisData> data,int snp1,int snp2,double 
 		}
 //		std::cout<<"sample "<<i<<",origin:"<<data->mGenotype[i][snp2][0]<<data->mGenotype[i][snp2][1];
 		for(int p=0;p<ploidy;p++){
-			data->mGenotype[i][snp2][p]=3-data->mGenotype[i][snp1][p];
+			if(data->mGenotype[i][snp1][p]!=0)
+				data->mGenotype[i][snp2][p]=3-data->mGenotype[i][snp1][p];
 		}
 //		std::cout<<"sample "<<i<<",after:"<<data->mGenotype[i][snp2][0]<<data->mGenotype[i][snp2][1];
+
+	}
+}
+
+bool equal( boost::multi_array<short, 3> data,int sample,int snp1,int snp2, int ploidy){
+//	std::cout<<"snp1:";
+//	for(int i=0;i<ploidy;i++){
+//		std::cout<<data[sample][snp1][i];
+//	};
+//	std::cout<<"\nsnp2:";
+//	for(int i=0;i<ploidy;i++){
+//		std::cout<<data[sample][snp2][i];
+//	};
+//	std::cout<<"\n";
+	for(int p=0;p<ploidy;p++){
+		if(data[sample][snp1][p]!=data[sample][snp2][p]){
+//			std::cout<<"not equal\n";
+			return false;
+		}
+	}
+//	std::cout<<"equal\n";
+	return true;
+}
+
+void SetGXGXG(boost::shared_ptr<SHEsis::SHEsisData> data,int snp1,int snp2,int snp3,double pre){
+	int ploidy=data->getNumOfChrSet();
+	boost::uniform_int<> dist(1,100);
+	boost::variate_generator<boost::mt19937,boost::uniform_int<> > dice(boost_rng,dist);
+	for(int i=0;i<data->getSampleNum();i++){
+		if(data->vLabel[i]==CONTROL)
+			continue;
+
+		double n=(double)dice()/100.;
+		if(n>pre){
+//			std::cout<<"n="<<n<<",skip sample"<<i<<"\n";
+			continue;
+		}
+//		std::cout<<"sample "<<i<<",origin:"<<data->mGenotype[i][snp2][0]<<data->mGenotype[i][snp2][1];
+		if(!equal(data->mGenotype,i,snp1,snp2,ploidy)){
+//			std::cout<<"sample "<<i<<" set to 1/1\n";
+			for(int p=0;p<ploidy;p++){
+				data->mGenotype[i][snp3][p]=1;
+			}
+		}
+		else{
+//			std::cout<<"sample "<<i<<" set to 2/2\n";
+			for(int p=0;p<ploidy;p++){
+				data->mGenotype[i][snp3][p]=2;
+			}
+		}
 
 	}
 }
@@ -43,8 +94,8 @@ boost::shared_ptr<SHEsis::SHEsisData> GenerateRandomData(int sampleNum,
                                                          int chrSetNum) {
   double probabilities[] = {0, 0.5,
                             0.5};  // 0.04 missing phenotype for individuals
-  double probabilities2[] = {0.1, 0.45,
-                             0.45};  // 0.01 is missing genotype for individuals
+  double probabilities2[] = {0.0, 0.5,
+                             0.5};  // 0.01 is missing genotype for individuals
   boost::random::discrete_distribution<> dist(probabilities);
   boost::random::discrete_distribution<> dist2(probabilities2);
   boost::shared_ptr<SHEsis::SHEsisData> data(
@@ -74,13 +125,15 @@ int main(){
 			{{"1","1"},{"2","2"},{"1","2"}}
 	};
 
-//	double res[6]={1,1,1,2,2,2};
+	double res[6]={1,1,1,2,2,2};
 	int sampleNum = 2000;
-	int snpNum = 30;
+	int snpNum = 5;
 	int ploidy = 2;
 //	boost::shared_ptr<SHEsisData> data(new SHEsis::SHEsisData(sampleNum, snpNum, ploidy));
 	boost::shared_ptr<SHEsisData> data=GenerateRandomData(sampleNum,snpNum,ploidy);
-	SetGXG(data,28,29,0.2);
+	data->statCount();
+//	SetGXG(data,0,1,0.5);
+	SetGXGXG(data,0,1,2,0.1);
 //	  std::cout << "Genotype Matrix:\n";
 //	  for (int iSample = 0; iSample < sampleNum; iSample++) {
 //		  std::cout<<((int)data->vLabel[iSample]==2?"case: ":"ctrl: ");
@@ -104,6 +157,7 @@ int main(){
 //	std::cout<<"snpnum="<<data->getSnpNum()<<"\n";
 	GeneInteractionBinary gib(data);
 	gib.setlb(3);
+	gib.setPermutation(10);
 	gib.setub(3);
 	gib.CalGeneInteraction();
 	gib.print();

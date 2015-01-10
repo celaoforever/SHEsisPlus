@@ -14,7 +14,7 @@ namespace SHEsis {
 
 
 struct gxgBinaryRes{
-	gxgBinaryRes():permutatedDiffMean(0),permutatedDiffVar(0){};
+	gxgBinaryRes():permutatedDiffMean(0),permutatedDiffVar(0),p(-999){};
 	std::string snpset;
 	double caseEntropy;
 	double ctrlEntropy;

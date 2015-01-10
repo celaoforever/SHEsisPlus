@@ -42,9 +42,9 @@ void GeneInteractionBinary::print(){
 	for(int i=0;i<this->res.size();i++){
 		std::cout<<res[i].snpset<<"\t"<<res[i].ctrlEntropy<<"\t"<<res[i].caseEntropy<<"\t"<<res[i].diff<<"\t"
 				<<res[i].permutatedDiffMean<<"\t"<<res[i].permutatedDiffVar<<"\t"<<res[i].p<<"\t";
-		for(int j=0;j<res[i].permutatedCaseEntropy.size();j++){
-				std::cout<<(res[j].permutatedCaseEntropy-res[j].permutatedCtrlEntropy)<<",";
-		}
+//		for(int j=0;j<res[i].permutatedCaseEntropy.size();j++){
+//				std::cout<<(res[i].permutatedCaseEntropy[j]-res[i].permutatedCtrlEntropy[j])<<",";
+//		}
 		std::cout<<"\n";
 	}
 }
@@ -70,7 +70,7 @@ void GeneInteractionBinary::CalGeneInteraction(){
 		std::vector<std::vector<int>  > Snp;
 		GenerateSNPCombination(i,Snp);
 		for(int j=0;j<Snp.size();j++){
-			this->res.push_back(this->GetOneSNPCombinationInformationGain(Snp[j]));
+			this->res.push_back(this->GetOneSNPCombinationInformationGain2(Snp[j]));
 //			this->ThreadPool.enqueue(boost::bind(&GeneInteractionBinary::GetOneSNPCombinationInformationGain,this,Snp[j]));
 		}
 	}
@@ -89,34 +89,52 @@ gxgBinaryRes GeneInteractionBinary::GetOneSNPCombinationInformationGain2(std::ve
 	std::vector<int> validCase;
 	std::vector<int> validCtrl;
 	this->getNonmissingSample(Snp,validCase,validCtrl);
+//	std::cout<<"nonmissing case:";
+//	printvector1D(validCase);
+//	std::cout<<"nonmissing ctrl:";
+//	printvector1D(validCtrl);
 	ret.caseEntropy =this->getInformationInteraction(validCase,Snp);
 	ret.ctrlEntropy=this->getInformationInteraction(validCtrl,Snp);
+//	std::cout<<"case entropy="<<ret.caseEntropy<<"\n";
+//	std::cout<<"ctrl entropy="<<ret.ctrlEntropy<<"\n";
 	ret.diff=ret.caseEntropy-ret.ctrlEntropy;
 	ret.caseLambda=sqrt(1-exp((-2)*(ret.caseEntropy)));
 	ret.ctrlLambda=sqrt(1-exp((-2)*(ret.ctrlEntropy)));
 	if(this->permutation>0){
+//		std::cout<<"permutating...\n";
 		std::vector<int> allSamples=validCase;
 		allSamples.insert(allSamples.end(),validCtrl.begin(),validCtrl.end());
+//		std::cout<<"all samples:";
+//		printvector1D(allSamples);
 		for(int p=0;p<this->permutation;p++){
+//			std::cout<<"permutating round "<<p<<"\n";
 			std::random_shuffle(allSamples.begin(),allSamples.end());
 			std::vector<int> PermutatedCase(allSamples.begin(),allSamples.begin()+validCase.size());
-			std::vector<int> PermutatedCtrl(allSamples.begin()+validCase.size()+1,allSamples.end());
+			std::vector<int> PermutatedCtrl(allSamples.begin()+validCase.size(),allSamples.end());
+//			std::cout<<"permutated case:";
+//			printvector1D(PermutatedCase);
+//			std::cout<<"permutated ctrl:";
+//			printvector1D(PermutatedCtrl);
 			ret.permutatedCaseEntropy.push_back(this->getInformationInteraction(PermutatedCase,Snp));
 			ret.permutatedCtrlEntropy.push_back(this->getInformationInteraction(PermutatedCtrl,Snp));
+//			std::cout<<"permutated case entropy:"<<ret.permutatedCaseEntropy[ret.permutatedCaseEntropy.size()-1]<<"\n";
+//			std::cout<<"permutated ctrl entropy:"<<ret.permutatedCtrlEntropy[ret.permutatedCtrlEntropy.size()-1]<<"\n";
 		}
+		//stat mean
+		for(int i=0;i<this->permutation;i++){
+			ret.permutatedDiffMean+=(ret.permutatedCaseEntropy[i]-ret.permutatedCtrlEntropy[i]);
+		}
+		ret.permutatedDiffMean/=(double)this->permutation;
+		//stat variance
+		for(int i=0;i<this->permutation;i++){
+			ret.permutatedDiffVar+=pow((ret.permutatedDiffMean-(ret.permutatedCaseEntropy[i]-ret.permutatedCtrlEntropy[i])),2.0);
+		}
+		ret.permutatedDiffVar/=(double)(this->permutation-1);
+		boost::math::normal s(ret.permutatedDiffMean,sqrt(ret.permutatedDiffVar));
+		double _abs=ret.diff<0?(-1)*ret.diff:ret.diff;
+		ret.p=boost::math::cdf(boost::math::complement(s,_abs));
+//		std::cout<<"mean="<<s.mean()<<",stdev="<<s.standard_deviation()<<",abs_val="<<_abs<<",p="<<ret.p<<"\n";
 	}
-	//stat mean
-	for(int i=0;i<this->permutation;i++){
-		ret.permutatedDiffMean+=(ret.permutatedCaseEntropy[i]-ret.permutatedCtrlEntropy[i]);
-	}
-	ret.permutatedDiffMean/=(double)this->permutation;
-	//stat variance
-	for(int i=0;i<this->permutation;i++){
-		ret.permutatedDiffVar+=pow((ret.permutatedDiffMean-(ret.permutatedCaseEntropy[i]-ret.permutatedCtrlEntropy[i])),2.0);
-	}
-	ret.permutatedDiffVar/=(double)(this->permutation-1);
-	boost::math::normal s(ret.permutatedDiffMean,sqrt(ret.permutatedDiffVar));
-	ret.p=boost::math::cdf(boost::math::complement(s,ret.diff));
 	return ret;
 }
 

@@ -36,10 +36,14 @@ GeneInteraction::GeneInteraction(boost::shared_ptr<SHEsisData> data):lowbound(2)
 void GeneInteraction::GenerateSNPCombination(int snpnum,std::vector<int> snpidx,std::vector<std::vector<int> >& ret){
 	ret.clear();
 	std::vector<int> r;
-
+//    std::cout<<"GenerateSNPCombination()\nsnpnum="<<snpnum<<"\n";
+//    std::cout<<"snpidx:";
+//    for(int i=0;i<snpidx.size();i++)
+//    	std::cout<<snpidx[i]<<",";
+//    std::cout<<"\n";
 	BOOST_ASSERT(snpnum<=snpidx.size());
 	for(int i=0; i <snpnum;i++)
-		r.push_back(i);
+		r.push_back(snpidx[i]);
 	  do {
 	    std::vector<int> tmp = r;
 	    ret.push_back(tmp);
@@ -68,11 +72,16 @@ void GeneInteraction::GenerateSNPCombination(int snpnum,std::vector<std::vector<
 
 double GeneInteraction::getInformationInteraction(std::vector<int> samples,std::vector<int> snps){
 	double ret=0;
+//	std::cout<<"getInformationInteraction()\nsnps:";
+//	for(int i=0;i<snps.size();i++){
+//		std::cout<<snps[i]<<",";
+//	}
 	for(int i=1;i<=snps.size();i++){
+//		std::cout<<"number of snp:"<<i<<"\n";
 		std::vector<std::vector<int> > combination;
 		this->GenerateSNPCombination(i,snps,combination);
 		for(int j =0;j<combination.size();j++){
-			ret+=pow(-1.0,(double)i)*(this->getEntropy(samples,combination[j]));
+			ret+=pow(-1.0,(double)(snps.size()-i))*(this->getEntropy(samples,combination[j]));
 		}
 	}
 	return ret;
@@ -80,8 +89,20 @@ double GeneInteraction::getInformationInteraction(std::vector<int> samples,std::
 
 double GeneInteraction::getEntropy(std::vector<int> samples, std::vector<int> snps){
 	double ret=0;
+//	std::cout<<"getEntropy()\nsnps:";
+//	for(int i=0;i<snps.size();i++){
+//		std::cout<<snps[i]<<",";
+//	}
 	std::vector<std::vector<std::string> > cp;
 	this->GenerateGenotypeCombination(snps,cp);
+
+//	std::cout<<"\ncp:\n";
+//	for(int i=0;i<cp.size();i++){
+//		for(int j=0;j<cp[i].size();j++){
+//			std::cout<<cp[i][j]<<",";
+//		}
+//		std::cout<<"\n";
+//	}
 	for(int cpIdx=0;cpIdx<cp.size();cpIdx++){
 		int count=0;
 		for(int sample=0;sample<samples.size();sample++){
