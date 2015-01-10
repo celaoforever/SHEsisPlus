@@ -16,12 +16,6 @@ template bool next_combination(std::vector<int>::iterator n_begin,
                                std::vector<int>::iterator r_begin,
                                std::vector<int>::iterator r_end);
 namespace SHEsis {
-typedef enum{
-	EQUAL=0,
-	NOT_EQUAL=1,
-	MISS=2
-}genotypeRetCode;
-
 
 class GeneInteraction {
 public:
@@ -35,12 +29,12 @@ protected:
 	int lowbound;
 	int upperbound;
 	boost::multi_array<std::string,2> mGenotypeStr;
-	genotypeRetCode genotypeEqual(std::string geno,int sample,int snp);
-	virtual double GetSingleSNPEntroyp(int snp,int group){};
-	virtual double GetMutualEntropy(std::vector<int> Snp){};
-	virtual void  GenerateGenotypeCombination(std::vector<int> Snp,std::vector<std::vector<std::string> >& ret ){};
-	virtual double GenotypeCombinationCount(std::vector<int> Snp,std::vector<int> Genotype,int group){};
-
+	void GenerateSNPCombination(int snpnum,std::vector<std::vector<int> >& ret);
+	void GenerateSNPCombination(int snpnum,std::vector<int> snpidx,std::vector<std::vector<int> >& ret);
+	void GenerateGenotypeCombination(std::vector<int>& Snp,std::vector<std::vector<std::string> > & ret );
+	bool genotypeEqual(std::string geno,int sample,int snp);
+	double getEntropy(std::vector<int> samples, std::vector<int> snps);
+	double getInformationInteraction(std::vector<int> samples,std::vector<int> snps);
 };
 
 } /* namespace SHEsis */
