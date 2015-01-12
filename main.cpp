@@ -550,8 +550,8 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
     if (ld) SHEsisArgs.ldtype = SHEsis::LD_IN_BOTH;
   };
 
-  if (vm.count("permutation") > 0 && vm.count("assoc") == 0)
-    throw std::runtime_error("--permutaion should be used along with --assoc");
+//  if (vm.count("permutation") > 0 && vm.count("assoc") == 0)
+  //  throw std::runtime_error("--permutaion should be used along with --assoc");
   //  if(vm.count("assoc")!=0 && vm.count("qtl")!=0)
   //	  throw std::runtime_error("--assoc cannot be specified together with
   //--qtl");
