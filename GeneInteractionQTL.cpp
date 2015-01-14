@@ -328,11 +328,11 @@ gxgQTLRes GeneInteractionQTL::GetOneSNPCombinationInformationGain(std::vector<in
 	lr->resetResponse(norm_qtl);
 	lr->resetSNP(norm_entropy);
 	lr->regress();
-	for(int i=0;i<ret.qtl.size();i++){
-		std::cout<<lr->regressors(0,i)<<"\t\t"<<lr->responses(i)<<"\t\t"<<lr->predictions(i)<<"\n";
-	}
-	std::cout<<"regression function:\ny="<<lr->coef(1)<<"x"<<(lr->coef(0)>0?"+":"-")<<lr->coef(0)<<",se="<<lr->se(1)<<"\n";
-	std::cout<<"se="<<lr->se(1)<<",p="<<lr->p(1)<<"\n\n";
+//	for(int i=0;i<ret.qtl.size();i++){
+//		std::cout<<lr->regressors(0,i)<<"\t\t"<<lr->responses(i)<<"\t\t"<<lr->predictions(i)<<"\n";
+//	}
+//	std::cout<<"regression function:\ny="<<lr->coef(1)<<"x"<<(lr->coef(0)>0?"+":"-")<<lr->coef(0)<<",se="<<lr->se(1)<<"\n";
+//	std::cout<<"se="<<lr->se(1)<<",p="<<lr->p(1)<<"\n\n";
 
 	ret.coef=lr->coef(1);
 	ret.p=lr->p(1);
