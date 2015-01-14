@@ -10,7 +10,6 @@
 using namespace std;
 using namespace SHEsis;
 #include <boost/random/discrete_distribution.hpp>
-#include <boost/assert.hpp>
 #include <boost/generator_iterator.hpp>
 #include <boost/random.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -21,13 +20,9 @@ boost::mt19937 boost_rng;
 boost::shared_ptr<SHEsis::SHEsisData> GenerateRandomData(int sampleNum,
                                                          int snpNum,
                                                          int chrSetNum) {
-  double probabilities[] = {0, 0.5,
-                            0.5};  // 0.04 missing phenotype for individuals
-  double GenoProb[] = {0.0, 0.5,
-                             0.5};  // 0.01 is missing genotype for individuals
-
-  boost::normal_distribution<> nd(10,2);
-  boost::variate_generator<boost::mt19937&,boost::normal_distribution<> > var_nor(rng, nd);
+  double GenoProb[] = {0.0, 0.5,0.5};  // 0.01 is missing genotype for individuals
+  boost::normal_distribution<> nd(0,1); //phenotype, sigma=2, mean=10
+  boost::variate_generator<boost::mt19937&,boost::normal_distribution<> > var_nor(boost_rng, nd);
   boost::random::discrete_distribution<> distGeno(GenoProb);
   boost::shared_ptr<SHEsis::SHEsisData> data(
       new SHEsis::SHEsisData(sampleNum, snpNum, chrSetNum));
@@ -42,6 +37,23 @@ boost::shared_ptr<SHEsis::SHEsisData> GenerateRandomData(int sampleNum,
   return data;
 }
 
+void SetGXG(boost::shared_ptr<SHEsis::SHEsisData> data,int snp1,int snp2,double pre){
+	int ploidy=data->getNumOfChrSet();
+	boost::uniform_int<> dist(1,100);
+	boost::variate_generator<boost::mt19937,boost::uniform_int<> > dice(boost_rng,dist);
+	for(int i=0;i<data->getSampleNum();i++){
+		double n=(double)dice()/100.;
+		if(n>pre){
+			continue;
+		}
+		double qtl=data->vQuantitativeTrait[i];
+		for(int p=0;p<ploidy;p++){
+			if(data->mGenotype[i][snp1][p]!=0)
+				data->mGenotype[i][snp2][p]=3-data->mGenotype[i][snp1][p];
+		}
+	}
+}
+
 int main(){
 	int sampleNum = 2000;
 	int snpNum = 5;
@@ -51,7 +63,7 @@ int main(){
 
 //	  std::cout << "Genotype Matrix:\n";
 //	  for (int iSample = 0; iSample < sampleNum; iSample++) {
-//		  std::cout<<((int)data->vLabel[iSample]==2?"case: ":"ctrl: ");
+//		  std::cout<<iSample<<"\t"<<(data->vQuantitativeTrait[iSample])<<" ";
 //	    for (int iSnp = 0; iSnp < snpNum; iSnp++) {
 //	      for (int iChrset = 0; iChrset < ploidy; iChrset++) {
 //	        std::cout << data->mGenotype[iSample][iSnp][iChrset] << "/";
@@ -62,6 +74,9 @@ int main(){
 //	  }
 
 	GeneInteractionQTL gib(data);
+	gib.setBinNum(100);
+	gib.setSamplePerBin(3);
+	gib.setMinBin(2);
 	gib.setlb(2);
 	gib.setub(3);
 	gib.CalGeneInteraction();

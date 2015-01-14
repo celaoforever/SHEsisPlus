@@ -14,6 +14,7 @@ namespace SHEsis {
 struct bin{
 	double start;
 	double end;
+	double meanqtl;
 	std::vector<int> SampleIdx;
 };
 
@@ -29,12 +30,17 @@ struct gxgQTLRes{
 	int nonmissing;
 };
 
+struct qtl2sampleIdx{
+	double qtl;
+	int idx;
+};
 class GeneInteractionQTL: public GeneInteraction {
 public:
 	GeneInteractionQTL(boost::shared_ptr<SHEsisData> data);
 	virtual ~GeneInteractionQTL();
 	virtual void CalGeneInteraction();
 	void setSamplePerBin(int s){this->MinSamplesPerBin=s;};
+	void setBinNum(int s){this->NumBin=s;};
 	void setMaxBin(int s){this->MaxBin=s;};
 	void setMinBin(int s){this->MinBin=s;};
 	void print();
@@ -44,14 +50,17 @@ private:
 	void statIntervalSampleNum(bin& b);
 	void statIntervalSampleNum(bin& b,std::vector<int>& samples);
 	int  UpdateBins(std::vector<int>& snp);
+	int  UpdateBins2(std::vector<int>& snp);
 	void GetBins();
 	void GetNonmissingSamples(std::vector<int>& snp,std::vector<int>& output );
+	void GetNonmissingSamples2(std::vector<int>& snp,std::vector<qtl2sampleIdx>& output );
 	bool ForwardMergeBins(std::list<bin>::iterator& iter);
 	bool BackwardMergeBins(std::list<bin>::reverse_iterator& iter);
 	std::list<bin> bins;
 	std::vector<gxgQTLRes> res;
 	boost::shared_ptr<linear> lr;
 	int MinSamplesPerBin;
+	int NumBin;
 	int MaxBin;
 	int MinBin;
 };
