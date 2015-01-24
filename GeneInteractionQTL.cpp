@@ -22,6 +22,7 @@ GeneInteractionQTL::~GeneInteractionQTL() {
 bool sortSampleByQtl(const qtl2sampleIdx& v1, const qtl2sampleIdx& v2){
 	return (v1.qtl<v2.qtl);
 }
+
 int GeneInteractionQTL::UpdateBins2(std::vector<int>& snp){
 	this->bins.clear();
 	std::vector<qtl2sampleIdx> validSamples;
@@ -38,15 +39,17 @@ int GeneInteractionQTL::UpdateBins2(std::vector<int>& snp){
 		if(rest>this->MinSamplesPerBin)
 			this->NumBin++;
 	}
-	std::cout<<"NumBin="<<this->NumBin<<",samplesPerbin="<<SamplesPerBin<<"\n";
+//	std::cout<<"NumBin="<<this->NumBin<<",samplesPerbin="<<SamplesPerBin<<"\n";
 	if(this->NumBin<this->MinBin)
 		return 0;
 
 	for(int i=0;i<this->NumBin-1;i++){
+//		std::cout<<"bin "<<i<<":";
 		bin b;
 		b.meanqtl=0;
 		for(int j=0;j<SamplesPerBin;j++){
 			int sampleidx=validSamples[i*SamplesPerBin+j].idx;
+//			std::cout<<sampleidx<<",";
 			double qtl=validSamples[i*SamplesPerBin+j].qtl;
 			b.SampleIdx.push_back(sampleidx);
 			b.meanqtl+=qtl;
@@ -56,6 +59,7 @@ int GeneInteractionQTL::UpdateBins2(std::vector<int>& snp){
 				b.end=qtl;
 
 		}
+//		std::cout<<"\n";
 		b.meanqtl/=(double)SamplesPerBin;
 		this->bins.push_back(b);
 	}
@@ -259,9 +263,9 @@ void GeneInteractionQTL::print(){
 	std::cout<<"snp_set\tnonmissing\tnum_bin\tcoef\tse\tp\tdetail\n";
 	for(int i=0;i<this->res.size();i++){
 		std::cout<<res[i].snpset<<"\t"<<res[i].nonmissing<<"\t"<<res[i].numBin<<"\t"<<res[i].coef<<"\t"<<res[i].se<<"\t"<<res[i].p<<"\t";
-//		for(int j=0;j<res[i].entropy.size();j++){
-//			std::cout<<res[i].entropy[j]<<",";
-//		}
+		for(int j=0;j<res[i].entropy.size();j++){
+			std::cout<<res[i].entropy[j]<<",";
+		}
 		std::cout<<"\n";
 	}
 }
@@ -298,7 +302,12 @@ void normalizeVector(std::vector<double>& v, std::vector<double>& out){
 		out.push_back(val);
 	}
 }
-
+void printvector1DD(std::vector<int> snp){
+	for(int i=0;i<snp.size();i++){
+			std::cout<<snp[i]<<",";
+	}
+	std::cout<<"\n";
+}
 gxgQTLRes GeneInteractionQTL::GetOneSNPCombinationInformationGain(std::vector<int>& Snp){
 	gxgQTLRes ret;
 	std::string snpset="";
@@ -314,19 +323,23 @@ gxgQTLRes GeneInteractionQTL::GetOneSNPCombinationInformationGain(std::vector<in
 		return ret;
 	};
 	//calculate information iteraction within each bins
+//	int _i=0;
 	for(std::list<bin>::iterator iter=this->bins.begin();iter != this->bins.end();iter++){
 		ret.entropy.push_back(this->getInformationInteraction(iter->SampleIdx,Snp));
+//		std::cout<<"bin "<<_i<<",total:"<<iter->SampleIdx.size()<<":\n";
+//		printvector1DD(iter->SampleIdx);
 		ret.qtl.push_back(this->getIntervalQTL(*iter));
+//		_i++;
 	}
 	//linear regression
-	std::vector<double> norm_qtl;
-	std::vector<double> norm_entropy;
-	normalizeVector(ret.qtl,norm_qtl);
-	normalizeVector(ret.entropy,norm_entropy);
-//	lr->resetResponse(ret.qtl);
-//	lr->resetSNP(ret.entropy);
-	lr->resetResponse(norm_qtl);
-	lr->resetSNP(norm_entropy);
+//	std::vector<double> norm_qtl;
+//	std::vector<double> norm_entropy;
+//	normalizeVector(ret.qtl,norm_qtl);
+//	normalizeVector(ret.entropy,norm_entropy);
+	lr->resetResponse(ret.qtl);
+	lr->resetSNP(ret.entropy);
+//	lr->resetResponse(norm_qtl);
+//	lr->resetSNP(norm_entropy);
 	lr->regress();
 //	for(int i=0;i<ret.qtl.size();i++){
 //		std::cout<<lr->regressors(0,i)<<"\t\t"<<lr->responses(i)<<"\t\t"<<lr->predictions(i)<<"\n";
