@@ -19,9 +19,12 @@ typedef enum{
 } DiseaseModel;
 struct RegressionRes{
 	RegressionRes():p(2),coef(-999),se(-999),allele(-999),nonmissing(-999),HolmP(-999),SidakSSP(-999),
-			SidakSDP(-999),BHP(-999),BYP(-999),permutationP(-999){}
+			SidakSDP(-999),BHP(-999),BYP(-999),permutationP(-999),OR(-999),ORlb(-999),ORub(-999){}
 	double p;
 	double coef;
+	double OR;
+	double ORlb;
+	double ORub;
 	double se;
 	short allele;
 	int nonmissing;

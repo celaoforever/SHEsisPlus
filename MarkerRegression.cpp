@@ -192,6 +192,13 @@ RegressionRes MarkerRegression::OneLocusRegression(int snp,short allele){
 	r.coef=lr->coef(1);
 	r.p=lr->p(1);
 	r.se=lr->se(1);
+	boost::shared_ptr<logistic> p=boost::dynamic_pointer_cast<logistic>(this->lr);
+	if(p && r.coef !=-999){
+		r.OR=exp(r.coef);
+		r.ORlb = exp(r.coef -1.96 * (r.se));
+		r.ORub = exp(r.coef +1.96 * (r.se));
+	};
+    //exp(coef[p] - par::ci_zt * se)
 	r.nonmissing=nonmissing;
 	return r;
 }
@@ -234,12 +241,16 @@ std::vector<short> MarkerRegression::FindAllele(int snp) {
 std::string MarkerRegression::reporthtml(){
 	  std::string res = "\n<h2> Single Locus Association Test (Regression): </h2>\n";
 	  boost::shared_ptr<SHEsis::CreatHtmlTable> html(new SHEsis::CreatHtmlTable());
+	  //linear regression no OR
+	  boost::shared_ptr<logistic> p=boost::dynamic_pointer_cast<logistic>(this->lr);
 	  html->createTable("Marker_Regression");
 	  std::vector<std::string> data;
 	  data.push_back("SNP");
 	  data.push_back("Effect allele");
 	  data.push_back("Nonmissing");
-	  data.push_back("coeff");
+	  data.push_back("Beta");
+	  if(p)
+		  data.push_back("OR");
 	  data.push_back("SE");
 	  data.push_back("p");
 	  if(this->permutation!=-1){
@@ -259,6 +270,15 @@ std::string MarkerRegression::reporthtml(){
 	    data.push_back(this->data->getallele(this->vResults[i].allele));
 	    data.push_back(convert2string(this->vResults[i].nonmissing));
 	    data.push_back(convert2string(this->vResults[i].coef));
+	    if(p){
+	    	if(this->vResults[i].OR == -999){
+	    		data.push_back("NA");
+	    	}else{
+			std::stringstream ss;
+			ss<<this->vResults[i].OR<<"["<<this->vResults[i].ORlb<<"~"<<this->vResults[i].ORub<<"]";
+			data.push_back(ss.str());
+	    	}
+	    }
 	    data.push_back(convert2string(this->vResults[i].se));
 	    data.push_back(convert2string(this->vResults[i].p));
 		if(this->permutation!=-1){
