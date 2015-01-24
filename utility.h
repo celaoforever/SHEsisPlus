@@ -141,7 +141,7 @@ static std::string HtmlHeaderServer =
 		 </a>\n\
 		  Results\n\
 		 <small class=\"on-right\"></small>\n\
-    	<button type=\"button\" class=\"bg-white large\" title=\"export to excel\" onclick=\"tablesToExcel(\'SHEsiResults.xls\', \'Excel\')\">\n\
+    	<button type=\"button\" class=\"bg-white large\" title=\"export to excel\" onclick=\"tablesToExcel(\'SHEsisResults.xls\', \'Excel\')\">\n\
 		<i class=\"icon-download fg-dark\"></i>\n\
 		export to excel\n\
 	    </button>\n\
