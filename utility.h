@@ -84,6 +84,7 @@ static std::string HtmlHeaderServer =
 		        <script src=\"../javascripts/jquery.min.js\"></script>\n\
 		        <script src=\"../javascripts/jquery-ui.js\"></script>\n\
 		        <script src=\"../javascripts/metro.min.js\"></script>\n\
+                <script src=\"../javascripts/onchange.js\"></script>\n\
 		    </head>\n\
 		    <style>\n\
 			pre{\n\
@@ -140,6 +141,10 @@ static std::string HtmlHeaderServer =
 		 </a>\n\
 		  Results\n\
 		 <small class=\"on-right\"></small>\n\
+    	<button type=\"button\" class=\"bg-white large\" title=\"export to excel\" onclick=\"tablesToExcel(\'SHEsiResults.xls\', \'Excel\')\">\n\
+		<i class=\"icon-download fg-dark\"></i>\n\
+		export to excel\n\
+	    </button>\n\
 		</h1>\n\
 ";
 
