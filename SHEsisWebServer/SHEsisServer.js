@@ -12,12 +12,12 @@ var Server = require('mongodb').Server;
 var kue = require('kue')
   , jobs = kue.createQueue()
   ;
-
+port=5903;
 app.use(express.compress());
 app.use(express.static('public'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded());
-bodyParser({strict:false});
+//app.use(bodyParser.json());
+//app.use(bodyParser.urlencoded());
+//bodyParser({strict:false});
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.get('/',function(req,res){
@@ -38,12 +38,13 @@ Enqueue(req,res);
 jobs.process('Run',12,function(job,done){
 console.log("processing job",job.id);
 var finalarg=job.data.arg.replace(/DuMmY1234_output/g,job.id);
+console.log(finalarg);
 RunSHEsis(finalarg,job.id,job.data.email,job.data.dataset);
 done && done();
 });
 
-app.listen(5903);
-console.log("SHEsis web server started at "+getDateTimeFormated());
+app.listen(port);
+console.log("SHEsis web server started at "+getDateTimeFormated()+".Port="+port);
 
 function Enqueue(req,res){
 var JSONARG={};
@@ -75,36 +76,57 @@ db.open(function(err,db){
 });
 }
 
+function isEmpty(str){
+if(!str){return true;}
+var lines=str.split("\n");
+var valid=0;
+for(i=0;i<lines.length;i++){
+line=lines[i].trim();
+if(line!=""){
+	valid++;
+}
+}
+if(valid>0){
+	return false;
+}else
+{
+	return true;
+}
+}
+
 function setArgs(req,jobid,jsonarg){
-var casedatafile="public/tmp/"+jobid+"_case.txt";
-var ctrldatafile="public/tmp/"+jobid+"_ctrl.txt";
-var qtldatafile="public/tmp/"+jobid+"_qtl.txt";
+//var casedatafile="public/tmp/"+jobid+"_case.txt";
+//var ctrldatafile="public/tmp/"+jobid+"_ctrl.txt";
+//var qtldatafile="public/tmp/"+jobid+"_qtl.txt";
+var datafile="public/tmp/"+jobid+"_input.txt";
+var covarfile="public/tmp/"+jobid+"_covar.txt";
 var output="public/tmp/DuMmY1234_output";
 var args="";
 var qtl=req.body.SelectPhenotype=="Case/Control"?false:true;
-if(qtl){
-	 fs.writeFile(qtldatafile,req.body.TextareaQTLdata,function(err){
-             if(err){
-                    console.log(err);
-             };
-        });
-	args+=" --qtl --input "+qtldatafile;
-	jsonarg.QTL=1;
-}else{
-	jsonarg.QTL=0;
-	fs.writeFile(casedatafile,req.body.TextareaCasedata,function(err){
-		if(err){
-			console.log(err);
-		};
-	});
-
-	fs.writeFile(ctrldatafile,req.body.TextareaControldata,function(err){
-        	if(err){
-                	console.log(err);
-        	};
-	});
-	args+="--input-case "+casedatafile+" --input-ctrl "+ctrldatafile;
+fs.writeFile(datafile,req.body.TextareaInputData,function(err){
+if(err){
+	console.log(err);
 };
+});
+jsonarg.QTL=0;
+if(qtl){
+	args+=" --qtl ";
+	jsonarg.QTL=1;
+}
+
+args+=" --input "+datafile;
+
+var covar=req.body.TextareaCovar;
+if(!isEmpty(covar)){
+fs.writeFile(covarfile,req.body.TextareaCovar,function(err){
+if(err){
+        console.log(err);
+};
+});
+args+=" --covar "+covarfile;
+}
+
+
 if(req.body.CheckBoxAnalysisTypeAssoc=="on"){
 	args+=" --assoc";
 	jsonarg.ASSOC=1;
@@ -292,7 +314,7 @@ if(err&&err.killed){
 	    SendInternalEmail("jiawei.shen@outlook.com","job "+jobid+" failed",msg);
 }else if(err){	    
 	    console.log("job",jobid,"error:",stderr);
-	    var msg="args: "+args+"\n"+"SHEsis msg: "+stderr+"\nNode msg: "+err;
+	    var msg="args: "+args+"\n"+"SHEsis msg: "+stderr+"\n"+stdout+"\nNode msg: "+err;
 	    SendInternalEmail("jiawei.shen@outlook.com","job "+jobid+" error",msg); 
 }else
 {

@@ -65,7 +65,7 @@
 
 <div class="container"   style="padding:30px 30px" >
 <font size="4">
-          <form name="SHEsisMain" autocomplete="off"  onsubmit="return validateForm()" action="Results" method="post">
+          <form name="SHEsisMain" autocomplete="off"  onsubmit="return validateForm2()" action="Results" method="post">
           <fildset>
 	    <table style="width:100%;table-layout:auto">
 	    <tr>
@@ -149,7 +149,7 @@
               </td>
 	     <td>
 	         <div class="input-control select">
-		 <select name="SelectPhenotype" value="Case/Control" style="width:85%; text-align:center"  onchange="selectQTL()">
+		 <select name="SelectPhenotype" value="Case/Control" style="width:85%; text-align:center">
 		   <option value="Case/Control">Case/Control</option>
 		   <option value="Quantitative Trait">Quantitative Trait</option>
 		  </select>  
@@ -229,36 +229,23 @@
 
 	    <tr>
 	      <td colspan="5">
+
 		<table  name="TableInputData" style="width:100%">
 		  <tr>
-		    <td >Input data for cases:
-<button type="button" title="Load sample data" onclick="loadSampleBinary()" class="bg-white"><i class="fg-lightBlue icon-help on-left"></i></button></td>
+		    <td>Input data: <button type="button" title="Load sample data" onclick="loadSample()"class="bg-white"><i class="fg-lightBlue icon-help on-left"></i></button></td>
 		    <td></td>
-		    <td >Input data for controls:
-		    </td>
+		    <td>Adjust for Covariates (Optional):</td>
 		  </tr>
 		  <tr>
-		    <td style="width:200px">
+		    <td style="width:242px">
 		      <div class="input-control textarea">
-			<textarea name="TextareaCasedata" rows="30" cols="20" wrap="OFF"></textarea>
+			<textarea name="TextareaInputData" rows="30" cols="30" placeholder="genotype data. For missing alleles, pls use '0'."  wrap="OFF"></textarea>
 		      </div>
 		    </td>
-		    <td style="width:15px"></td>
-		    <td style="width:200px">
+		    <td style="width:10px"></td>
+		    <td style="width:210px">
 		      <div class="input-control textarea">
-			<textarea name="TextareaControldata" rows="30" cols="20" wrap="OFF"></textarea>
-		      </div>		      
-		    </td>
-		  </tr>
-		</table>
-		<table  name="TableInputDataQTL" style="width:100%;display:none">
-		  <tr>
-		    <td>Input data for quantitative trait: <button type="button" title="Load sample data" onclick="loadSampleQTL()"class="bg-white"><i class="fg-lightBlue icon-help on-left"></i></button></td>
-		  </tr>
-		  <tr>
-		    <td>
-		      <div class="input-control textarea">
-			<textarea name="TextareaQTLdata" rows="30" cols="40" wrap="OFF"></textarea>
+			<textarea name="TextareaCovar" rows="30" cols="30" wrap="OFF" placeholder="eg. age, sex, BMI, etc. For missing covariates, pls use 'NA'."></textarea>
 		      </div>
 		    </td>
 		  </tr>
@@ -269,7 +256,7 @@
 	      <td colspan="5">
 		<div style="text-align:center">
 		  <input type="submit" class="large bg-lightBlue fg-white" value="Calculate" ></input>
-		  <input type="reset" onclick="ResetForm()"  class="large" value="  Reset  "></input>
+		  <input type="reset"  class="large" value="  Reset  "></input>
 		</div>
 	      </td>
 	    </tr>
