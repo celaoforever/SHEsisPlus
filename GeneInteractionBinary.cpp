@@ -11,13 +11,86 @@
 
 namespace SHEsis {
 
-GeneInteractionBinary::GeneInteractionBinary(boost::shared_ptr<SHEsisData> data):GeneInteraction(data),permutation(10) {
+GeneInteractionBinary::GeneInteractionBinary(boost::shared_ptr<SHEsisData> data):GeneInteraction(data) {
 	// TODO Auto-generated constructor stub
 }
 
 GeneInteractionBinary::~GeneInteractionBinary() {
 	// TODO Auto-generated destructor stub
 }
+
+std::string GeneInteractionBinary::reporthtml(){
+	  std::string _res = "\n<h2> Gene Interaction Analysis (Binary): </h2>\n";
+	  boost::shared_ptr<SHEsis::CreatHtmlTable> html(new SHEsis::CreatHtmlTable());
+	  html->createTable("GeneInteraction_QTL");
+	  std::vector<std::string> data;
+	  data.push_back("SNP set");
+	  data.push_back("Nonmissing");
+	  data.push_back("Case Entropy");
+	  data.push_back("Control Entropy");
+	  data.push_back("diff");
+	  data.push_back("p");
+	  if (this->adjust) {
+	    data.push_back("Holm");
+	    data.push_back("SidakSS");
+	    data.push_back("SidakSD");
+	    data.push_back("FDR_BH");
+	    data.push_back("FDR_BY");
+	  }
+	  html->addHeadRow(data);
+	  for (int i = 0; i < this->res.size(); i++) {
+	    data.clear();
+	    data.push_back(this->res[i].snpset);
+	    data.push_back(convert2string(this->res[i].nonmissing));
+	    data.push_back(convert2string(this->res[i].caseEntropy));
+	    data.push_back(convert2string(this->res[i].ctrlEntropy));
+	    data.push_back(convert2string(this->res[i].diff));
+	    data.push_back(convert2string(this->res[i].p));
+	    if (this->adjust) {
+	      data.push_back(convert2string(this->res[i].HolmP));
+	      data.push_back(convert2string(this->res[i].SidakSSP));
+	      data.push_back(convert2string(this->res[i].SidakSDP));
+	      data.push_back(convert2string(this->res[i].BHP));
+	      data.push_back(convert2string(this->res[i].BYP));
+	    }
+	    html->addDataRow(data);
+	  }
+	  _res += html->getTable();
+	  return _res;
+}
+
+std::string GeneInteractionBinary::reporttxt(){
+	  std::stringstream _res;
+	  _res.precision(3);
+	  _res << "\n-------------------------------------------------------\n";
+	  _res << "Gene Interaction Analysis (Binary)\n";
+	  _res << "-------------------------------------------------------\n";
+	  _res << "SNP set\tNonmissing\tCase Entropy\tControl Entropy\tDiff\tP value";
+	  if (this->adjust) {
+		  _res << "\t\tHolm\tSidakSS\tSidakSD\tFDR_BH\tFDR_BY";
+	  }
+	  _res << "\n";
+	  for (int i = 0; i < this->res.size(); i++) {
+		  _res << this->res[i].snpset << "\t";
+		  _res << this->res[i].nonmissing << "\t";
+		  _res << this->res[i].caseEntropy << "\t";
+		  _res << this->res[i].ctrlEntropy << "\t";
+		  _res << this->res[i].diff << "\t";
+		  _res << convert2string(this->res[i].p) << "\t";
+	    if (this->adjust) {
+	     _res << convert2string(this->res[i].HolmP) << "\t"
+	          << convert2string(this->res[i].SidakSSP) << "\t"
+	          << convert2string(this->res[i].SidakSDP) << "\t"
+	          << convert2string(this->res[i].BHP) << "\t"
+	          << convert2string(this->res[i].BYP);
+	    }
+	    _res << "\n";
+	  }
+	  _res << "-------------------------------------------------------\n";
+	  return _res.str();
+}
+
+
 void GeneInteractionBinary::getNonmissingSample(std::vector<int>& Snp,std::vector<int>& validCase,std::vector<int>& validCtrl){
 	validCase.clear();
 	validCtrl.clear();
@@ -74,6 +147,43 @@ void GeneInteractionBinary::CalGeneInteraction(){
 //			this->ThreadPool.enqueue(boost::bind(&GeneInteractionBinary::GetOneSNPCombinationInformationGain,this,Snp[j]));
 		}
 	}
+//		for(int i=0;i<this->data->getSnpNum();i=i+2){
+//			std::vector<int>  Snp;
+//			Snp.push_back(i);
+//			Snp.push_back(i+1);
+//			this->res.push_back(this->GetOneSNPCombinationInformationGain2(Snp));
+//		}
+		 if (this->adjust) {
+		    std::vector<MultiComp> originp;
+		    std::vector<double> adjusted;
+		    for (int i = 0; i < this->res.size(); i++) {
+		      MultiComp val;
+		      val.p = this->res[i].p;
+		      val.idx = i;
+		      originp.push_back(val);
+		    };
+		    std::sort(originp.begin(), originp.end());
+		    HolmCorrection(originp, adjusted);
+		    for (int i = 0; i < this->res.size(); i++)
+		      this->res[i].HolmP = adjusted[i];
+
+		    SidakSDCorrection(originp, adjusted);
+		    for (int i = 0; i < this->res.size(); i++)
+		      this->res[i].SidakSDP = adjusted[i];
+
+		    SidakSSCorrection(originp, adjusted);
+		    for (int i = 0; i < this->res.size(); i++)
+		      this->res[i].SidakSSP = adjusted[i];
+
+		    BHCorrection(originp, adjusted);
+		    for (int i = 0; i < this->res.size(); i++)
+		      this->res[i].BHP = adjusted[i];
+
+		    BYCorrection(originp, adjusted);
+		    for (int i = 0; i < this->res.size(); i++)
+		      this->res[i].BYP = adjusted[i];
+		  }
+
 }
 
 
@@ -98,8 +208,13 @@ gxgBinaryRes GeneInteractionBinary::GetOneSNPCombinationInformationGain2(std::ve
 //	std::cout<<"case entropy="<<ret.caseEntropy<<"\n";
 //	std::cout<<"ctrl entropy="<<ret.ctrlEntropy<<"\n";
 	ret.diff=ret.caseEntropy-ret.ctrlEntropy;
-	ret.caseLambda=sqrt(1-exp((-2)*(ret.caseEntropy)));
-	ret.ctrlLambda=sqrt(1-exp((-2)*(ret.ctrlEntropy)));
+	ret.nonmissing=validCase.size()+validCtrl.size();
+	if(ret.diff==0){
+		ret.p=1;
+		return ret;
+	}
+//	ret.caseLambda=sqrt(1-exp((-2)*(ret.caseEntropy)));
+//	ret.ctrlLambda=sqrt(1-exp((-2)*(ret.ctrlEntropy)));
 	if(this->permutation>0){
 //		std::cout<<"permutating...\n";
 		std::vector<int> allSamples=validCase;
@@ -130,9 +245,14 @@ gxgBinaryRes GeneInteractionBinary::GetOneSNPCombinationInformationGain2(std::ve
 			ret.permutatedDiffVar+=pow((ret.permutatedDiffMean-(ret.permutatedCaseEntropy[i]-ret.permutatedCtrlEntropy[i])),2.0);
 		}
 		ret.permutatedDiffVar/=(double)(this->permutation-1);
-		boost::math::normal s(ret.permutatedDiffMean,sqrt(ret.permutatedDiffVar));
-		double _abs=ret.diff<0?(-1)*ret.diff:ret.diff;
-		ret.p=boost::math::cdf(boost::math::complement(s,_abs));
+		boost::math::normal s(0,1);
+		double T=(ret.diff-ret.permutatedDiffMean)/sqrt(ret.permutatedDiffVar);
+		T=T<0?(-1)*T:T;
+		try{
+		ret.p=boost::math::cdf(boost::math::complement(s,T));
+		}catch(...){
+			ret.p=-999;
+		}
 //		std::cout<<"mean="<<s.mean()<<",stdev="<<s.standard_deviation()<<",abs_val="<<_abs<<",p="<<ret.p<<"\n";
 	}
 	return ret;
@@ -153,8 +273,8 @@ gxgBinaryRes GeneInteractionBinary::GetOneSNPCombinationInformationGain(std::vec
 	this->GenerateGenotypeCombination(Snp,cp);
 	this->GetInformationGain(Snp,cp,ret.caseEntropy,ret.ctrlEntropy);
 	ret.diff=ret.caseEntropy-ret.ctrlEntropy;
-	ret.caseLambda=sqrt(1-exp((-2)*(ret.caseEntropy)));
-	ret.ctrlLambda=sqrt(1-exp((-2)*(ret.ctrlEntropy)));
+//	ret.caseLambda=sqrt(1-exp((-2)*(ret.caseEntropy)));
+//	ret.ctrlLambda=sqrt(1-exp((-2)*(ret.ctrlEntropy)));
 	return ret;
 }
 

@@ -14,18 +14,24 @@ namespace SHEsis {
 
 
 struct gxgBinaryRes{
-	gxgBinaryRes():permutatedDiffMean(0),permutatedDiffVar(0),p(-999){};
+	gxgBinaryRes():permutatedDiffMean(0),permutatedDiffVar(0),p(-999),nonmissing(-999){};
 	std::string snpset;
 	double caseEntropy;
 	double ctrlEntropy;
 	double diff;
-	double caseLambda;
-	double ctrlLambda;
+	int nonmissing;
+//	double caseLambda;
+//	double ctrlLambda;
 	std::vector<double> permutatedCaseEntropy;
 	std::vector<double> permutatedCtrlEntropy;
 	double permutatedDiffMean;
 	double permutatedDiffVar;
 	double p;
+	double HolmP;
+	double SidakSDP;
+	double SidakSSP;
+	double BHP;
+	double BYP;
 };
 
 class GeneInteractionBinary: public GeneInteraction {
@@ -34,9 +40,9 @@ public:
 	virtual ~GeneInteractionBinary();
 	virtual void CalGeneInteraction();
 	void print();
-	void setPermutation(int p){this->permutation=p;};
 private:
-	int permutation;
+	virtual std::string reporttxt();
+	virtual std::string reporthtml();
 	std::vector<gxgBinaryRes> res;
 	gxgBinaryRes GetOneSNPCombinationInformationGain2(std::vector<int>& Snp);
 	void getNonmissingSample(std::vector<int>& Snp,std::vector<int>& validCase,std::vector<int>& validCtrl);

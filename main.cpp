@@ -13,6 +13,8 @@
 #include "MarkerRegression.h"
 #include "HWETest.h"
 #include "QTL.h"
+#include "GeneInteractionBinary.h"
+#include "GeneInteractionQTL.h"
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/erase.hpp>
@@ -33,6 +35,7 @@ struct arguments {
         html(true),
         hweAnalysis(false),
         ldAnalysis(false),
+        epistasis(false),
         permutation(-1),
         webserver(false),
         qtl(false),
@@ -40,6 +43,9 @@ struct arguments {
         adjust(false),
         forceRegress(false),
         covar(""),
+        epilb(2),
+        epiub(2),
+        epipermutation(50),
         model(SHEsis::ADDICTIVE),
         hapmethod(EM) {};
   std::vector<std::string> inputfiles;
@@ -50,6 +56,9 @@ struct arguments {
   std::string covar;
   int ploidy;
   int permutation;
+  int epilb;
+  int epiub;
+  int epipermutation;
   bool containsPhenotype;
   bool haploAnalysis;
   bool assocAnalysis;
@@ -59,6 +68,7 @@ struct arguments {
   bool webserver;
   bool adjust;
   bool forceRegress;
+  bool epistasis;
   double lft;
   std::vector<short> mask;
   SHEsis::LD_TYPE ldtype;
@@ -87,14 +97,16 @@ void reportHtml(std::stringstream& report,
                 boost::shared_ptr<SHEsis::QTL> QTLHandle,
                 boost::shared_ptr<SHEsis::HWETest> HWEHandle,
                 boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
-                boost::shared_ptr<SHEsis::LDTest> LDHandle);
+                boost::shared_ptr<SHEsis::LDTest> LDHandle,
+                boost::shared_ptr<SHEsis::GeneInteraction> EpiHandle);
 void reporttxt(std::stringstream& report,
                boost::shared_ptr<SHEsis::AssociationTest> AssocHandle,
                boost::shared_ptr<SHEsis::MarkerRegression> RegressHandle,
                boost::shared_ptr<SHEsis::QTL> QTLHandle,
                boost::shared_ptr<SHEsis::HWETest> HWEHandle,
                boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
-               boost::shared_ptr<SHEsis::LDTest> LDHandle);
+               boost::shared_ptr<SHEsis::LDTest> LDHandle,
+               boost::shared_ptr<SHEsis::GeneInteraction> EpiHandle);
 void writePendingPage(std::ofstream& report);
 
 int main(int argc, char* argv[]) {
@@ -142,6 +154,7 @@ int main(int argc, char* argv[]) {
   boost::shared_ptr<SHEsis::HWETest> HWEHandle;
   boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle;
   boost::shared_ptr<SHEsis::LDTest> LDHandle;
+  boost::shared_ptr<SHEsis::GeneInteraction> EpiHandle;
 
   if (SHEsisArgs.assocAnalysis) {
     std::cout << "Starting association test...\n";
@@ -228,10 +241,30 @@ int main(int argc, char* argv[]) {
     std::cout << "done\n";
   };
 
+  if(SHEsisArgs.epistasis){
+	  std::cout << "Starting epistasis analysis...\n";
+	  if(data->vQuantitativeTrait.size() == 0){
+		  EpiHandle.reset(new SHEsis::GeneInteractionBinary(data));
+	  }else{
+		  EpiHandle.reset(new SHEsis::GeneInteractionQTL(data));
+//		  EpiHandle->setBinNum(SHEsisArgs.epibin);
+//		  EpiHandle->setMinBin(SHEsisArgs.epiminbin);
+//		  EpiHandle->setSamplePerBin(SHEsisArgs.epiminsample);
+//		  std::cout<<"binNum="<<SHEsisArgs.epibin<<",minBin="<<SHEsisArgs.epiminbin<<",epiminisample="<<SHEsisArgs.epiminsample<<"\n";
+	  }
+	  EpiHandle->setAdjust(SHEsisArgs.adjust);
+	  EpiHandle->setlb(SHEsisArgs.epilb);
+	  EpiHandle->setub(SHEsisArgs.epiub);
+	  EpiHandle->setPermutation(SHEsisArgs.epipermutation);
+	  std::cout<<"epilb="<<SHEsisArgs.epilb<<",epiub="<<SHEsisArgs.epiub<<",epipermutation="<<SHEsisArgs.epipermutation<<"\n";
+	  EpiHandle->CalGeneInteraction();
+	  std::cout << "done\n";
+  }
+
   if (SHEsisArgs.html)
-    reportHtml(report, AssocHandle, RegressHandle,QTLHandle, HWEHandle, HapHandle, LDHandle);
+    reportHtml(report, AssocHandle, RegressHandle,QTLHandle, HWEHandle, HapHandle, LDHandle,EpiHandle);
   else
-    reporttxt(report, AssocHandle,RegressHandle, QTLHandle, HWEHandle, HapHandle, LDHandle);
+    reporttxt(report, AssocHandle,RegressHandle, QTLHandle, HWEHandle, HapHandle, LDHandle,EpiHandle);
   ofile.open(filename.c_str());
   ofile << report.str();
   ofile.close();
@@ -261,7 +294,8 @@ void reporttxt(std::stringstream& report,
                boost::shared_ptr<SHEsis::QTL> QTLHandle,
                boost::shared_ptr<SHEsis::HWETest> HWEHandle,
                boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
-               boost::shared_ptr<SHEsis::LDTest> LDHandle) {
+               boost::shared_ptr<SHEsis::LDTest> LDHandle,
+               boost::shared_ptr<SHEsis::GeneInteraction> EpiHandle) {
   if (AssocHandle) {
     report << AssocHandle->reporttxt();
   }
@@ -280,6 +314,9 @@ void reporttxt(std::stringstream& report,
   if (LDHandle) {
     report << LDHandle->reporttxt();
   }
+  if(EpiHandle){
+	  report<<EpiHandle->reporttxt();
+  }
 }
 
 void reportHtml(std::stringstream& report,
@@ -288,7 +325,8 @@ void reportHtml(std::stringstream& report,
                 boost::shared_ptr<SHEsis::QTL> QTLHandle,
                 boost::shared_ptr<SHEsis::HWETest> HWEHandle,
                 boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
-                boost::shared_ptr<SHEsis::LDTest> LDHandle) {
+                boost::shared_ptr<SHEsis::LDTest> LDHandle,
+                boost::shared_ptr<SHEsis::GeneInteraction> EpiHandle) {
   if (!SHEsisArgs.webserver) {
     report << HtmlHeader;
     report << "<h1>SHEsis </h1>\n";
@@ -312,6 +350,9 @@ void reportHtml(std::stringstream& report,
   }
   if (LDHandle) {
     report << LDHandle->reporthtml();
+  }
+  if(EpiHandle){
+	  report<<EpiHandle->reporthtml();
   }
   if (!SHEsisArgs.webserver)
     report << "</body>\n</html>\n";
@@ -443,6 +484,10 @@ void addOptions(int argc, char* argv[], po::options_description& desc,
       "use 1st and 3rd SNPs when there are 3 SNPs in all.")(
       "lft", po::value<double>(),
       "lowest frequency threshold for haplotype analysis")(
+      "epistasis","perform gene interaction analysis")(
+      "epi-lb",po::value<int>(),"lower bound of number of snps to perform gene interaction analysis,default:2 (2-way interaction)")(
+      "epi-ub",po::value<int>(),"upper bound of number of snps to perform gene interaction analysis,default:2 (2-way interaction)")(
+      "epi-permutation",po::value<int>(),"number of permutations when performing gene interaction analysis, default:50")(
       "ld-in-case", "perform Linkage disequilibrium test in cases")(
       "ld-in-ctrl", "perform Linkage disequilibrium test in controls")(
       "ld", "perform Linkage disequilibrium test in both cases and controls")(
@@ -596,6 +641,26 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
     SHEsisArgs.haploAnalysis = true;
     SHEsisArgs.hapmethod = EM;
   };
+
+  if(vm.count("epistasis") !=0){
+	  SHEsisArgs.epistasis=true;
+  }
+  if(vm.count("epi-lb")!=0){
+	  SHEsisArgs.epilb = vm["epi-lb"].as<int>();
+	  if(SHEsisArgs.epilb<2)
+		  throw std::runtime_error("--epi-lb should be above 2");
+  }
+  if(vm.count("epi-ub")!=0){
+	  SHEsisArgs.epiub = vm["epi-ub"].as<int>();
+	  if(SHEsisArgs.epiub<SHEsisArgs.epilb)
+		  throw std::runtime_error("--epi-ub should be equal or higher than --epi-lb");
+  }
+  if(vm.count("epi-permutation")!=0){
+	  SHEsisArgs.epipermutation= vm["epi-permutation"].as<int>();
+	  if(SHEsisArgs.epipermutation<=0)
+		  throw std::runtime_error("--epi-permutation should be higher than 0");
+  }
+
   if (vm.count("adjust") != 0) SHEsisArgs.adjust = true;
 
   if (vm.count("mask")) {
@@ -622,7 +687,7 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
   if (vm.count("report-txt")) SHEsisArgs.html = false;
 
   if (!SHEsisArgs.hweAnalysis && !SHEsisArgs.haploAnalysis &&
-      !SHEsisArgs.assocAnalysis && !SHEsisArgs.ldAnalysis)
+      !SHEsisArgs.assocAnalysis && !SHEsisArgs.ldAnalysis && !SHEsisArgs.epistasis)
     throw std::runtime_error(
         "at least one type of analysis should be specified.");
 }

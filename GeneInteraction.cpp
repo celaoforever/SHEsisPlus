@@ -16,10 +16,13 @@ bool GeneInteraction::genotypeEqual(std::string geno,int sample,int snp){
 	 return (this->mGenotypeStr[sample][snp]==geno);
 }
 
-GeneInteraction::GeneInteraction(boost::shared_ptr<SHEsisData> data):lowbound(2),upperbound(2),data(data),
+GeneInteraction::GeneInteraction(boost::shared_ptr<SHEsisData> data):lowbound(2),upperbound(2),data(data),adjust(false),permutation(50),
 		mGenotypeStr(boost::extents[data->getSampleNum()][data->getSnpNum()]){
 	if(this->data->vLocusInfo[0].BothGenotypeCount.begin() == this->data->vLocusInfo[0].BothGenotypeCount.end()){
-		this->data->statCount(this->data->vLabel);
+		if(this->data->vQuantitativeTrait.size()==0)
+			this->data->statCount(this->data->vLabel);
+		else
+			this->data->statCount();
 	}
 	for(int sample=0;sample<this->data->getSampleNum();sample++){
 		for(int snp=0;snp<this->data->getSnpNum();snp++){
@@ -120,13 +123,16 @@ double GeneInteraction::getEntropy(std::vector<int> samples, std::vector<int> sn
 //		for(int i=0;i<cp[cpIdx].size();i++){
 //			std::cout<<cp[cpIdx][i]<<",";
 //		}
-
 		double rate=(double)count/(double)samples.size();
 //		std::cout<<"\nrate="<<rate<<"\n";
 		if(rate!=0)
 			ret+=rate*log(rate);
+		//	ret+=pow(rate,a);
+		//std::cout<<"rate="<<rate<<",a="<<a<<",factor="<<po<<",ret="<<ret<<"\n";
 	}
+//	ret=(1-ret)*1/(a-1);
 	return ret*(-1);
+	//return ret;
 }
 
 void GeneInteraction::GenerateGenotypeCombination(std::vector<int> &Snp,std::vector<std::vector<std::string> >& ret){

@@ -14,6 +14,7 @@ using namespace SHEsis;
 #include <boost/generator_iterator.hpp>
 #include <boost/random.hpp>
 #include <boost/random/mersenne_twister.hpp>
+#include <fstream>
 boost::mt19937 boost_rng;
 
 void SetGXG(boost::shared_ptr<SHEsis::SHEsisData> data,int snp1,int snp2,double pre){
@@ -126,14 +127,36 @@ int main(){
 	};
 
 	double res[6]={1,1,1,2,2,2};
-	int sampleNum = 2000;
-	int snpNum = 5;
+	int sampleNum = 1000;
+	int snpNum = 2000;
 	int ploidy = 2;
 //	boost::shared_ptr<SHEsisData> data(new SHEsis::SHEsisData(sampleNum, snpNum, ploidy));
 	boost::shared_ptr<SHEsisData> data=GenerateRandomData(sampleNum,snpNum,ploidy);
+	for(int i=0;i<snpNum;i=i+2){
+			SetGXG(data,i,i+1,0.3);
+	}
 	data->statCount();
+	std::ofstream ped,map;
+	ped.open("test_binary.ped");
+	map.open("test_binary.map");
+//	  std::cout << "Genotype Matrix:\n";
+	  for (int iSample = 0; iSample < sampleNum; iSample++) {
+		  ped<<iSample<<" 0 0 0 1 "<<(data->vLabel[iSample])<<" ";
+	    for (int iSnp = 0; iSnp < snpNum; iSnp++) {
+	      for (int iChrset = 0; iChrset < ploidy; iChrset++) {
+	    	  ped << data->mGenotype[iSample][iSnp][iChrset] << " ";
+	      }
+	      ped << " ";
+	    }
+	    ped<< "\n";
+	  }
+	  for(int snp=0;snp<snpNum;snp++){
+		  map<<"1 snp"<<snp<<" 0 "<<snp<<"\n";
+	  }
+	  ped.close();
+	  map.close();
 //	SetGXG(data,0,1,0.5);
-	SetGXGXG(data,0,1,2,0.1);
+//	SetGXGXG(data,0,1,2,0.1);
 //	  std::cout << "Genotype Matrix:\n";
 //	  for (int iSample = 0; iSample < sampleNum; iSample++) {
 //		  std::cout<<((int)data->vLabel[iSample]==2?"case: ":"ctrl: ");
@@ -156,9 +179,9 @@ int main(){
 //	}
 //	std::cout<<"snpnum="<<data->getSnpNum()<<"\n";
 	GeneInteractionBinary gib(data);
-	gib.setlb(3);
-	gib.setPermutation(10);
-	gib.setub(3);
+	gib.setlb(2);
+	gib.setPermutation(200);
+	gib.setub(2);
 	gib.CalGeneInteraction();
 	gib.print();
 	return 0;

@@ -6,7 +6,7 @@
  */
 
 #include "GeneInteractionQTL.h"
-
+#include <sstream>
 using namespace std;
 using namespace SHEsis;
 #include <boost/random/discrete_distribution.hpp>
@@ -14,6 +14,7 @@ using namespace SHEsis;
 #include <boost/random.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/normal_distribution.hpp>
+#include <fstream>
 
 boost::mt19937 boost_rng;
 
@@ -23,8 +24,8 @@ bool sortSampleByQtl(const qtl2sampleIdx& v1, const qtl2sampleIdx& v2){
 
 boost::shared_ptr<SHEsis::SHEsisData> GenerateRandomData(int sampleNum,
                                                          int snpNum,
-                                                         int chrSetNum) {
-  double GenoProb[] = {0.0, 0.5,0.5};  // 0.01 is missing genotype for individuals
+                                                         int chrSetNum,double maf) {
+  double GenoProb[] = {0.0, maf,1-maf};  // 0.01 is missing genotype for individuals
   boost::normal_distribution<> nd(0,1); //phenotype, sigma=2, mean=10
   boost::variate_generator<boost::mt19937&,boost::normal_distribution<> > var_nor(boost_rng, nd);
   boost::random::discrete_distribution<> distGeno(GenoProb);
@@ -94,18 +95,36 @@ void SetGXG(boost::shared_ptr<SHEsis::SHEsisData> data,std::vector<int> snp,int 
 		b.SampleIdx.push_back(validSamples[j].idx);
 	}
 	bins.push_back(b);
-	int binidx=0;
-	double unit=1/(double)NumBin;
+	int binidx=1;
+	double unit=1/(double)NumBin/(double)NumBin; //square
+//	double unit=1/(double)NumBin; //linear
+//	double unit=1/sqrt((double)NumBin);//sqrt
 	for(std::list<bin>::iterator iter=bins.begin();iter!=bins.end();iter++){
+		double final_unit=unit;
 		int interactionNum=0;
+		double noise=(double)dice()/100.;
+		if(noise<0.0){
+			double per=(double)dice()/100.;
+			per=per-0.5;
+			final_unit=unit*(1+per);
+		}
+	//	std::cout<<"calc bin "<<binidx<<"\tpre\t"<<((double)binidx*binidx*final_unit)<<"\n";
 		for(int i=0;i<iter->SampleIdx.size();i++){
 			double n=(double)dice()/100.;
+//			double noise=(double)dice()/100;
+//			if(noise<0.05){
+//				continue;
+//			}
 			if(n>pre){
 				continue;
 			}
 			n=(double)dice()/100.;
-			if(n<(double)binidx*unit)
-				continue;
+//			if(n<(double)binidx*final_unit) //linear
+			if(n<(double)binidx*binidx*final_unit) //square
+//			if(n<sqrt((double)binidx)*final_unit) //sqrt
+			{
+ 				continue;
+			};
 
 			int sampleidx=iter->SampleIdx[i];
 			if(snp.size()== 2 ){
@@ -135,36 +154,77 @@ void SetGXG(boost::shared_ptr<SHEsis::SHEsisData> data,std::vector<int> snp,int 
 	}
 }
 
-int main(){
+int main(int argc,char *argv[]){
 	int sampleNum = 1000;
-	int snpNum = 4;
-	int ploidy = 2;
-	boost::shared_ptr<SHEsisData> data=GenerateRandomData(sampleNum,snpNum,ploidy);
-	std::vector<int> snp;
-	snp.push_back(0);
-	snp.push_back(1);
-	snp.push_back(2);
-	SetGXG(data,snp,3,2,1);
+	int snpNum = 2000;
+	int ploidy = 3;
+	double pre=0.05;
+	sampleNum=atoi(argv[1]);
+	snpNum=atoi(argv[2]);
+	ploidy=atoi(argv[3]);
+	pre=atof(argv[4]);
+	int permutation=atoi(argv[5]);
+	double maf=atof(argv[6]);
+	int lowb=2;//atoi(argv[7]);
+	int hib=2;//atoi(argv[8]);
+	double a=0;
+	std::cout<<"sample:"<<sampleNum<<",snp:"<<snpNum<<",ploidy:"<<ploidy<<",pre:"<<pre<<",maf:"<<maf<<",lowb"<<lowb<<",ub"<<hib<<"\n";
+	boost::shared_ptr<SHEsisData> data=GenerateRandomData(sampleNum,snpNum,ploidy,maf);
+	for(int i=0;i<snpNum;i=i+2){
+		std::vector<int> snp;
+		snp.push_back(i);
+		snp.push_back(i+1);
+		SetGXG(data,snp,40,2,pre);
+	}
+//			std::vector<int> snp;
+//			snp.push_back(0);
+//			snp.push_back(1);
+//			SetGXG(data,snp,40,2,0.5);
 	data->statCount();
-
+//	std::ofstream output;
+//	output.open("1000samples10snpinteraciton0-1p2.txt");
+//		  for (int iSample = 0; iSample < sampleNum; iSample++) {
+//			  output<<iSample<<" "<<(data->vQuantitativeTrait[iSample])<<" ";
+//		    for (int iSnp = 0; iSnp < snpNum; iSnp++) {
+//		      for (int iChrset = 0; iChrset < ploidy; iChrset++) {
+//		    	  output << data->mGenotype[iSample][iSnp][iChrset] << " ";
+//		      }
+//		      output << " ";
+//		    }
+//		    output<< "\n";
+//		  }
+	std::ofstream ped,map;
+	std::stringstream name;
+	name<<"square_"<<(snpNum/2)<<"interaction_"<<sampleNum<<"samples_"<<ploidy<<"ploidy_"<<pre<<"pre_"<<maf<<"maf";
+	//name<<"normal_"<<snpNum<<"snps_"<<sampleNum<<"samples_"<<ploidy<<"ploidy_"<<maf<<"maf";
+	std::string pedname=name.str()+".ped";
+	std::string mapname=name.str()+".map";
+	ped.open(pedname.data());
+	map.open(mapname.data());
 //	  std::cout << "Genotype Matrix:\n";
-//	  for (int iSample = 0; iSample < sampleNum; iSample++) {
-//		  std::cout<<iSample<<"\t"<<(data->vQuantitativeTrait[iSample])<<" ";
-//	    for (int iSnp = 0; iSnp < snpNum; iSnp++) {
-//	      for (int iChrset = 0; iChrset < ploidy; iChrset++) {
-//	        std::cout << data->mGenotype[iSample][iSnp][iChrset] << "/";
-//	      }
-//	      std::cout << " ";
-//	    }
-//	    std::cout << "\n";
-//	  }
+	  for (int iSample = 0; iSample < sampleNum; iSample++) {
+		  ped<<iSample<<" 0 0 0 1 "<<(data->vQuantitativeTrait[iSample])<<" ";
+	    for (int iSnp = 0; iSnp < snpNum; iSnp++) {
+	      for (int iChrset = 0; iChrset < ploidy; iChrset++) {
+	    	  ped << data->mGenotype[iSample][iSnp][iChrset] << " ";
+	      }
+	      ped << " ";
+	    }
+	    ped<< "\n";
+	  }
+	  for(int snp=0;snp<snpNum;snp++){
+		  map<<"1 snp"<<snp<<" 0 "<<snp<<"\n";
+	  }
+	  ped.close();
+	  map.close();
 
 	GeneInteractionQTL gib(data);
-	gib.setBinNum(20);
-	gib.setSamplePerBin(2);
+	gib.setBinNum(2);
+//	gib.setSamplePerBin(40);
 	gib.setMinBin(0);
-	gib.setlb(2);
-	gib.setub(3);
+	gib.setlb(lowb);
+	gib.setPermutation(permutation);
+	gib.setub(hib);
 	gib.CalGeneInteraction();
 	gib.print();
 	return 0;
