@@ -68,7 +68,7 @@ void linear::getPvalue(){
 		    boost::math::students_t dist(df);
 //		    if(i == 1)
 //		    	std::cout<<"t="<<t<<"\n";
-		    this->p(i) = boost::math::cdf(boost::math::complement(dist, t));
+		    this->p(i) = 2*boost::math::cdf(boost::math::complement(dist, t));
 		}
 		catch (...) {
 			this->p(i) = -999;

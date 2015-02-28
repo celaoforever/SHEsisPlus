@@ -66,7 +66,7 @@ void logistic::getPvalue(){
 		double Z=this->coef(i)/this->se(i);
 		try {
 		   boost::math::chi_squared dist(1);
-		    this->p(i) = boost::math::cdf(boost::math::complement(dist, Z*Z));
+		    this->p(i) =2* boost::math::cdf(boost::math::complement(dist, Z*Z));
 		}catch (...) {
 		    this->p(i) = -999;
 		  }
