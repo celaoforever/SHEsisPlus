@@ -193,6 +193,25 @@ int main(int argc, char* argv[]) {
     HWEHandle->AllSnpHWETest();
     std::cout << "done\n";
   }
+  if(SHEsisArgs.epistasis){
+	  std::cout << "Starting epistasis analysis...\n";
+	  if(data->vQuantitativeTrait.size() == 0){
+		  EpiHandle.reset(new SHEsis::GeneInteractionBinary(data));
+	  }else{
+		  EpiHandle.reset(new SHEsis::GeneInteractionQTL(data));
+//		  EpiHandle->setBinNum(SHEsisArgs.epibin);
+//		  EpiHandle->setMinBin(SHEsisArgs.epiminbin);
+//		  EpiHandle->setSamplePerBin(SHEsisArgs.epiminsample);
+//		  std::cout<<"binNum="<<SHEsisArgs.epibin<<",minBin="<<SHEsisArgs.epiminbin<<",epiminisample="<<SHEsisArgs.epiminsample<<"\n";
+	  }
+	  EpiHandle->setAdjust(SHEsisArgs.adjust);
+	  EpiHandle->setlb(SHEsisArgs.epilb);
+	  EpiHandle->setub(SHEsisArgs.epiub);
+	  EpiHandle->setPermutation(SHEsisArgs.epipermutation);
+	  std::cout<<"epilb="<<SHEsisArgs.epilb<<",epiub="<<SHEsisArgs.epiub<<",epipermutation="<<SHEsisArgs.epipermutation<<"\n";
+	  EpiHandle->CalGeneInteraction();
+	  std::cout << "done\n";
+  }
 
   if (SHEsisArgs.haploAnalysis && SHEsisArgs.ploidy > 1) {
     std::cout << "Starting haplotype analysis...\n";
@@ -241,25 +260,6 @@ int main(int argc, char* argv[]) {
     std::cout << "done\n";
   };
 
-  if(SHEsisArgs.epistasis){
-	  std::cout << "Starting epistasis analysis...\n";
-	  if(data->vQuantitativeTrait.size() == 0){
-		  EpiHandle.reset(new SHEsis::GeneInteractionBinary(data));
-	  }else{
-		  EpiHandle.reset(new SHEsis::GeneInteractionQTL(data));
-//		  EpiHandle->setBinNum(SHEsisArgs.epibin);
-//		  EpiHandle->setMinBin(SHEsisArgs.epiminbin);
-//		  EpiHandle->setSamplePerBin(SHEsisArgs.epiminsample);
-//		  std::cout<<"binNum="<<SHEsisArgs.epibin<<",minBin="<<SHEsisArgs.epiminbin<<",epiminisample="<<SHEsisArgs.epiminsample<<"\n";
-	  }
-	  EpiHandle->setAdjust(SHEsisArgs.adjust);
-	  EpiHandle->setlb(SHEsisArgs.epilb);
-	  EpiHandle->setub(SHEsisArgs.epiub);
-	  EpiHandle->setPermutation(SHEsisArgs.epipermutation);
-	  std::cout<<"epilb="<<SHEsisArgs.epilb<<",epiub="<<SHEsisArgs.epiub<<",epipermutation="<<SHEsisArgs.epipermutation<<"\n";
-	  EpiHandle->CalGeneInteraction();
-	  std::cout << "done\n";
-  }
 
   if (SHEsisArgs.html)
     reportHtml(report, AssocHandle, RegressHandle,QTLHandle, HWEHandle, HapHandle, LDHandle,EpiHandle);
@@ -345,15 +345,16 @@ void reportHtml(std::stringstream& report,
   if (HWEHandle) {
     report << HWEHandle->reporthtml();
   }
+  if(EpiHandle){
+	  report<<EpiHandle->reporthtml();
+  }
   if (HapHandle) {
     report << HapHandle->reporthtml();
   }
   if (LDHandle) {
     report << LDHandle->reporthtml();
   }
-  if(EpiHandle){
-	  report<<EpiHandle->reporthtml();
-  }
+
   if (!SHEsisArgs.webserver)
     report << "</body>\n</html>\n";
   else

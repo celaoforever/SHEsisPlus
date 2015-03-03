@@ -26,8 +26,8 @@ std::string GeneInteractionBinary::reporthtml(){
 	  std::vector<std::string> data;
 	  data.push_back("SNP set");
 	  data.push_back("Nonmissing");
-	  data.push_back("Case Entropy");
-	  data.push_back("Control Entropy");
+	  data.push_back("Case Interaction");
+	  data.push_back("Control Interaction");
 	  data.push_back("diff");
 	  data.push_back("p");
 	  if (this->adjust) {

@@ -12,7 +12,7 @@
 namespace SHEsis {
 
 GeneInteractionQTL::GeneInteractionQTL(boost::shared_ptr<SHEsisData> data):GeneInteraction(data),
-		NumBin(2),MinBin(2),MinSamplesPerBin(50){
+		NumBin(2),MinBin(2),MinSamplesPerBin(1){
 	this->lr.reset(new linear);
 
 }
@@ -32,6 +32,8 @@ std::string GeneInteractionQTL::reporthtml(){
 	  std::vector<std::string> data;
 	  data.push_back("SNP set");
 	  data.push_back("Nonmissing");
+	  data.push_back("Interaction1");
+	  data.push_back("Interaction2");
 	  data.push_back("diff");
 	  data.push_back("p");
 	  if (this->adjust) {
@@ -46,6 +48,8 @@ std::string GeneInteractionQTL::reporthtml(){
 	    data.clear();
 	    data.push_back(this->res[i].snpset);
 	    data.push_back(convert2string(this->res[i].nonmissing));
+	    data.push_back(convert2string(this->res[i].entropy[0]));
+	    data.push_back(convert2string(this->res[i].entropy[1]));
 	    data.push_back(convert2string(this->res[i].diff));
 	    data.push_back(convert2string(this->res[i].p));
 	    if (this->adjust) {
