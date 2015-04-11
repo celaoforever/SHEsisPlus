@@ -21,24 +21,27 @@ boost::mt19937 boost_rng;
 bool sortSampleByQtl(const qtl2sampleIdx& v1, const qtl2sampleIdx& v2){
 	return (v1.qtl<v2.qtl);
 }
-
 boost::shared_ptr<SHEsis::SHEsisData> GenerateRandomData(int sampleNum,
                                                          int snpNum,
-                                                         int chrSetNum,double maf) {
-  double GenoProb[] = {0.0, maf,1-maf};  // 0.01 is missing genotype for individuals
+                                                         int chrSetNum) {
+
   boost::normal_distribution<> nd(0,1); //phenotype, sigma=2, mean=10
   boost::variate_generator<boost::mt19937&,boost::normal_distribution<> > var_nor(boost_rng, nd);
-  boost::random::discrete_distribution<> distGeno(GenoProb);
   boost::shared_ptr<SHEsis::SHEsisData> data(
       new SHEsis::SHEsisData(sampleNum, snpNum, chrSetNum));
   for (int iSample = 0; iSample < sampleNum; iSample++) {
 	  data->vQuantitativeTrait.push_back(var_nor());
+  };
     for (int iSnp = 0; iSnp < snpNum; iSnp++) {
+    	  double maf=var_nor()>0?0.2:0.4;
+    	  double GenoProb[] = {0.0, maf,1-maf};  // 0.01 is missing genotype for individuals
+    	  boost::random::discrete_distribution<> distGeno(GenoProb);
+    	for (int iSample = 0; iSample < sampleNum; iSample++) {
       for (int iChrset = 0; iChrset < chrSetNum; iChrset++) {
         data->mGenotype[iSample][iSnp][iChrset] = distGeno(boost_rng);
       }
     }
-  }
+    }
   return data;
 }
 
@@ -49,6 +52,61 @@ bool equal( boost::multi_array<short, 3> data,int sample,int snp1,int snp2, int 
 		}
 	}
 	return true;
+}
+
+bool isHet(boost::shared_ptr<SHEsis::SHEsisData> data,int snp,int sample){
+	bool ret=true;
+	short last=0;
+	for(int p=0;p<data->getNumOfChrSet();p++){
+		if(last!=0&&last!=data->mGenotype[sample][snp][p])
+			return false;
+		last=data->mGenotype[sample][snp][p];
+	}
+	return true;
+}
+
+boost::shared_ptr<SHEsis::SHEsisData> set2way(int sampleNum,int ploidy,double hi){
+	boost::normal_distribution<> nd1(0,1);
+	boost::variate_generator<boost::mt19937&,boost::normal_distribution<> > var_nor1(boost_rng, nd1);
+	boost::normal_distribution<> nd2(hi,1);
+	boost::variate_generator<boost::mt19937&,boost::normal_distribution<> > var_nor2(boost_rng, nd2);
+	double GenoProb[] = {0.0, 0.5,0.5};
+	boost::random::discrete_distribution<> distGeno(GenoProb);
+	boost::shared_ptr<SHEsis::SHEsisData> data(
+	      new SHEsis::SHEsisData(sampleNum, 2, ploidy));
+
+	for(int snp=0;snp<2;snp++){
+		for(int sample=0;sample<sampleNum;sample++){
+			for(int p=0;p<ploidy;p++){
+				data->mGenotype[sample][snp][p]=distGeno(boost_rng);
+			}
+		}
+	}
+//if normal
+	if(hi<0){
+		for(int sample=0;sample<sampleNum;sample++){
+			data->vQuantitativeTrait.push_back(var_nor1());
+		}
+		return data;
+	}
+	if(ploidy == 2){
+		for(int sample=0;sample<sampleNum;sample++){
+			if((isHet(data,0,sample)&& !isHet(data,1,sample))||(!isHet(data,0,sample)&& isHet(data,1,sample))){
+				data->vQuantitativeTrait.push_back(var_nor2());
+			}else{
+				data->vQuantitativeTrait.push_back(var_nor1());
+			}
+		}
+	}else if (ploidy == 3){
+		for(int sample=0;sample<sampleNum;sample++){
+			if(isHet(data,0,sample)&& isHet(data,1,sample)){
+				data->vQuantitativeTrait.push_back(var_nor2());
+			}else{
+				data->vQuantitativeTrait.push_back(var_nor1());
+			}
+		}
+	}
+	return data;
 }
 
 void SetGXG(boost::shared_ptr<SHEsis::SHEsisData> data,std::vector<int> snp,int NumBin, int MinSamplesPerBin,double pre){
@@ -108,7 +166,7 @@ void SetGXG(boost::shared_ptr<SHEsis::SHEsisData> data,std::vector<int> snp,int 
 			per=per-0.5;
 			final_unit=unit*(1+per);
 		}
-	//	std::cout<<"calc bin "<<binidx<<"\tpre\t"<<((double)binidx*binidx*final_unit)<<"\n";
+//		std::cout<<"calc bin "<<binidx<<"\tpre\t"<<((double)binidx*binidx*final_unit)<<"\n";
 		for(int i=0;i<iter->SampleIdx.size();i++){
 			double n=(double)dice()/100.;
 //			double noise=(double)dice()/100;
@@ -156,26 +214,43 @@ void SetGXG(boost::shared_ptr<SHEsis::SHEsisData> data,std::vector<int> snp,int 
 
 int main(int argc,char *argv[]){
 	int sampleNum = 1000;
-	int snpNum = 2000;
+	int snpNum = 2;
 	int ploidy = 3;
-	double pre=0.05;
+//	double pre=0.05;
 	sampleNum=atoi(argv[1]);
-	snpNum=atoi(argv[2]);
-	ploidy=atoi(argv[3]);
-	pre=atof(argv[4]);
-	int permutation=atoi(argv[5]);
-	double maf=atof(argv[6]);
-	int lowb=2;//atoi(argv[7]);
-	int hib=2;//atoi(argv[8]);
-	double a=0;
-	std::cout<<"sample:"<<sampleNum<<",snp:"<<snpNum<<",ploidy:"<<ploidy<<",pre:"<<pre<<",maf:"<<maf<<",lowb"<<lowb<<",ub"<<hib<<"\n";
-	boost::shared_ptr<SHEsisData> data=GenerateRandomData(sampleNum,snpNum,ploidy,maf);
-	for(int i=0;i<snpNum;i=i+2){
-		std::vector<int> snp;
-		snp.push_back(i);
-		snp.push_back(i+1);
-		SetGXG(data,snp,40,2,pre);
-	}
+	ploidy=atoi(argv[2]);
+	double hi=atof(argv[3]);
+	int round=atoi(argv[4]);
+//	int permutation=atoi(argv[5]);
+//	double maf=atof(argv[6]);
+//	int lowb=atoi(argv[7]);
+//	int hib=atoi(argv[8]);
+//	double a=0;
+//	std::cout<<"sample:"<<sampleNum<<",snp:"<<snpNum<<",ploidy:"<<ploidy<<",pre:"<<pre<<",bins for simulation:"<<maf<<",lowb"<<lowb<<",ub"<<hib<<"\n";
+	std::cout<<"snp_set\tnonmissing\tdiff\tpermutation p\tdist p\n";
+	for(int k=0;k<round;k++){
+	boost::shared_ptr<SHEsis::SHEsisData> data=set2way(sampleNum,ploidy,hi);
+
+	//	boost::shared_ptr<SHEsisData> data=GenerateRandomData(sampleNum,snpNum,ploidy);
+//	if(maf == 1){
+//	if(lowb == 2 && hib == 2){
+//		for(int i=0;i<snpNum;i=i+2){
+//			std::vector<int> snp;
+//			snp.push_back(i);
+//			snp.push_back(i+1);
+//			SetGXG(data,snp,maf,2,pre);
+//		}
+////	}else if(lowb==3 && hib == 3){
+//		for(int i=0;i<snpNum;i=i+3){
+//			std::vector<int> snp;
+//			snp.push_back(i);
+//			snp.push_back(i+1);
+//			snp.push_back(i+2);
+//			std::cout<<"set interaction for snp"<<i<<",snp"<<(i+1)<<",snp"<<(i+2)<<"\n";
+//			SetGXG(data,snp,40,2,pre);
+//		}
+//	}
+//	}
 //			std::vector<int> snp;
 //			snp.push_back(0);
 //			snp.push_back(1);
@@ -195,12 +270,14 @@ int main(int argc,char *argv[]){
 //		  }
 	std::ofstream ped,map;
 	std::stringstream name;
-	name<<"square_"<<(snpNum/2)<<"interaction_"<<sampleNum<<"samples_"<<ploidy<<"ploidy_"<<pre<<"pre_"<<maf<<"maf";
-	//name<<"normal_"<<snpNum<<"snps_"<<sampleNum<<"samples_"<<ploidy<<"ploidy_"<<maf<<"maf";
+//	name<<"square_"<<(snpNum/2)<<"interaction_"<<sampleNum<<"samples_"<<ploidy<<"ploidy_"<<pre<<"pre_"<<maf<<"maf";
+	name<<"penetrance_"<<sampleNum<<"samples_"<<ploidy<<"ploidy_"<<k;
 	std::string pedname=name.str()+".ped";
 	std::string mapname=name.str()+".map";
 	ped.open(pedname.data());
 	map.open(mapname.data());
+//	std::ofstream shesisfile;
+//	shesisfile.open(name.str().c_str());
 //	  std::cout << "Genotype Matrix:\n";
 	  for (int iSample = 0; iSample < sampleNum; iSample++) {
 		  ped<<iSample<<" 0 0 0 1 "<<(data->vQuantitativeTrait[iSample])<<" ";
@@ -217,16 +294,28 @@ int main(int argc,char *argv[]){
 	  }
 	  ped.close();
 	  map.close();
+//	for (int iSample = 0; iSample < sampleNum; iSample++) {
+//		shesisfile<<iSample<<"\t"<<(data->vQuantitativeTrait[iSample])<<"\t";
+//		for (int iSnp = 0; iSnp < snpNum; iSnp++) {
+//			for (int iChrset = 0; iChrset < ploidy; iChrset++) {
+//				shesisfile << data->mGenotype[iSample][iSnp][iChrset] << " ";
+//			}
+//			shesisfile << "\t";
+//		}
+//		shesisfile<< "\n";
+//	}
+//	shesisfile.close();
 
 	GeneInteractionQTL gib(data);
-	gib.setBinNum(2);
-//	gib.setSamplePerBin(40);
-	gib.setMinBin(0);
-	gib.setlb(lowb);
-	gib.setPermutation(permutation);
-	gib.setub(hib);
-	gib.CalGeneInteraction();
+	gib.setlb(2);
+	gib.setPermutation(1000);
+	gib.setub(2);
+	gib.setMinBin(1);
+	gib.setBinNum(10);
+	gib.setSamplePerBin(100);
+	//gib.CalGeneInteraction();
 	gib.print();
+	}
 	return 0;
 }
 
