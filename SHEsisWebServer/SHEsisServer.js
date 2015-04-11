@@ -15,9 +15,6 @@ var kue = require('kue')
 port=5903;
 app.use(express.compress());
 app.use(express.static('public'));
-//app.use(bodyParser.json());
-//app.use(bodyParser.urlencoded());
-//bodyParser({strict:false});
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.get('/',function(req,res){
@@ -38,7 +35,7 @@ Enqueue(req,res);
 jobs.process('Run',12,function(job,done){
 console.log("processing job",job.id);
 var finalarg=job.data.arg.replace(/DuMmY1234_output/g,job.id);
-console.log(finalarg);
+//console.log(finalarg);
 RunSHEsis(finalarg,job.id,job.data.email,job.data.dataset);
 done && done();
 });
@@ -95,9 +92,6 @@ if(valid>0){
 }
 
 function setArgs(req,jobid,jsonarg){
-//var casedatafile="public/tmp/"+jobid+"_case.txt";
-//var ctrldatafile="public/tmp/"+jobid+"_ctrl.txt";
-//var qtldatafile="public/tmp/"+jobid+"_qtl.txt";
 var datafile="public/tmp/"+jobid+"_input.txt";
 var covarfile="public/tmp/"+jobid+"_covar.txt";
 var output="public/tmp/DuMmY1234_output";
@@ -126,20 +120,45 @@ if(err){
 args+=" --covar "+covarfile;
 }
 
+    if(req.body.CheckBoxAnalysisTypeEpi!=undefined){
+	if(req.body.CheckBoxAnalysisTypeAssoc=="on"  ){
+	    args+=" --assoc";
+            jsonarg.ASSOC=1;
+    	    args+=" --hwe";
+	    jsonarg.HWE=1;
+	}else
+	{
+	    jsonarg.ASSOC=0;
+	    jsonarg.HWE=0;
+	};
+    }else{
+	if(req.body.CheckBoxAnalysisTypeAssoc=="on"  ){
+	    args+=" --assoc";
+            jsonarg.ASSOC=1;
+	}else
+	{
+	    jsonarg.ASSOC=0;
+	};
+	if(req.body.CheckBoxAnalysisTypeHWE=="on"  ){
+    	    args+=" --hwe";
+	    jsonarg.HWE=1;
+	}else
+	{
+	    jsonarg.HWE=0;
+	};
+    }
+    
 
-if(req.body.CheckBoxAnalysisTypeAssoc=="on"){
-	args+=" --assoc";
-	jsonarg.ASSOC=1;
+
+    
+if(req.body.CheckBoxAnalysisTypeEpi=="on"){
+    args+=" --epistasis";
+    args+=" --epi-lb "+ req.body.TextEpiLb;
+    args+=" --epi-ub "+ req.body.TextEpiUb;
+    jsonarg.EPI=1;
 }else
 {
-	jsonarg.ASSOC=0;
-};
-if(req.body.CheckBoxAnalysisTypeHWE=="on"){
-	args+=" --hwe";
-	jsonarg.HWE=1;
-}else
-{
-	jsonarg.HWE=0;
+    jsonarg.EPI=0;
 };
 if(req.body.CheckBoxAnalysisTypeHap=="on"){
 	args+=" --haplo-EM";
@@ -149,7 +168,8 @@ if(req.body.CheckBoxAnalysisTypeHap=="on"){
 	jsonarg.HAP=0;
 }
 if(req.body.CheckBoxMultiCompPbased=="on"){
-	args+=" --adjust";
+    args+=" --adjust";
+
 	jsonarg.ADJUST=1;
 }else
 {
@@ -300,8 +320,8 @@ var bin=cp.exec(cmd,function(err,stdout,stderr){
 
 
 function RunSHEsis(args,jobid,email,dataset){
-console.log('bin/SHEsis ',args);
-var bin=cp.exec('bin/SHEsis '+args,{timeout:36000000},function(err,stdout,stderr){
+console.log('bin/SHEsis_dev ',args);
+var bin=cp.exec('bin/SHEsis_dev '+args,{timeout:36000000},function(err,stdout,stderr){
 var arrMatches=stdout.toString().match('ERROR.*');
 
 if(err&&err.killed){
