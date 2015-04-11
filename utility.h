@@ -12,7 +12,7 @@
 #include <boost/assert.hpp>
 #include <boost/multi_array.hpp>
 #include <boost/math/distributions/chi_squared.hpp>
-#define SHEsisABS(x) x < 0 ? (-1) * x : x
+#define SHEsisABS(x) ((x) < 0 ? (-1) * (x) :( x))
 
 typedef enum HaploMethod { EM, SAT } HapMethod;
 typedef std::vector<std::string> Vi;
