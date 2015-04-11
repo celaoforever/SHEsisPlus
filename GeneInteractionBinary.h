@@ -20,13 +20,12 @@ struct gxgBinaryRes{
 	double ctrlEntropy;
 	double diff;
 	int nonmissing;
-//	double caseLambda;
-//	double ctrlLambda;
 	std::vector<double> permutatedCaseEntropy;
 	std::vector<double> permutatedCtrlEntropy;
 	double permutatedDiffMean;
 	double permutatedDiffVar;
 	double p;
+//	double p2;
 	double HolmP;
 	double SidakSDP;
 	double SidakSSP;
@@ -44,12 +43,8 @@ private:
 	virtual std::string reporttxt();
 	virtual std::string reporthtml();
 	std::vector<gxgBinaryRes> res;
-	gxgBinaryRes GetOneSNPCombinationInformationGain2(std::vector<int>& Snp);
-	void getNonmissingSample(std::vector<int>& Snp,std::vector<int>& validCase,std::vector<int>& validCtrl);
-	//below not used in new version
-	void getSingleEntropySum(std::vector<int>& Snp,std::vector<int>& validCase,std::vector<int>& validCtrl,double& CaseSum, double& CtrlSum);
 	gxgBinaryRes GetOneSNPCombinationInformationGain(std::vector<int>& Snp);
-	void GetInformationGain(std::vector<int>& Snp,std::vector<std::vector<std::string> >& cp,double& caseGain,double& ctrlGain);
+	void getNonmissingSample(std::vector<int>& Snp,std::vector<int>& validCase,std::vector<int>& validCtrl);
 };
 
 } /* namespace SHEsis */
