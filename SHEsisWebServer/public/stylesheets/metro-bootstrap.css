@@ -6193,7 +6193,7 @@ a {
   color: #ffffff;
 }
 .metro .accordion > .accordion-frame {
-  border: 1px #eaeaea solid;
+  border: 1px #eaeaea none;
   margin-bottom: 2px;
 }
 .metro .accordion > .accordion-frame > .heading {
