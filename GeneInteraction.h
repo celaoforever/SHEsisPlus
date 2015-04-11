@@ -38,6 +38,7 @@ protected:
 	bool adjust;
 	int permutation;
 	boost::multi_array<std::string,2> mGenotypeStr;
+	double getP(std::vector<double> permutated,double origin);
 	void GenerateSNPCombination(int snpnum,std::vector<std::vector<int> >& ret);
 	void GenerateSNPCombination(int snpnum,std::vector<int> snpidx,std::vector<std::vector<int> >& ret);
 	void GenerateGenotypeCombination(std::vector<int>& Snp,std::vector<std::vector<std::string> > & ret );

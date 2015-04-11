@@ -16,6 +16,20 @@ bool GeneInteraction::genotypeEqual(std::string geno,int sample,int snp){
 	 return (this->mGenotypeStr[sample][snp]==geno);
 }
 
+
+double GeneInteraction::getP(std::vector<double> permutated,double origin){
+	double p=0;
+	origin=SHEsisABS(origin);
+	for(int i=0;i<permutated.size();i++){
+		double abs=SHEsisABS(permutated[i]);
+		if(origin<abs){
+			p++;
+		}
+	}
+	p=p/(double)permutated.size();
+	return p;
+}
+
 GeneInteraction::GeneInteraction(boost::shared_ptr<SHEsisData> data):lowbound(2),upperbound(2),data(data),adjust(false),permutation(50),
 		mGenotypeStr(boost::extents[data->getSampleNum()][data->getSnpNum()]){
 	if(this->data->vLocusInfo[0].BothGenotypeCount.begin() == this->data->vLocusInfo[0].BothGenotypeCount.end()){
