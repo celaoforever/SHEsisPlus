@@ -8,16 +8,14 @@
         <script src="javascripts/metro.min.js"></script>
 	<script src="javascripts/checkform.js"></script>
 	<script src="javascripts/onchange.js"></script>
+	<script src="javascripts/metro-accordion.js"></script>
 	<link rel="icon" href="images/logo.PNG" type="image/x-icon"/>
 	<title>SHEsisPlus</title>
-
     </head>
     <body class="metro">
 <div style="background: url(images/dna5-corp.jpg) top left no-repeat;background-size:cover;height:200px;">
    <div class="container"  style="padding:50px 20px">
-      <h1 class="fg-white" style="filter:blur(add=1,direction=45,strength=3)"><strong>SHEsisPlus</strong> 	<a href="SHEsis_dev2.html" class="fg-white" style="font-family:Verdana">
-	<font size="4"><u>Go to Development Version</u></font>
-      </a></h1>
+      <h1 class="fg-white"><strong>SHEsisPlus</strong></h1>
       <a class="fg-white" style="font-family:Verdana">
 	<font size="4">A web-based platform for association test on polyploid and multiallelic species.</font>
       </a>
@@ -79,45 +77,47 @@
 	      </td>
 	     </tr>
 	    <tr>  
-	      <td style="width:220px">
+	      <td style="width:210px">
 		Choose analysis :
 	      </td>
-	      <td>
+	      <td style="width:260px">
 	      <label class="inline-block">
 		<div class="input-control checkbox" data-role="input-control">
 		<input name="CheckBoxAnalysisTypeAssoc"   type="checkbox"></input>
 		<span class="check"></span>
-		Association Test
+		Single Locus Test
 		</div>
 	      </label>
 	      </td>
-	      <td style="width:300px">
+	      	      <td style="width:260px">
 	      <label class="inline-block">
 		<div class="input-control checkbox" data-role="input-control">
-		<input name="CheckBoxAnalysisTypeHWE"  type="checkbox"></input>
+		<input name="CheckBoxAnalysisTypeEpi"   type="checkbox"></input>
 		<span class="check"></span>
-		Hardy-Weinberg Equilibrium
+		Gene Interaction 
 		</div>
 	      </label>
 	      </td>
-	      <td>
+	      <td style="width:260px">
 	      <label class="inline-block">
 		<div class="input-control checkbox" data-role="input-control">
-		<input name="CheckBoxAnalysisTypeHap"   type="checkbox"></input>
+		<input name="CheckBoxAnalysisTypeHap"  type="checkbox"></input>
 		<span class="check"></span>
 		Haplotype Analysis
 		</div>
-	      </label>	 
+	      </label>
 	      </td>
-	      <td>
+
+	      <td style="width:260px" >
 	      <label class="inline-block">
 		<div class="input-control checkbox" data-role="input-control">
 		<input name="CheckBoxAnalysisTypeLD"   type="checkbox"></input>
 		<span class="check"></span>
 		Linkage Disequilibrium
 		</div>
-	      </label>
+	      </label>	 
 	      </td>
+
 	    </div>
 	    </tr>	    
 	    <tr>
@@ -158,39 +158,7 @@
 		  </select>  
 		 </div>
 	     </td>
-	     <td>
-	       Mask for hap-analysis (Optional):
-	     </td>
-	     <td colspan=2>
-	       <div class="input-control text">
-	       <input name="TextMask" style="width:100%" type="text" placeholder="eg. 1,1,0,1 to choose 1st,2nd&4th sites when there are 4 sites."></input>
-	       </div>
-	     </td> 
-
-	    </tr>
-	    <tr>
-	      <td>
-		Calculate LD in:
-              </td>
-	     <td>
-	         <div class="input-control select">
-		 <select name="SelectLDType" style="width:85%; text-align:center">
-		   <option value="Both case and control">All samples</option>
-		   <option value="Just case">Just case</option>
-		   <option value="Just control">Just control</option>
-		  </select>  
-		 </div>
-	     </td>
-	     <td>
-	       Lowest frequency for hap-analysis:
-	     </td>
-	     <td colspan=2>
-	        <div class="input-control text">
-	       <input name="TextLFT" style="width:100%" type="number" min="0" max="1" step="0.01" value="0.03"></input>
-	       </div>
-	     </td> 
-	     <tr>
-	       <td>Multiple comparision:</td>
+	       <td>Adjust P value:</td>
 	       <td>
 	      <label class="inline-block">
 		<div class="input-control checkbox" data-role="input-control">
@@ -199,17 +167,9 @@
 		Sidak, FDR, Holm's correction 
 		</div>
 	      </label>	 
-	       </td>   
-	       <td>
-		 Number of permutations:
-	       </td>  
-	       <td colspan=2>
-	        <div class="input-control text">
-	       <input name="TextPermutation" style="width:100%" type="number" min="0" max="10000" step="1" value="0"></input>
-	       </div>		 
-	       </td>
-	     </tr>
-            </tr>
+	       </td> 
+	    </tr>
+
 	    <tr>
 	      <td>Your E-mail (Optional):</td>
 	      <td>
@@ -226,6 +186,81 @@
 	      </div>		
 	      </td>
 	    </tr>
+
+<tr>
+  <td colspan="5">
+    <div class="accordion" data-role="accordion">
+      <div class="accordion-frame "   >
+	<a href="#" class="heading collapsed bg-white" style="padding-left:0px"><u>Advanced Options</u></a>
+	<div class="content" style="padding-left:0px">
+	  <table style="width:100%;table-layout:auto">
+	    <tr>
+	      <td style="width:227px">
+		Calculate LD in:
+              </td>
+	     <td style="width:276px">
+	         <div class="input-control select">
+		 <select name="SelectLDType" style="width:85%; text-align:center">
+		   <option value="Both case and control">All samples</option>
+		   <option value="Just case">Just case</option>
+		   <option value="Just control">Just control</option>
+		  </select>  
+		 </div>
+	     </td>
+	     <td style="width:276px">
+	       Lowest frequency for hap-analysis:
+	     </td>
+	     <td colspan=2 >
+	        <div class="input-control text">
+	       <input name="TextLFT" style="width:100%" type="number" min="0" max="1" step="0.01" value="0.03"></input>
+	       </div>
+	     </td>
+	    </tr>
+	    <tr>
+	      	  <td>
+		 Number of permutations:
+	       </td>  
+	       <td>
+	        <div class="input-control text">
+	       <input name="TextPermutation" style="width:85%" type="number" min="0" max="10000" step="1" value="0" ></input>
+	       </div>		 
+	       </td>
+	     <td>
+	       Mask for hap-analysis (Optional):
+	     </td>
+	     <td colspan=2>
+	       <div class="input-control text">
+	       <input name="TextMask" style="width:100%" type="text" placeholder="eg. 1,1,0,1 to choose 1st,2nd&4th sites when there are 4 sites."></input>
+	       </div>
+	     </td> 
+	    </tr>
+	    <tr >
+	      <td>
+		Orders of Gene Interaction:
+	      </td>
+	           
+	      <td colspan="5">
+		<table >
+		  <td style="width:100px">		     
+		     <div class="input-control text inline-block">
+		    
+	       <input class="inline-block" name="TextEpiLb" style="width:80%" type="number" min="2" max="5" step="1" value="2" > </input>
+	      </div></td><td style="width:50px"> to  </td>
+ 	      <td style="width:100px"><div class="input-control text inline-block">
+	       <input class="inline-block" name="TextEpiUb" style="width:80%" type="number" min="2" max="5" step="1" value="2" ></input>
+	      </div></td>
+	      <td><div style="padding-left:25px">( for example, "2 to 4" means calculate 2-way, 3-way and 4-way interactions. )</div></td>
+		   </table>
+	      </td>
+	   
+	    </tr>
+	  </table>
+	</div>
+      </div>
+    </div>
+    </td>
+  </tr>
+	    
 	    <tr>
 	      <td><br> </td>
 	    </tr>
@@ -237,16 +272,16 @@
 		  <tr>
 		    <td>Input data: <button type="button" title="Load sample data" onclick="loadSample()"class="bg-white"><i class="fg-lightBlue icon-help on-left"></i></button></td>
 		    <td></td>
-		    <td>Adjust for Covariates (Optional):</td>
+		    <td>Adjust for Covariates (Optional, for single locus test only):</td>
 		  </tr>
 		  <tr>
-		    <td style="width:242px">
+		    <td style="width:415px">
 		      <div class="input-control textarea">
-			<textarea name="TextareaInputData" rows="30" cols="30" placeholder="genotype data. For missing alleles, pls use '0'."  wrap="OFF"></textarea>
+			<textarea name="TextareaInputData" rows="30" cols="30" placeholder="genotype data. '0' for missing alleles and 'NA' for missing phenotypes."  wrap="OFF"></textarea>
 		      </div>
 		    </td>
-		    <td style="width:10px"></td>
-		    <td style="width:210px">
+		    <td style="width:15px"></td>
+		    <td style="width:380px">
 		      <div class="input-control textarea">
 			<textarea name="TextareaCovar" rows="30" cols="30" wrap="OFF" placeholder="eg. age, sex, BMI, etc. For missing covariates, pls use 'NA'."></textarea>
 		      </div>
