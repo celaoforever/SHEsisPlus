@@ -64,10 +64,12 @@
 <br>
 <li><a href="#analysis"  style="color:black">Choose Analysis</a></li>
 <li><a href="#dataset"  style="color:black">Specify The Dataset</a></li>
-<li><a href="#hap"  style="color:black">Extra Options For Haplotype Analysis</a></li>
-<li><a href="#ld"  style="color:black">Extra Options For Linkage Disequilibrium</a></li>
 <li><a href="#multi"  style="color:black">Multiple Comparision</a></li>
 <li><a href="#mail"  style="color:black">Send A Mail When Completed</a></li>
+<li><a href="#ld"  style="color:black">Haplotype Analysis</a></li>
+<li><a href="#hap"  style="color:black">Linkage Disequilibrium</a></li>
+<li><a href="#permutation"  style="color:black">Permutations</a></li>
+<li><a href="#epi"  style="color:black">Epistasis</a></li>
 </ul>
 <br>
 <li><a href="#output"  style="color:black">Interpret Output</a></li>
@@ -87,43 +89,45 @@
 <br>
 <font size="4">
 <div style="text-indent:2em;padding:0px 0px 0px 0px">
-SHEsisPlus is a web-based platform for analysis of genetic association, Hardy-weinberg equilibrium, linkage disequilibrium and haplotype construction at multiallelic polymorphism loci, compatible for both diploid and polyploid species. The web-based version provides most of the functions. The stand-alone version is also available. You can download it from <a href=#>here</a>.
+SHEsisPlus is a web-based platform for analysis of genetic association, Hardy-weinberg equilibrium, linkage disequilibrium, haplotype construction and epistasis detection at multiallelic polymorphism loci, compatible for both diploid and polyploid species. The web-based version provides most of the functions. The stand-alone version is also available. You can download it from <a href="http://github.com/celaoforever/SHEsisPlus">github</a>.
 </div>
 <br>
 <h2 id="new"> What's new </h2>
 <br>
 <font size="4">
 <div style="text-indent:2em;padding:0px 0px 0px 0px">
-Compared to previous version of SHEsis, SHEsisPlus is compatitable for haploid, diploid and polyploid species. It can not only analyze case/control data, but also quantitative trait data. It provides various ways of P value adjustments, including Holm step-down, Sidak single-step, Sidak step-down, FDR and permutation tests. All these can be can be performed via the webui.
+Compared to previous version of SHEsis, SHEsisPlus is compatitable for haploid, diploid and polyploid species. It can not only analyze case/control data, but also quantitative trait data. Covariate adjustments are also available. Moreover, epistasis analysis is also implemented in this version. SHEsisPlus provides various ways of P value adjustments, including Holm step-down, Sidak single-step, Sidak step-down, FDR and permutation tests. All these can be can be performed via the webui.
 </div>
 <br>
 <h2 id="brow">Browser Support</h2>
 <table class="table bordered" >
 <tr align="center">
 <td style="width:200px">
-<img src="http://www.w3schools.com/images/compatible_chrome.gif" style="padding:10px 20px 10px 40px" title="Chrome">
+<img src="images/chrome.png" style="padding:10px 20px 10px 10px;width:50%;height:40%" title="Chrome">
 </td>
 <td style="width:200px">
-<img src="http://www.w3schools.com/images/compatible_firefox.gif" style="padding:10px 20px 10px 10px" title="Firefox">
+<img src="images/firefox.png" style="padding:10px 20px 10px 10px;width:50%;height:40%" title="Firefox">
 </td>
 <td style="width:200px">
-<img src="http://www.w3schools.com/images/compatible_safari.gif" style="padding:10px 20px 10px 10px" title="Safari">
+<img src="images/safari.png" style="padding:10px 20px 10px 10px;width:50%;height:40%" title="Safari">
 </td>
 <td style="width:200px">
-<img src="http://www.w3schools.com/images/compatible_opera.gif" style="padding:10px 20px 10px 10px" title="Opera">
+<img src="images/opera.png" style="padding:10px 20px 10px 10px;width:50%;height:40%" title="Opera">
 </td>
 <td style="width:200px">
-<img src="http://www.w3schools.com/images/compatible_ie.gif" style="padding:10px 20px 10px 10px" title="IE">
+<img src="images/ie.png" style="padding:10px 20px 10px 10px;width:50%;height:40%" title="IE">
 </td>
 </tr>
 <tr align="center">
 <td>Supoorted</td><td>Supported</td><td>Supported</td><td>Supported</td><td>Required IE9 or higher</td>
 </tr>
 </table>
-<div style="text-indent:2em"> 
+<div> 
 SHEsisPlus supports all of the modern browers, including Chrome, Firefox, Safari, Opera and IE. If you are using IE, please use IE9 or higher. 
 </div>
-
+<div>
+<strong><font color="red">NOTE:</font></strong> To ensure that SHEsisPlus works properly, please enable javascripts in your browser settings.  
+ </div>
 <br>
 <h2 id="input"> Input format</h2>
 <br>
@@ -137,12 +141,12 @@ SHEsisPlus supports all of the modern browers, including Chrome, Firefox, Safari
   </div>
   <div class="content" style="padding:0px 0px 0px 0px">
     <pre>
-    id1  G A  C C  1 1  A1 A2
-    id2  A A  T C  1 1  A2 A2
-    id3  A A  T T  2 2  A3 A4
-    id4  0 0  T T  3 3  A5 A3
-    id5  G G  A A  2 3  A1 A2
-    id6  A A  C A  0 0  A6 A7
+    id1  case G A  C C  1 1  A1 A2
+    id2  case A A  T C  1 1  A2 A2
+    id3  ctrl A A  T T  2 2  A3 A4
+    id4  ctrl 0 0  T T  3 3  A5 A3
+    id5  ctrl G G  A A  2 3  A1 A2
+    id6  case A A  C A  0 0  A6 A7
    </pre>
   </div>
 </div>
@@ -155,12 +159,12 @@ SHEsisPlus supports all of the modern browers, including Chrome, Firefox, Safari
   </div>
   <div class="content" style="padding:0px 0px 0px 0px">
     <pre>
-    id1  A G A  T C C  1 1 1  AA T  TT
-    id2  A A A  C T C  2 1 1  A  T  AA
-    id3  G A A  C T T  3 2 2  TT A  T
-    id4  0 0 0  A T T  3 3 3  AA T  AT
-    id5  G G G  T A A  1 2 3  TA TT T
-    id6  G A A  C C A  0 0 0  AA A  A
+    id1  case A G A  T C C  1 1 1  AA T  TT
+    id2  ctrl A A A  C T C  2 1 1  A  T  AA
+    id3  ctrl G A A  C T T  3 2 2  TT A  T
+    id4  NA   0 0 0  A T T  3 3 3  AA T  AT
+    id5  ctrl G G G  T A A  1 2 3  TA TT T
+    id6  case G A A  C C A  0 0 0  AA A  A
    </pre>
   </div>
 </div>
@@ -170,7 +174,7 @@ SHEsisPlus supports all of the modern browers, including Chrome, Firefox, Safari
 
 <br>
 <div style="text-indent:2em">
-The first column is sample id. The following columns are genotypes. They should be delimited by space, comma or tab. Adjacent tokens will be compressed and will be treated as a single token. Genotypes can be any string (e.g. 1,2,3,4, or A,T,G,C , or A1,A2,A3,A4, or anything else) except 0, which is the coding for missing genotypes. 
+The first column is sample id. The second column is disease status, "case" for cases and "ctrl" for controls. The following columns are genotypes. They should be delimited by space, comma or tab. Adjacent tokens will be compressed and will be treated as a single token. Genotypes can be any string (e.g. 1,2,3,4, or A,T,G,C , or A1,A2,A3,A4, or anything else) except 0, which is the coding for missing genotypes. Use "NA" for missing phenotypes.
 </div>
 <br>
 <div style="text-indent:2em">
@@ -189,7 +193,7 @@ The above shown is sample data for diploid and tripolid species. For diploid spe
     <pre>
     id1  20.6  G A  C C  1 1  A1 A2
     id2  25.4  A A  T C  1 1  A2 A2
-    id3  23.1  A A  T T  2 2  A3 A4
+    id3  NA    A A  T T  2 2  A3 A4
     id4  42.4  0 0  T T  3 3  A5 A3
     id5  11.0  G G  A A  2 3  A1 A2
     id6  5.5   A A  C A  0 0  A6 A7
@@ -219,14 +223,45 @@ The above shown is sample data for diploid and tripolid species. For diploid spe
 </div>
 <br>
 <div style="text-indent:2em">
-The format for quantitative trait data is similar to that for case/control data except that the second column is the quantitative trait. The quantitative trait should be numeric.
+ The format for quantitative trait data is similar to that for case/control data except that the second column is the quantitative trait. The quantitative trait should be numeric. Use "NA" for missing phenotypes.
+</div>
+<br>
+<h3 id="inputQTL">3. Covariates</h3>
+<div class="grid fluid">
+<div class="row">
+<div class="span6" style="padding:10px 0px 0px 50px">
+<div class="panel">
+  <div class="panel-header">
+    example for covariate data 
+  </div>
+  <div class="content" style="padding:0px 0px 0px 0px">
+    <pre>
+      15 1.5 0.33
+      25 2.5 1.23
+      30 1.0 0.10
+      45 5.4 1.02
+      10 NA 4.01
+      85 2.2 2.11
+   </pre>
+  </div>
+</div>
+</div>
+</div>
+</div>
+<br>
+<div style="text-indent:2em">
+For single locus association analysis, if covariates are provided, regression will be used, instead of chi-square test. The above is an example of covariate data. One line is a sample and one column is a covariate. The number of lines should be consistent with that in the genotype data. 
 </div>
 <br>
 <h2 id="arg">Arguments </h2>
 <br>
+<div>
+<strong>Basic options: </strong> 
+</div>
+<br>
 <h3 id="analysis">1. Choose analysis </h3>
 <div style="text-indent:2em">
-There are 4 type of analysis available: <i>association test, Hardy-Weinberg Equilibrum analysis, haplotype analysis and linkage disequilibrium analysis</i>. You need to choose the kind of tests you'd like to perform by clicking the checkbox in front of the analysis name. You should choose at least one kind of analysis, and you can also choose all the four analysis at the same time.
+There are 4 type of analysis available: <i>Single Locus Test, Gene Interaction Analysis, Haplotype Analysis and Linkage Disequilibrium Analysis</i>. You need to choose the kind of tests you'd like to perform by clicking the checkbox in front of the analysis name. You should choose at least one kind of analysis, and you can also choose all the four analysis at the same time.
 </div>
 <br>
 <h3 id="dataset">2. Specify the dataset </h3>
@@ -235,15 +270,33 @@ SHEsisPlus supports analysis of polyploid species. You should specify <i>ploidy<
 </div>
 <br>
 <div style="text-indent:2em">
-<i>Phenotype</i> should also be specified. If the phenotype of your data is binary (case/control), please select "Case/Control" for phenotype. Then you should input data for both cases and controls in the below textarea. If your data is with quantitative trait, please select "Quantitative Trait" instead. Then in your data, every individual should have a quantitave trait and the quantitative trait should be numeric. 
+<i>Phenotype</i> should also be specified. If the phenotype of your data is binary (case/control), please select "Case/Control" for phenotype. Then you should input data for both cases and controls in the below textarea. If your data is with quantitative trait, please select "Quantitative Trait" instead. Then in your data, every individual should have a quantitave trait and the quantitative trait should be numeric.
 </div>
 <br>
 <div style="text-indent:2em">
 You could enter your maker names into the <i>Marker name</i> textfiled. Please use space, tab or comma to deliminate it. For example, "rs11,rs22,rs33,rs44" when there are 4 sites in all. This is opntional. If it is left blank, or invalid input is given, marker names will default to site1, site2, site3, ... 
 </div>
 <br>
-
-<h3 id="hap">3. Extra options for Haplotype analysis</h3>
+<h3 id="multi">3. Multiple comparision</h3>
+<div style="text-indent:2em">
+We provided the methods to adjust for multiple testing. Two types of methods are available. One is p-value based methods including Holm's step down procedure, Sidal single-step procedure, Sidak step-down procedure, Benjamini & Hocheberg step-up FDR control and Benjamini & Yekutieli step-up FDR control. The other is permutation test, which is a data-level method and is much slower. If you want to perform p-value based adjustment, clicking the checkbox <i>Sidak, FDR, Holm's correction</i> after the label <i>Multiple comparision</i>.
+</div>
+<br>
+<h3 id="mail">4. Send a mail when completed</h3>
+<div style="text-indent:2em">
+Sometimes the analysis takes a long time, especially when your dataset is very large, or permutation test is selected. Under such circumstance, you can provide your e-mail address in the textfiled <i>Your E-mail</i>. When the analysis is done, the link to the results will be sent to your mailbox. Additionally, you can also specify the name of the dataset, which will be included in the mail subject. 
+</div>
+<br>
+<div>
+<strong>Advanced options: </strong> 
+</div>
+<br>
+<h3 id="ld">1. Linkage disequilibrium</h3>
+<div style="text-indent:2em">
+For case/control data, linkage disequilibrium analysis can be carried out either in cases, in controls or in both cases and controls. You can select it after the label <i>Calculate LD in</i>. For quantitative trait data, linkage disequilibrium will be carried out in all samples.
+</div>
+<br>
+<h3 id="hap">2. Haplotype analysis</h3>
 <div style="text-indent:2em">
 If <i>Haplotype analysis</i> is choosen, you could define the <i>lowest frequency threshold (LFT)</i> of analysis. The default value of LFT is 0.03. Every single haplotype with a frequency less than this value will be discarded in the association analysis. The range of LFT is [0,1). This step is optional. Invalid input will default the value to 0.03.
 </div>
@@ -252,21 +305,17 @@ If <i>Haplotype analysis</i> is choosen, you could define the <i>lowest frequenc
 Moreover, you can also use a subset of the markers to perform haplotype. To do this, enter selected sites in <i>Mask for hap-analysis</i> textfiled. It should be deliminated by space, tab or comma. For example, "1,1,0,1" to choose 1st, 2nd and 4th sites for haplotype analysis when there are 4 site in all. If no mask is given, all the sites will be used.
 </div>
 <br>
-<h3 id="ld">4. Extra options for Linkage disequilibrium</h3>
+<h3 id="permutation">3. Permutaions</h3>
 <div style="text-indent:2em">
-For case/control data, linkage disequilibrium analysis can be carried out either in cases, in controls or in both cases and controls. You can select it after the label <i>Calculate LD in</i>. For quantitative trait data, linkage disequilibrium will be carried out in all samples.
+If you want to perform permutation test, enter the number of permutations in the textfiled <i>Number of permutations</i>. Currently, SHEsisPlus webserver accepts number of permutations <10000.
 </div>
 <br>
-<h3 id="multi">5. Multiple comparision</h3>
+<h3 id="epi">4. Gene Interaction</h3>
 <div style="text-indent:2em">
-We provided the methods to adjust for multiple testing. Two types of methods are available. One is p-value based methods including Holm's step down procedure, Sidal single-step procedure, Sidak step-down procedure, Benjamini & Hocheberg step-up FDR control and Benjamini & Yekutieli step-up FDR control. The other is permutation test, which is a data-level method and is much slower. If you want to perform p-value based adjustment, clicking the checkbox <i>Sidak, FDR, Holm's correction</i> after the label <i>Multiple comparision</i>. If you want to perform permutation test, enter the number of permutations in the textfiled <i>Number of permutations</i>. Currently, SHEsisPlus webserver accepts number of permutations <10000.
+By default, SHEsisPlus calculates 2-way interactions of the provided SNPs. If you want to calculate higher order interactions, please specify the orders in <i>Orders of Gene Interaction</i>. The online version supports calculations of up to 5-way interactions. 
 </div>
 <br>
-<h3 id="mail">6. Send a mail when completed</h3>
-<div style="text-indent:2em">
-Sometimes the analysis takes a long time, especially when your dataset is very large, or permutation test is selected. Under such circumstance, you can provide your e-mail address in the textfiled <i>Your E-mail</i>. When the analysis is done, the link to the results will be sent to your mailbox. Additionally, you can also specify the name of the dataset, which will be included in the mail subject. 
-</div>
-<br>
+
 <h2 id="output">Interpret output</h2>
 <br>
 <h3 id="outputBinary">1. Binary phenotype</h3>
@@ -334,7 +383,13 @@ This is an exmple of output for case/control association analysis. The fileds ar
 The output is straightforward. Hardy-weinberg equilibrium is calculated in cases, in controls, and in both cases and controls. Both Pearson's chi square test and Fisher's exact test are performed. 
 </div>
 <br>
-<h4>c. Haplotype analysis</h4>
+<h4>c. Epistasis detection</h4>
+<img src="images/help_binary_epi.JPG" style="padding:10px 20px 10px 10px">
+<div style="text-indent:2em">
+SHEsisPlus uses entropy-based algorithm for epistasis detection. Interactions between SNPs are quantified by information interaction, which is the amount information bound up in a set of SNPs and is not present in any subset of these SNPs. Information interaction is calculated in cases and controls respectively. The stasistic is the difference in information interaction between cases and controls. P value is obtained by permutation tests.
+</div>
+<br>
+<h4>d. Haplotype analysis</h4>
 <div style="text-indent:2em">
 For web-based SHEsisPlus, the algorithm used for haplotype interfernce is expectation maximization (EM). Another algorithm based on <a href="http://www.ncbi.nlm.nih.gov/pubmed/18667059">SAT</a> is available for stand-alone version. The SAT-based algorithm is much more slower than EM algorithm.The output for haplotype analysis looks like: 
 </div>
@@ -344,7 +399,7 @@ For web-based SHEsisPlus, the algorithm used for haplotype interfernce is expect
  In this example, haplotypes with frequency <0.03 are discarded. 0.03 is the default value. You can change this value by modifying textfield <i>Lowest frequency for hap-analysis</i>. The fields in the table are also easy to understand. Apart from association test for every single haplotype, a global result is also given. This result shows if the haplotype distribution is different between cases and controls.
 </div>
 <br>
-<h4>d. Linkage disequilibrium analysis</h4>
+<h4>e. Linkage disequilibrium analysis</h4>
 <img src="images/help_binary_D.jpg" style="width:40%;height:40%;padding:10px 20px 10px 10px">
 <img src="images/help_binary_R2.jpg" style="width:40%;height:40%;padding:10px 20px 10px 10px">
 <div style="text-indent:2em">
@@ -405,7 +460,12 @@ The following fields have been described before.
 For quantative trait, Hardy-weinberg equilibrium test in all samples are carried out. 
 </div>
 <br>
-<h4>c. Haplotype analysis</h4>
+<h4>c. Epistasis detection</h4>
+<div style="text-indent:2em">
+For quantitative traits, individuals are divided into two groups: high trait value gourp and low trait value group. Information interaction is calculated in these two groups respectively.   
+</div>
+<br>
+<h4>d. Haplotype analysis</h4>
 <img src="images/help-hap-qtl.PNG" style="padding:10px 20px 10px 10px">
 <div style="text-indent:2em">
  <i>Total count</i> is the count of this haplotype in the dataset. The other fileds have been described before 
