@@ -104,9 +104,14 @@ boost::shared_ptr<SHEsis::SHEsisData> GenerateRandomData(int sampleNum,
   for (int iSample = 0; iSample < sampleNum; iSample++) {
 //    BOOST_ASSERT(iSample < data->vLabel.size());
     data->vLabel.push_back(((SHEsis::SampleStatus)dist(boost_rng)));
+  }
     for (int iSnp = 0; iSnp < snpNum; iSnp++) {
+  	  double maf=dist(boost_rng)==1?0.2:0.4;
+  	  double GenoProb[] = {0.0, maf,1-maf};  // 0.01 is missing genotype for individuals
+  	  boost::random::discrete_distribution<> distGeno(GenoProb);
+  	for (int iSample = 0; iSample < sampleNum; iSample++) {
       for (int iChrset = 0; iChrset < chrSetNum; iChrset++) {
-        data->mGenotype[iSample][iSnp][iChrset] = dist2(boost_rng);
+        data->mGenotype[iSample][iSnp][iChrset] = distGeno(boost_rng);
       }
     }
   }
@@ -116,7 +121,7 @@ boost::shared_ptr<SHEsis::SHEsisData> GenerateRandomData(int sampleNum,
   return data;
 }
 
-int main(){
+int main(int argc,char *argv[]){
 	string snp[6][3][2]={
 			{{"1","2"},{"1","2"},{"1","2"}},
 			{{"1","2"},{"1","2"},{"1","1"}},
@@ -130,15 +135,32 @@ int main(){
 	int sampleNum = 1000;
 	int snpNum = 2000;
 	int ploidy = 2;
+	sampleNum=atoi(argv[1]);
+	snpNum=atoi(argv[2]);
+	ploidy=atoi(argv[3]);
+	double pre=0.3;
+	pre=atof(argv[4]);
+	int permutation=atoi(argv[5]);
+	double maf=atof(argv[6]);
+	int lowb=atoi(argv[7]);
+	int hib=atoi(argv[8]);
 //	boost::shared_ptr<SHEsisData> data(new SHEsis::SHEsisData(sampleNum, snpNum, ploidy));
 	boost::shared_ptr<SHEsisData> data=GenerateRandomData(sampleNum,snpNum,ploidy);
-	for(int i=0;i<snpNum;i=i+2){
-			SetGXG(data,i,i+1,0.3);
+//	for(int i=0;i<snpNum;i=i+2){
+//			SetGXG(data,i,i+1,pre);
+//	}
+	for(int i=0;i<snpNum;i=i+3){
+			SetGXGXG(data,i,i+1,i+2,pre);
 	}
 	data->statCount();
 	std::ofstream ped,map;
-	ped.open("test_binary.ped");
-	map.open("test_binary.map");
+	std::stringstream name;
+	name<<"binary_"<<(snpNum/2)<<"interaction_"<<sampleNum<<"samples_"<<ploidy<<"ploidy_"<<pre<<"pre_";
+//	name<<"binary_"<<snpNum<<"snps_"<<sampleNum<<"samples_"<<ploidy<<"ploidy_"<<maf<<"maf";
+	std::string pedname=name.str()+".ped";
+	std::string mapname=name.str()+".map";
+	ped.open(pedname.data());
+	map.open(mapname.data());
 //	  std::cout << "Genotype Matrix:\n";
 	  for (int iSample = 0; iSample < sampleNum; iSample++) {
 		  ped<<iSample<<" 0 0 0 1 "<<(data->vLabel[iSample])<<" ";
@@ -179,9 +201,9 @@ int main(){
 //	}
 //	std::cout<<"snpnum="<<data->getSnpNum()<<"\n";
 	GeneInteractionBinary gib(data);
-	gib.setlb(2);
-	gib.setPermutation(200);
-	gib.setub(2);
+	gib.setlb(lowb);
+	gib.setPermutation(permutation);
+	gib.setub(hib);
 	gib.CalGeneInteraction();
 	gib.print();
 	return 0;
