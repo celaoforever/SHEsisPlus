@@ -81,14 +81,14 @@ void addOptions(int argc, char* argv[], po::options_description& desc,
                 po::variables_map& vm);
 void checkOptions(po::options_description& desc, po::variables_map& vm);
 int ReadInput(int ploidy, bool containsPhenotype, std::string filepath,
-              std::vector<std::vector<std::string> >& filecontent);
+              std::vector<std::vector<std::string> >& filecontent,std::vector<int>& invalidIdx);
 boost::shared_ptr<SHEsis::SHEsisData> parseDataWithPhenotype(
     int snpnum, int ploidy, std::vector<std::vector<std::string> >& content);
 boost::shared_ptr<SHEsis::SHEsisData> parseDataNoPhenotype(
     int snpnum, int ploidy, std::vector<std::vector<std::string> >& casecontent,
     std::vector<std::vector<std::string> >& ctrlcontent);
 boost::shared_ptr<SHEsis::SHEsisData> parseInput();
-std::vector< std::vector<double> > ReadCovar(std::string filepath);
+std::vector< std::vector<double> > ReadCovar(std::string filepath,std::vector<int>& invalidIdx);
 void getSnpNamefile(std::string& path, std::vector<std::string>& snp);
 void getSnpNameline(std::string& names, std::vector<std::string>& snp);
 void reportHtml(std::stringstream& report,
@@ -364,23 +364,26 @@ void reportHtml(std::stringstream& report,
 boost::shared_ptr<SHEsis::SHEsisData> parseInput() {
   boost::shared_ptr<SHEsis::SHEsisData> data;
   std::vector<std::vector<std::string> > filecontent;
+  std::vector<int> invalidIdx;
   std::vector<std::vector<std::string> > filecontentcase;
   std::vector<std::vector<std::string> > filecontentctrl;
   int snpnum, snpcase, snpctrl;
   if (SHEsisArgs.inputfiles.size() > 0) {
+	BOOST_ASSERT(SHEsisArgs.inputfiles.size()==1);
     for (int i = 0; i < SHEsisArgs.inputfiles.size(); i++) {
       snpnum = ReadInput(SHEsisArgs.ploidy, SHEsisArgs.containsPhenotype,
-                         SHEsisArgs.inputfiles[i], filecontent);
+                         SHEsisArgs.inputfiles[i], filecontent,invalidIdx);
     }
     data = parseDataWithPhenotype(snpnum, SHEsisArgs.ploidy, filecontent);
   } else if (SHEsisArgs.inputctrls.size() > 0 &&
              SHEsisArgs.inputcases.size() > 0) {
+	BOOST_ASSERT(SHEsisArgs.inputctrls.size()==1 && SHEsisArgs.inputcases.size()==1 );
     for (int i = 0; i < SHEsisArgs.inputctrls.size(); i++)
       snpctrl = ReadInput(SHEsisArgs.ploidy, SHEsisArgs.containsPhenotype,
-                          SHEsisArgs.inputctrls[i], filecontentctrl);
+                          SHEsisArgs.inputctrls[i], filecontentctrl,invalidIdx);
     for (int i = 0; i < SHEsisArgs.inputcases.size(); i++)
       snpcase = ReadInput(SHEsisArgs.ploidy, SHEsisArgs.containsPhenotype,
-                          SHEsisArgs.inputcases[i], filecontentcase);
+                          SHEsisArgs.inputcases[i], filecontentcase,invalidIdx);
     if (snpctrl != snpcase)
       throw std::runtime_error("SNP number in cases and controls disagrees.");
     data = parseDataNoPhenotype(snpcase, SHEsisArgs.ploidy, filecontentcase,
@@ -389,7 +392,7 @@ boost::shared_ptr<SHEsis::SHEsisData> parseInput() {
     throw std::runtime_error("Please check the input files.");
   };
   if(SHEsisArgs.covar!=""){
-	  data->covar=ReadCovar(SHEsisArgs.covar);
+	  data->covar=ReadCovar(SHEsisArgs.covar,invalidIdx);
   }
 
   return data;
@@ -450,13 +453,13 @@ void addOptions(int argc, char* argv[], po::options_description& desc,
                 po::variables_map& vm) {
   desc.add_options()("help", "produce help message")(
       "input", po::value<std::vector<std::string> >(),
-      "path for the input file containing both cases and controls, can be "
-      "specified for multiple times")(
+      "path for the input file containing both cases and controls"
+      /*", can be specified for multiple times"*/)(
       "input-case", po::value<std::vector<std::string> >(),
-      "path for the input file containing cases, can be specified for multiple "
-      "times")("input-ctrl", po::value<std::vector<std::string> >(),
-               "path for the input file containing controls, can be specified "
-               "for multiple times")(
+      "path for the input file containing cases "
+      /*", can be specified for multiple times"*/)("input-ctrl", po::value<std::vector<std::string> >(),
+               "path for the input file containing controls "
+               /*", can be specified for multiple times"*/)(
       "covar",po::value<std::string>(),"path for covariates")(
       "snpname-file", po::value<std::string>(),
       "path for file that contains names of snps")(
@@ -693,7 +696,7 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
         "at least one type of analysis should be specified.");
 }
 
-std::vector< std::vector<double> > ReadCovar(std::string filepath){
+std::vector< std::vector<double> > ReadCovar(std::string filepath,std::vector<int>& invalidIdx){
 	std::vector< std::vector<double> > res;
 	std::string line;
 	std::ifstream file(filepath.c_str());
@@ -704,10 +707,6 @@ std::vector< std::vector<double> > ReadCovar(std::string filepath){
 		std::vector<std::string> strs;
 		boost::erase_all(line,"\r");
 		boost::trim_if(line,boost::is_any_of("\t ,"));
-		if(line.empty()){
-			lineidx++;
-			continue;
-		}
 		boost::split(strs,line,boost::is_any_of("\t ,"),boost::token_compress_on);
 		std::vector<double> aCovar;
 		for(int i=0;i<strs.size();i++){
@@ -735,11 +734,17 @@ std::vector< std::vector<double> > ReadCovar(std::string filepath){
 		}
 		res.push_back(aCovar);
 	}
+	for(int i=0;i<invalidIdx.size();i++){
+		res.erase(res.begin()+invalidIdx[i]);
+	}
+	for(int i=0;i<res.size();i++){
+		std::cout<<i<<": "<<res[i][0]<<"\n";
+	}
 	return res;
 }
 
 int ReadInput(int ploidy, bool containsPhenotype, std::string filepath,
-              std::vector<std::vector<std::string> >& filecontent) {
+              std::vector<std::vector<std::string> >& filecontent,std::vector<int>& invalidIdx) {
   std::string line;
   std::ifstream file(filepath.c_str());
   if (!file.is_open())
@@ -759,6 +764,10 @@ int ReadInput(int ploidy, bool containsPhenotype, std::string filepath,
                  boost::token_compress_on);
 
     if (containsPhenotype) {
+    	if("NA" == strs[1]){
+    		invalidIdx.push_back(filecontent.size());
+    		continue;
+    	}
     	if(!SHEsisArgs.qtl){
     		if(strs[1] != "case"&& strs[1] != "ctrl"){
     			int pheno;
