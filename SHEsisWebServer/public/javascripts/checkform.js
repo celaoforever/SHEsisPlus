@@ -3,7 +3,7 @@ function validateAnalysisType(){
 	if(document.getElementsByName('CheckBoxAnalysisTypeAssoc')[0].checked){
 		count++;
 	};
-        if(document.getElementsByName('CheckBoxAnalysisTypeHWE')[0].checked){
+        if(document.getElementsByName('CheckBoxAnalysisTypeEpi')[0].checked){
                 count++;
         };
         if(document.getElementsByName('CheckBoxAnalysisTypeHap')[0].checked){
@@ -142,12 +142,12 @@ function validateInputData(){
                         return false;
                 };
 	    if(document.getElementsByName("SelectPhenotype")[0].value=="Quantitative Trait"){
-		if (!isNumber(fields[1])){
+		if (!isNumber(fields[1])&& (fields[1]!="NA")){
 		    setLegend("Input data error, in line "+ (i+1)+". For quantitative trait, phenotype should be numeric, but "+fields[1]+" found.");
 		    return false;
 		}
 	    }else{
-		if(fields[1]!="case" && fields[1]!="ctrl"){
+		if(fields[1]!="case" && fields[1]!="ctrl" && fields[1]!="NA"){
 		    setLegend("Input data error, in line "+ (i+1)+". For case/control data, phenotype should be either 'case' or 'ctrl', but "+fields[1]+" found.");
 		    return false;
 		}

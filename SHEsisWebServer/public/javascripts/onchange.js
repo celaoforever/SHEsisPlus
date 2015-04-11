@@ -34,7 +34,11 @@ function loadSampleDataBinary(){
     document.getElementsByName("TextareaInputData")[0].value=data;
     document.getElementsByName("TextareaCovar")[0].value=covar;
     document.getElementsByName('CheckBoxAnalysisTypeAssoc')[0].checked=true;
-    document.getElementsByName('CheckBoxAnalysisTypeHWE')[0].checked=true;
+    if(document.getElementsByName('CheckBoxAnalysisTypeHWE')[0]!=undefined){
+	document.getElementsByName('CheckBoxAnalysisTypeHWE')[0].checked=true;
+    }else{
+	document.getElementsByName('CheckBoxAnalysisTypeEpi')[0].checked=true;
+    }
     document.getElementsByName('CheckBoxAnalysisTypeHap')[0].checked=true;
     document.getElementsByName('CheckBoxAnalysisTypeLD')[0].checked=true;
     document.getElementsByName("SelectPhenotype")[0].value="Case/Control";
@@ -50,7 +54,11 @@ function loadSampleDataQTL(){
     document.getElementsByName("TextareaInputData")[0].value=data;
     document.getElementsByName("TextareaCovar")[0].value=covar;
     document.getElementsByName('CheckBoxAnalysisTypeAssoc')[0].checked=true;
-    document.getElementsByName('CheckBoxAnalysisTypeHWE')[0].checked=true;
+    if(document.getElementsByName('CheckBoxAnalysisTypeHWE')[0]!=undefined){
+	document.getElementsByName('CheckBoxAnalysisTypeHWE')[0].checked=true;
+    }else{
+	document.getElementsByName('CheckBoxAnalysisTypeEpi')[0].checked=true;
+    }
     document.getElementsByName('CheckBoxAnalysisTypeHap')[0].checked=true;
     document.getElementsByName('CheckBoxAnalysisTypeLD')[0].checked=true;
     document.getElementsByName("SelectPhenotype")[0].value="Quantitative Trait";
