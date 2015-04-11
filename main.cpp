@@ -737,9 +737,6 @@ std::vector< std::vector<double> > ReadCovar(std::string filepath,std::vector<in
 	for(int i=0;i<invalidIdx.size();i++){
 		res.erase(res.begin()+invalidIdx[i]);
 	}
-	for(int i=0;i<res.size();i++){
-		std::cout<<i<<": "<<res[i][0]<<"\n";
-	}
 	return res;
 }
 
