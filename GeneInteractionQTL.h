@@ -21,7 +21,7 @@ std::vector<int> SampleIdx;
 
 struct gxgQTLRes{
 	//gxgQTLRes():p(-999),nonmissing(-999){}
-	gxgQTLRes():p(-999),nonmissing(-999){}
+	gxgQTLRes():p(-999),LowEntropy(-999),HighEntropy(-999),diff(-999),nonmissing(-999){}
 	std::string snpset;
 	double LowEntropy;
 	double HighEntropy;
