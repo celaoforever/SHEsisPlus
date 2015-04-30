@@ -120,36 +120,16 @@ if(err){
 args+=" --covar "+covarfile;
 }
 
-    if(req.body.CheckBoxAnalysisTypeEpi!=undefined){
-	if(req.body.CheckBoxAnalysisTypeAssoc=="on"  ){
-	    args+=" --assoc";
-            jsonarg.ASSOC=1;
-    	    args+=" --hwe";
-	    jsonarg.HWE=1;
-	}else
-	{
-	    jsonarg.ASSOC=0;
-	    jsonarg.HWE=0;
-	};
-    }else{
-	if(req.body.CheckBoxAnalysisTypeAssoc=="on"  ){
-	    args+=" --assoc";
-            jsonarg.ASSOC=1;
-	}else
-	{
-	    jsonarg.ASSOC=0;
-	};
-	if(req.body.CheckBoxAnalysisTypeHWE=="on"  ){
-    	    args+=" --hwe";
-	    jsonarg.HWE=1;
-	}else
-	{
-	    jsonarg.HWE=0;
-	};
-    }
-    
-
-
+if(req.body.CheckBoxAnalysisTypeAssoc=="on"  ){
+    args+=" --assoc";
+    jsonarg.ASSOC=1;
+    args+=" --hwe";
+    jsonarg.HWE=1;
+}else
+{
+    jsonarg.ASSOC=0;
+    jsonarg.HWE=0;
+};
     
 if(req.body.CheckBoxAnalysisTypeEpi=="on"){
     args+=" --epistasis";
@@ -201,7 +181,7 @@ if(req.body.TextPermutation>0){
 jsonarg.PERMUTATION=req.body.TextPermutation;
 args+=" --ploidy "+req.body.SelectPloidy;
 args+=" --lft "+req.body.TextLFT;
-args+=" --snpname-line \""+req.body.TextMarkername  + "\"";
+args+=" --snpname-line \'"+req.body.TextMarkername  + "\'";
 args+=" --mask "+"\""+req.body.TextMask+"\"";
 jsonarg.PLOIDY=req.body.SelectPloidy;
 jsonarg.LFT=req.body.TextLFT;
@@ -320,8 +300,8 @@ var bin=cp.exec(cmd,function(err,stdout,stderr){
 
 
 function RunSHEsis(args,jobid,email,dataset){
-console.log('bin/SHEsis_dev ',args);
-var bin=cp.exec('bin/SHEsis_dev '+args,{timeout:36000000},function(err,stdout,stderr){
+console.log('bin/SHEsis ',args);
+var bin=cp.exec('bin/SHEsis '+args,{timeout:36000000},function(err,stdout,stderr){
 var arrMatches=stdout.toString().match('ERROR.*');
 
 if(err&&err.killed){

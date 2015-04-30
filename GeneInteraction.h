@@ -22,8 +22,26 @@ public:
 	boost::shared_ptr<SHEsisData> data;
 	GeneInteraction(boost::shared_ptr<SHEsisData> data);
 	virtual ~GeneInteraction();
-	void setlb(int l){this->lowbound=l<2?2:l;}
-	void setub(int u){if(this->data && u>this->data->getSnpNum()){this->upperbound=this->data->getSnpNum();}else{this->upperbound=u;}}
+	void setlb(int l){
+		if(this->data && l>this->data->getSnpNum())
+		{
+			this->lowbound=this->data->getSnpNum();
+		}else if(l<2){
+			this->lowbound=2;
+		}else{
+			this->lowbound=l;
+		};
+	}
+	void setub(int u){
+		if(this->data && u>this->data->getSnpNum())
+		{
+			this->upperbound=this->data->getSnpNum();
+		}else if(u<2){
+			this->upperbound=2;
+		}else{
+			this->upperbound=u;
+		}
+	}
 	void setAdjust(bool s){this->adjust=s;};
 	void setPermutation(int s){this->permutation=s;};
 	virtual void setBinNum(int s){};
