@@ -25,6 +25,7 @@ HaplotypeEM::HaplotypeEM(boost::shared_ptr<SHEsisData> data)
       InterMediate(
           boost::extents[data->getSampleNum()][2][data->getNumOfChrSet()]),
       err(0.0001),
+      showResults(true),
       missing(new bool[data->getSampleNum()]) {
   //	this->sortGenotype();
   for (int i = 0; i < this->data->getSnpNum(); i++) {
@@ -42,7 +43,8 @@ HaplotypeEM::HaplotypeEM(boost::shared_ptr<SHEsisData> data, int Snp,
                          std::vector<short> mask)
     : HaplotypeBase(data, mask),
       phased(1),
-      PhasedData(boost::extents[data->getSampleNum()][data->getSnpNum()]
+      showResults(true),
+      PhasedData(boost::extents[data->getSampleNum()][/*data->getSnpNum()*/Snp]
                                [data->getNumOfChrSet()]),
       InterMediate(
           boost::extents[data->getSampleNum()][2][data->getNumOfChrSet()]),
@@ -816,13 +818,21 @@ void HaplotypeEM::getResults() {
       this->Results.genotypes[sample][ploidy] = hm[p.str()];
     }
   };
-  //  for(int i=0;i<this->data->getSampleNum();i++){
-  //	  	 std::cout<<"sample"<<i;
-  //	  for(int j=0;j<this->data->getNumOfChrSet();j++){
-  //		  std::cout<<" "<<this->Results.genotypes[i][j];
-  //	  }
-  //	  std::cout<<"\n";
-  //  }
+  if(!this->silent){
+/*for statistics
+    for(int i=0;i<this->data->getSampleNum();i++){
+  	  	 std::cerr<<i<<"\t";
+  	  for(int j=0;j<this->data->getNumOfChrSet();j++){
+  		  		for(int k=0;k<this->SnpIdx.size();k++){
+  		  	    	std::cerr<<this->data->getallele(this->Results.haplotypes[this->Results.genotypes[i][j]][k]);
+  		  		}
+  		  		std::cerr<<"\t";
+  		 // std::cout<<this->Results.genotypes[i][j]<<"\t";
+ 	  }
+  	  std::cerr<<"\n";
+    }
+for statistics*/
+  }
 
   int haploNum = hm.size();
   this->Results.CaseCount.reset(new int[haploNum]);
@@ -858,13 +868,13 @@ void HaplotypeEM::getResults() {
     }
   };
 
-  //	std::cout<<"\nHaplotypes:\n";
-  //	for(int k=0;k<this->Results.haplotypes.size();k++){
-  //		for(int i=0;i<this->SnpIdx.size();i++){
-  //	    	std::cout<<this->Results.haplotypes[k][i];
-  //		}
-  //		std::cout<<":"<< (this->Results.BothCount[k])<<"\n";
-  //	}
+//  	std::cout<<"\nHaplotypes:\n";
+//  	for(int k=0;k<this->Results.haplotypes.size();k++){
+//  		for(int i=0;i<this->SnpIdx.size();i++){
+//  	    	std::cout<<this->Results.haplotypes[k][i];
+//  		}
+//  		std::cout<<":"<< (this->Results.BothCount[k])<<"\n";
+//  	}
 }
 
 void HaplotypeEM::startHaplotypeAnalysis() {
@@ -892,7 +902,20 @@ void HaplotypeEM::startHaplotypeAnalysis() {
       fflush(stdout);
     }
   }
-  this->getResults();
+  if(this->showResults)
+	  this->getResults();
+  else{
+//	    std::cout<<"Phased data:\n";
+//	    for(int i=0;i<this->data->getSampleNum();i++){
+//	  	  for(int j=0;j<this->SnpIdx.size();j++){
+//	  		  for(int k=0;k<this->data->getNumOfChrSet();k++){
+//	  			  std::cout<<this->PhasedData[i][j][k]<<"/";
+//	  		  }
+//	  		  std::cout<<" ";
+//	  	  }
+//	  	  std::cout<<"\n";
+//	    }
+  }
 }
 
 } /* namespace SHEsis */

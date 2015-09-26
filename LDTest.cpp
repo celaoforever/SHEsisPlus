@@ -24,7 +24,13 @@ LDTest::LDTest(boost::shared_ptr<SHEsisData> data, std::string path)
       resR2(boost::extents[this->data->getSnpNum()][this->data->getSnpNum()]) {
   // TODO Auto-generated constructor stub
 }
+LDTest::LDTest(boost::shared_ptr<SHEsisData> data)
+    : data(data),
+      ldtype(LD_IN_BOTH),
+      bForceSAT(false){
 
+  // TODO Auto-generated constructor stub
+}
 LDTest::~LDTest() {
   // TODO Auto-generated destructor stub
 }

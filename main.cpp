@@ -7,6 +7,7 @@
 #include "SHEsisData.h"
 #include "HaplotypeEM.h"
 #include "Haplotype.h"
+#include "HaplotypeLD.h"
 //#include "HaplotypeDiploid.h"
 #include "AssociationTest.h"
 #include "LDTest.h"
@@ -47,7 +48,8 @@ struct arguments {
         epiub(2),
         epipermutation(50),
         model(SHEsis::ADDICTIVE),
-        hapmethod(EM) {};
+        hapmethod(EM),
+        HapLDT(0.1){};
   std::vector<std::string> inputfiles;
   std::vector<std::string> inputcases;
   std::vector<std::string> inputctrls;
@@ -70,6 +72,7 @@ struct arguments {
   bool forceRegress;
   bool epistasis;
   double lft;
+  double HapLDT;
   std::vector<short> mask;
   SHEsis::LD_TYPE ldtype;
   HapMethod hapmethod;
@@ -96,7 +99,7 @@ void reportHtml(std::stringstream& report,
                 boost::shared_ptr<SHEsis::MarkerRegression> RegressHandle,
                 boost::shared_ptr<SHEsis::QTL> QTLHandle,
                 boost::shared_ptr<SHEsis::HWETest> HWEHandle,
-                boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
+                boost::shared_ptr<SHEsis::HaplotypeLD> HapHandle,
                 boost::shared_ptr<SHEsis::LDTest> LDHandle,
                 boost::shared_ptr<SHEsis::GeneInteraction> EpiHandle);
 void reporttxt(std::stringstream& report,
@@ -104,7 +107,7 @@ void reporttxt(std::stringstream& report,
                boost::shared_ptr<SHEsis::MarkerRegression> RegressHandle,
                boost::shared_ptr<SHEsis::QTL> QTLHandle,
                boost::shared_ptr<SHEsis::HWETest> HWEHandle,
-               boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
+               boost::shared_ptr<SHEsis::HaplotypeLD> HapHandle,
                boost::shared_ptr<SHEsis::LDTest> LDHandle,
                boost::shared_ptr<SHEsis::GeneInteraction> EpiHandle);
 void writePendingPage(std::ofstream& report);
@@ -152,7 +155,7 @@ int main(int argc, char* argv[]) {
   boost::shared_ptr<SHEsis::MarkerRegression> RegressHandle;
   boost::shared_ptr<SHEsis::QTL> QTLHandle;
   boost::shared_ptr<SHEsis::HWETest> HWEHandle;
-  boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle;
+  boost::shared_ptr<SHEsis::HaplotypeLD> HapHandle;
   boost::shared_ptr<SHEsis::LDTest> LDHandle;
   boost::shared_ptr<SHEsis::GeneInteraction> EpiHandle;
 
@@ -225,20 +228,11 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < SHEsisArgs.mask.size(); i++) {
       snpnum += SHEsisArgs.mask[i];
     };
-    if (EM == SHEsisArgs.hapmethod) {
-      if (0 == snpnum)  // no mask
-        HapHandle.reset(new SHEsis::HaplotypeEM(data));
-      else
-        HapHandle.reset(new SHEsis::HaplotypeEM(data, snpnum, SHEsisArgs.mask));
-      HapHandle->setoutput(SHEsisArgs.output);
-    }
+    if (0 == snpnum)  // no mask
+      HapHandle.reset(new SHEsis::HaplotypeLD(data));
+    else
+      HapHandle.reset(new SHEsis::HaplotypeLD(data, snpnum, SHEsisArgs.mask));
 
-    if (SAT == SHEsisArgs.hapmethod) {
-      if (0 == snpnum)  // no mask
-        HapHandle.reset(new SHEsis::Haplotype(data));
-      else
-        HapHandle.reset(new SHEsis::Haplotype(data, snpnum, SHEsisArgs.mask));
-    }
     if (SHEsisArgs.adjust) HapHandle->setAdjust(true);
     if (SHEsisArgs.lft >= 0 && SHEsisArgs.lft < 1)
       HapHandle->setFreqThreshold(SHEsisArgs.lft);
@@ -246,7 +240,8 @@ int main(int argc, char* argv[]) {
       std::cout << "***WARNING: lowest frequency threshold for haplotype "
                    "analysis is invalid..defaulting to 0.03\n";
     HapHandle->setSilent(false);
-    HapHandle->startHaplotypeAnalysis();
+    HapHandle->setLDT(SHEsisArgs.HapLDT);
+    HapHandle->phaseAll();
     HapHandle->AssociationTest();
     std::cout << "done\n";
   }
@@ -293,7 +288,7 @@ void reporttxt(std::stringstream& report,
                boost::shared_ptr<SHEsis::MarkerRegression> RegressHandle,
                boost::shared_ptr<SHEsis::QTL> QTLHandle,
                boost::shared_ptr<SHEsis::HWETest> HWEHandle,
-               boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
+               boost::shared_ptr<SHEsis::HaplotypeLD> HapHandle,
                boost::shared_ptr<SHEsis::LDTest> LDHandle,
                boost::shared_ptr<SHEsis::GeneInteraction> EpiHandle) {
   if (AssocHandle) {
@@ -324,7 +319,7 @@ void reportHtml(std::stringstream& report,
                 boost::shared_ptr<SHEsis::MarkerRegression> RegressHandle,
                 boost::shared_ptr<SHEsis::QTL> QTLHandle,
                 boost::shared_ptr<SHEsis::HWETest> HWEHandle,
-                boost::shared_ptr<SHEsis::HaplotypeBase> HapHandle,
+                boost::shared_ptr<SHEsis::HaplotypeLD> HapHandle,
                 boost::shared_ptr<SHEsis::LDTest> LDHandle,
                 boost::shared_ptr<SHEsis::GeneInteraction> EpiHandle) {
   if (!SHEsisArgs.webserver) {
@@ -482,12 +477,14 @@ void addOptions(int argc, char* argv[], po::options_description& desc,
     		   "default:addictive")(
       "haplo-EM",
       "perform haplotype analysis using expectation maximization algorithm")(
-      "haplo-SAT", "perform haplotype analysis using SAT-based algorithm")(
+      "haplo-SAT", "perform haplotype analysis using SAT-based algorithm, no longer used")(
       "mask", po::value<std::string>(),
       "mask of snps for haplotype analysis, comma delimited. eg. mask=1,0,1 to "
       "use 1st and 3rd SNPs when there are 3 SNPs in all.")(
       "lft", po::value<double>(),
       "lowest frequency threshold for haplotype analysis")(
+      "hapld",po::value<double>(),
+      "R2 to define a LD block. Snp in one snp block will be phased together. default:0.2")(
       "epistasis","perform gene interaction analysis")(
       "epi-lb",po::value<int>(),"lower bound of number of snps to perform gene interaction analysis,default:2 (2-way interaction)")(
       "epi-ub",po::value<int>(),"upper bound of number of snps to perform gene interaction analysis,default:2 (2-way interaction)")(
@@ -645,6 +642,9 @@ void checkOptions(po::options_description& desc, po::variables_map& vm) {
     SHEsisArgs.haploAnalysis = true;
     SHEsisArgs.hapmethod = EM;
   };
+  if( vm.count("hapld")!=0){
+	  SHEsisArgs.HapLDT=vm["hapld"].as<double>();
+  }
 
   if(vm.count("epistasis") !=0){
 	  SHEsisArgs.epistasis=true;

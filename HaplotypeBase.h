@@ -105,6 +105,7 @@ class HaplotypeBase {
   HapTestResult Results;
   int NonmissingCase;
   int NonmissingCtrl;
+  std::vector<int> SnpIdx;
   void setoutput(std::string t){};
  protected:
   void AssociationTestBinary();
@@ -112,9 +113,7 @@ class HaplotypeBase {
   singHapQTLRes SingleHaploAssociationTestQTL(int hapIdx);
   int getHaploCount(int sample, int hapIdx);
   bool IsHaploMissing(int sample);
-
   std::vector<short> mask;
-  std::vector<int> SnpIdx;
   std::string reporthtmltableBinary();
   std::string reporthtmltableQTL();
   std::string reporttxttableBinary();

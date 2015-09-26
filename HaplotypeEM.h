@@ -36,8 +36,9 @@ class HaplotypeEM : public HaplotypeBase {
               std::vector<short> mask);
   virtual ~HaplotypeEM();
   virtual void startHaplotypeAnalysis();
+  void ShowResults(bool b){this->showResults=b;};
   boost::shared_ptr<bool[]> missing;
-
+  boost::multi_array<short, 3> PhasedData;
  private:
   void sortGenotype();
   void sortInterMediate();
@@ -55,7 +56,6 @@ class HaplotypeEM : public HaplotypeBase {
   void getCombination();
   OneGenotypeExpandedHaplo oneGenoGetCombination(int sample);
   std::vector<int> getSampleIdx(int genotype);
-  boost::multi_array<short, 3> PhasedData;
   std::vector<int> UniqueGenotypeIdx;  // 2 loci, diploid
   std::vector<int> UniqueGenotypeCount;
   boost::multi_array<short, 3> InterMediate;
@@ -66,6 +66,7 @@ class HaplotypeEM : public HaplotypeBase {
   std::vector<std::vector<int> > combination;
   int phased;
   double err;
+  bool showResults;
 };
 
 } /* namespace SHEsis */

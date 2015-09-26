@@ -21,10 +21,12 @@ struct NonmissingSampleAlleleCount {
 class LDTest {
  public:
   LDTest(boost::shared_ptr<SHEsisData> data, std::string path);
+  LDTest(boost::shared_ptr<SHEsisData> data);
   virtual ~LDTest();
   void AllLociLDtest();
   void DrawLDMapDandR2();
   void printRes();
+  void TwoLociLDTest(int snp1, int snp2, LD_TYPE type, double& R2, double& D);
   void setLDType(LD_TYPE t) {
     this->ldtype = t;
   };
@@ -35,7 +37,7 @@ class LDTest {
   std::string reporttxt();
 
  private:
-  void TwoLociLDTest(int snp1, int snp2, LD_TYPE type, double& R2, double& D);
+
   void DrawLDMap(int type);
   void StatAllelesInNonmissingSample(boost::shared_ptr<bool[]> missing,
                                      int snp1, int snp2);

@@ -11,13 +11,13 @@ CXXFLAGS =  -fmessage-length=0   -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS 
  CXXFLAGS += -O0 -g
  endif
 
-TARGET = SHEsis SHEsisData_test AssociationTest_test HWETest_test  LDTest_test QTL_test DataGenerator GeneInteractionQTL_test GeneInteractionBinary_test logistic linear MarkerRegression_test HaplotypeEM_test
+TARGET = SHEsis SHEsisData_test AssociationTest_test HWETest_test  LDTest_test QTL_test DataGenerator GeneInteractionQTL_test GeneInteractionBinary_test logistic linear MarkerRegression_test HaplotypeEM_test HaplotypeLD_test
 
-all: QTL_test HaplotypeDiploid_test SHEsis SHEsisData_test AssociationTest_test Haplotype_test HWETest_test LDTest_test HaplotypeEM_test DataGenerator logistic linear MarkerRegression_test 
+all: QTL_test HaplotypeDiploid_test SHEsis SHEsisData_test AssociationTest_test Haplotype_test HWETest_test LDTest_test HaplotypeEM_test DataGenerator logistic linear MarkerRegression_test  HaplotypeLD_test
 
 
-SHEsis:	 main.o  SHEsisData.o fisher.o utility.o AssociationTest.o HWETest.o LDTest.o QTL.o HaplotypeBase.o Haplotype.o HaplotypeEM.o  IndexingVariables.o  ArrayStorage.o System.o Solver.o Options.o  BMP.o font.o minifont.o CreatHtmlTable.o linear.o regression.o logistic.o  MarkerRegression.o GeneInteractionQTL.o GeneInteractionBinary.o GeneInteraction.o
-	$(CXX) $(LIB) -lmlpack   -o SHEsis SHEsisData.o main.o fisher.o utility.o AssociationTest.o HWETest.o LDTest.o HaplotypeBase.o HaplotypeEM.o Haplotype.o CreatHtmlTable.o  IndexingVariables.o ArrayStorage.o System.o Solver.o Options.o  BMP.o font.o minifont.o QTL.o linear.o regression.o logistic.o  MarkerRegression.o  GeneInteractionQTL.o GeneInteractionBinary.o GeneInteraction.o
+SHEsis:	 main.o  HaplotypeLD.o SHEsisData.o fisher.o utility.o AssociationTest.o HWETest.o LDTest.o QTL.o HaplotypeBase.o Haplotype.o HaplotypeEM.o  IndexingVariables.o  ArrayStorage.o System.o Solver.o Options.o  BMP.o font.o minifont.o CreatHtmlTable.o linear.o regression.o logistic.o  MarkerRegression.o GeneInteractionQTL.o GeneInteractionBinary.o GeneInteraction.o
+	$(CXX) $(LIB) -lmlpack   -o SHEsis SHEsisData.o HaplotypeLD.o main.o fisher.o utility.o AssociationTest.o HWETest.o LDTest.o HaplotypeBase.o HaplotypeEM.o Haplotype.o CreatHtmlTable.o  IndexingVariables.o ArrayStorage.o System.o Solver.o Options.o  BMP.o font.o minifont.o QTL.o linear.o regression.o logistic.o  MarkerRegression.o  GeneInteractionQTL.o GeneInteractionBinary.o GeneInteraction.o
 
 DataGenerator: DataGenerator.o
 	$(CXX) $(LIB) -o DataGenerator DataGenerator.o -l:libboost_program_options.a 
@@ -39,6 +39,9 @@ HaplotypeDiploid_test: SHEsisData.o HaplotypeBase.o HaplotypeDiploid_test.o fish
 
 HaplotypeEM_test: HaplotypeEM.o SHEsisData.o HaplotypeBase.o HaplotypeEM_test.o fisher.o utility.o CreatHtmlTable.o
 	$(CXX) -o HaplotypeEM_test HaplotypeEM.o SHEsisData.o HaplotypeBase.o HaplotypeEM_test.o fisher.o utility.o CreatHtmlTable.o
+
+HaplotypeLD_test: HaplotypeLD_test.o BMP.o font.o minifont.o  Haplotype.o IndexingVariables.o ArrayStorage.o System.o Solver.o Options.o   LDTest.o HaplotypeLD.o HaplotypeEM.o SHEsisData.o HaplotypeBase.o  fisher.o utility.o CreatHtmlTable.o
+	$(CXX) -o HaplotypeLD_test BMP.o HaplotypeLD_test.o font.o minifont.o  Haplotype.o IndexingVariables.o ArrayStorage.o System.o Solver.o Options.o   LDTest.o  HaplotypeLD.o HaplotypeEM.o SHEsisData.o HaplotypeBase.o fisher.o utility.o CreatHtmlTable.o
 
 LDTest_test: SHEsisData.o LDTest_test.o HaplotypeEM.o LDTest.o HaplotypeBase.o BMP.o font.o minifont.o Haplotype.o  IndexingVariables.o ArrayStorage.o System.o Solver.o Options.o  fisher.o utility.o  CreatHtmlTable.o
 	$(CXX) -o LDTest_test SHEsisData.o HaplotypeBase.o HaplotypeEM.o LDTest_test.o LDTest.o BMP.o font.o minifont.o Haplotype.o IndexingVariables.o ArrayStorage.o System.o Solver.o Options.o   fisher.o utility.o  CreatHtmlTable.o
