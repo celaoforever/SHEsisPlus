@@ -307,7 +307,8 @@ std::string HaplotypeBase::reporttxttableBinary() {
   for (int i = 0; i < this->Results.singleHap.size(); i++) {
     if (-999 == this->Results.singleHap[i].pearsonp) continue;
     for (int j = 0; j < this->SnpIdx.size(); j++) {
-      res << this->data->getallele(this->Results.haplotypes[i][j]);
+    	//TODO: revise back
+      res << /*this->data->getallele*/(this->Results.haplotypes[i][j]);
     }
     res << "\t\t";
     double freq =

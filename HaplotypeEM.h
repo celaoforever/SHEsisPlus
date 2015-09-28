@@ -36,6 +36,7 @@ class HaplotypeEM : public HaplotypeBase {
               std::vector<short> mask);
   virtual ~HaplotypeEM();
   virtual void startHaplotypeAnalysis();
+  void getResults();
   void ShowResults(bool b){this->showResults=b;};
   boost::shared_ptr<bool[]> missing;
   boost::multi_array<short, 3> PhasedData;
@@ -52,7 +53,6 @@ class HaplotypeEM : public HaplotypeBase {
   void statMissing();
   void getFinalHap();
   void PhaseCurrent();
-  void getResults();
   void getCombination();
   OneGenotypeExpandedHaplo oneGenoGetCombination(int sample);
   std::vector<int> getSampleIdx(int genotype);
