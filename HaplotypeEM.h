@@ -38,6 +38,7 @@ class HaplotypeEM : public HaplotypeBase {
   virtual void startHaplotypeAnalysis();
   void getResults();
   void ShowResults(bool b){this->showResults=b;};
+  void setSeed(int s) {this->seed=s;};
   boost::shared_ptr<bool[]> missing;
   boost::multi_array<short, 3> PhasedData;
  private:
@@ -64,6 +65,8 @@ class HaplotypeEM : public HaplotypeBase {
   boost::shared_ptr<int[]> Sample2Genotype;
   std::vector<OneGenotypeExpandedHaplo> Expanded;
   std::vector<std::vector<int> > combination;
+  std::vector<double> getInitialFreq(int hapcount,int seed);
+  int seed;
   int phased;
   double err;
   bool showResults;

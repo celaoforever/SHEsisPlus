@@ -8,7 +8,8 @@
 #include "HaplotypeEM.h"
 #include "fisher.h"
 #include "utility.h"
-
+#include <sys/time.h>
+#include <boost/random.hpp>
 template bool next_combination(std::vector<int>::iterator n_begin,
                                std::vector<int>::iterator n_end,
                                std::vector<int>::iterator r_begin,
@@ -19,7 +20,7 @@ std::vector<boost::shared_ptr<short[]> > OneGenotypeExpandedHaplo::haploType;
 std::vector<double> OneGenotypeExpandedHaplo::hapfreq;
 HaplotypeEM::HaplotypeEM(boost::shared_ptr<SHEsisData> data)
     : HaplotypeBase(data),
-      phased(1),
+      phased(1),seed(0),
       PhasedData(boost::extents[data->getSampleNum()][data->getSnpNum()]
                                [data->getNumOfChrSet()]),
       InterMediate(
@@ -42,7 +43,7 @@ HaplotypeEM::HaplotypeEM(boost::shared_ptr<SHEsisData> data)
 HaplotypeEM::HaplotypeEM(boost::shared_ptr<SHEsisData> data, int Snp,
                          std::vector<short> mask)
     : HaplotypeBase(data, mask),
-      phased(1),
+      phased(1),seed(0),
       showResults(true),
       PhasedData(boost::extents[data->getSampleNum()][/*data->getSnpNum()*/Snp]
                                [data->getNumOfChrSet()]),
@@ -627,6 +628,32 @@ bool containsHap(HaploCombination s, int hapidx) {
   }
   return false;
 }
+std::vector<double> HaplotypeEM::getInitialFreq(int hapcount, int seed){
+	if (!seed) {
+		timeval t;
+		gettimeofday(&t,NULL);
+		seed=(int)t.tv_sec;
+	}
+
+	boost::mt19937 rng((int)seed);
+	boost::uniform_real<> dist(1,100);
+	boost::variate_generator<boost::mt19937&,boost::uniform_real<> > random(rng,dist);
+	double sum=0;
+	std::vector<double> ret;
+	for(int i=0;i<hapcount;i++){
+		double n=(double)random();
+		sum+=n;
+		ret.push_back(n);
+	}
+	std::transform(ret.begin(),ret.end(),ret.begin(),std::bind2nd(std::divides<double>(),(double)sum));
+	//std::cout<<"seed="<<seed<<"\n";//","<<"initial freq:\n";
+	//for(int i=0;i<ret.size();i++){
+	//	std::cout<<ret[i]<<",";
+	//}
+	//std::cout<<"\n";
+	return ret;
+
+}
 
 void HaplotypeEM::CalculateFreq() {
   int hapcount = OneGenotypeExpandedHaplo::haploType.size();
@@ -634,8 +661,9 @@ void HaplotypeEM::CalculateFreq() {
     OneGenotypeExpandedHaplo::hapfreq.push_back(1.0 / (double)hapcount);
   };
 
-  std::vector<double> H(OneGenotypeExpandedHaplo::haploType.size(),
-                        1.0 / (double)hapcount);
+  std::vector<double> H=this->getInitialFreq(hapcount,this->seed);
+  /*(OneGenotypeExpandedHaplo::haploType.size(),
+                        1.0 / (double)hapcount);*/
 
   double E = 1;
   while (E > this->err) {

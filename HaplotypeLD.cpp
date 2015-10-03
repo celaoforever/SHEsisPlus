@@ -178,6 +178,7 @@ void HaplotypeLD::phaseAll(){
 	int count=0;
 	while(true)
 	{
+		//std::cout<<"level "<<count<<"\n";
 		//std::cout<<"DataToPhase:\n";
 		//printArray(this->DataToPhase->mGenotype);
 		//std::cout<<"num snp:"<<this->DataToPhase->getSnpNum()<<",per block:"<<this->numSnpPerBlock<<"\n";
@@ -186,6 +187,7 @@ void HaplotypeLD::phaseAll(){
 		this->PhasedData->vLabel=this->data->vLabel;
 		this->PhasedData->vQuantitativeTrait=this->data->vQuantitativeTrait;
 		for(int i=0;i<numOfBlock;i++){
+			//std::cout<<"block "<<i<<"\n";
 			startsnp=i*this->numSnpPerBlock;
 			endsnp=MIN((1+i)*this->numSnpPerBlock-1,this->DataToPhase->getSnpNum()-1);
 			this->getHaplotypeSub(startsnp,endsnp,this->DataToPhase);
@@ -212,9 +214,11 @@ void HaplotypeLD::phaseAll(){
 		this->DataToPhase->mGenotype=this->PhasedData->mGenotype;
 		count++;
 	};
+	this->hap.reset(new HaplotypeEM(this->data));
 	this->hap->PhasedData.resize(extension(this->PhasedData->mGenotype));
 	this->hap->PhasedData=this->PhasedData->mGenotype;
 	this->hap->SnpIdx.clear();
+	this->hap->setFreqThreshold(this->lft);
 	this->hap->SnpIdx.push_back(0);
 	this->hap->getResults();
 	for(int i=0;i<this->hap->Results.haplotypes.size();i++){
@@ -226,7 +230,7 @@ void HaplotypeLD::phaseAll(){
 			hapMap::map_by<code>::const_iterator iter=this->hapcode.by<code>().find(cur[j]);
 			BOOST_ASSERT(iter!=this->hapcode.by<code>().end());
 			ss=iter->get<haplo>();
-			std::cout<<"hap code:"<<cur[0]<<",haplotype:"<<ss<<"\n";
+			//std::cout<<"hap code:"<<cur[0]<<",haplotype:"<<ss<<"\n";
 			std::vector<std::string> vec;
 			boost::algorithm::split(vec,ss,boost::algorithm::is_any_of(","));
 			for(int k=0;k<vec.size()-1;k++){
@@ -235,11 +239,12 @@ void HaplotypeLD::phaseAll(){
 		}
 		this->haplotypes.push_back(res);
 	}
+	/*
     for(int i=0;i<this->data->getSampleNum();i++){
   	  	 std::cerr<<i<<"\t";
   	  for(int j=0;j<this->data->getNumOfChrSet();j++){
   		  		for(int k=0;k<this->SnpIdx.size();k++){
-  		  	    	std::cerr<</*this->data->getallele*/(this->haplotypes[this->hap->Results.genotypes[i][j]][k]);
+  		  	    	std::cerr<<this->data->getallele(this->haplotypes[this->hap->Results.genotypes[i][j]][k]);
   		  		}
   		  		std::cerr<<"\t";
   		 // std::cout<<this->Results.genotypes[i][j]<<"\t";
@@ -247,7 +252,7 @@ void HaplotypeLD::phaseAll(){
   	  std::cerr<<"\n";
     }
 
-
+*/
 	//std::cout<<"haplotypes:\n";
 	//for(int i=0;i<this->haplotypes.size();i++){
 //		for(int j=0;j<this->SnpIdx.size();j++){
@@ -273,6 +278,7 @@ std::string HaplotypeLD::reporttxt(){
 	this->hap->Results.haplotypes=this->haplotypes;
 	this->hap->SnpIdx=this->SnpIdx;
 	this->hap->data=this->data;
+	this->hap->setFreqThreshold(this->lft);
 	return this->hap->reporttxt();
 }
 
@@ -285,14 +291,122 @@ void HaplotypeLD::getHaplotypeSub(int start, int end){
 	this->hap->ShowResults(false);
 	this->hap->startHaplotypeAnalysis();
 }
+long getCheckSum(boost::multi_array<short,3> d){
+	long sum=0;int r=55665;int c1=52845;int c2=22719;
+	for(int sample=0;sample<d.shape()[0];sample++){
+		for(int snp=0;snp<d.shape()[1];snp++){
+			for(int p=0;p<d.shape()[2];p++){
+				char low=d[sample][snp][p]&0xFF00;
+				char hi =d[sample][snp][p]&0x00FF;
+				char cipher;
+				cipher=(low ^ (r>>8));
+				r=(cipher+r)*c1+c2;
+				sum+=cipher;
+				cipher=(hi ^(r>>8));
+				r=(cipher+r)*c1+c2;
+				sum+=cipher;
+			}
+		}
+	}
+	return sum;
+}
+int getIdx(std::vector<long> check,long val){
+	for(int i=0;i<check.size();i++){
+		if(val == check[i]){
+			return i;
+		}
+	}
+	return -1;
+}
+int getSelection(std::vector<long> check,std::vector<int> haps,bool uniq=true){
+	float threshold=0.3;
+	std::map<long,int> count;
+	//std::cout<<"checksums,num:";
+	int min=0xFFFF;
+	int minidx=-1;
+	for(int i=0;i<check.size();i++){
+		long val=check[i];
+		//std::cout<<val<<'/'<<haps[i]<<" ";
+		std::map<long,int>::iterator iter=count.find(val);
+		if(min>haps[i]){
+			min=haps[i];
+			minidx=i;
+		}
+		min=min>haps[i]?haps[i]:min;
+		if(iter != count.end()){
+			iter->second++;
+		}else{
+			count[val]=1;
+		}
+	}
+
+	//std::cout<<"\n";
+	int maxidx=-1;
+	int maxcount=-1;
+	int maxval=-1;
+	std::map<long,int>::iterator i=count.begin();
+	for(;i!=count.end();i++){
+		//std::cout<<"checksum="<<i->first<<",count="<<i->second<<"\n";
+		if(i->second>maxval){
+			maxval=i->second;
+			maxidx=getIdx(check,i->first);
+			maxcount=1;
+		}else if (i->second == maxval){
+			maxcount++;
+		}
+	}
+	//std::cout<<"maxidx="<<maxidx<<",maxval="<<maxval<<",maxcount="<<maxcount<<"ratio="<<( (float)maxval/(float)check.size())<<"\n";
+	return minidx;
+	if(uniq){
+		if(1 == maxcount &&( (float)maxval/(float)check.size())>threshold){
+			return maxidx;
+			//std::cout<<"return "<<maxidx<<"\n";
+		}else{
+			//std::cout<<"return -1"<<"\n";
+			return -1;
+		}
+	}else{
+		BOOST_ASSERT(-1!=maxidx);
+		//std::cout<<"return "<<maxidx<<"\n";
+		return maxidx;
+	}
+}
+
+
 void HaplotypeLD::getHaplotypeSub(int start, int end,boost::shared_ptr<SHEsisData> d){
 	std::vector<short> m(d->getSnpNum(),0);
 	for(int i=start;i<=end;i++){
 		m[this->SnpIdx[i]]=1;
 	};
-	this->hap.reset(new HaplotypeEM(d,end-start+1,m));
-	this->hap->ShowResults(false);
-	this->hap->startHaplotypeAnalysis();
+
+	int maxIteration=50;
+	int minIteraction=15;
+	int iteration=0;
+	std::vector<boost::shared_ptr<HaplotypeEM> > locals;
+	std::vector<long> checksums;
+	std::vector<int> numOfHaps;
+	int finalchoose=-1;
+	while((iteration<maxIteration)){
+		////std::cout<<"iteration:"<<iteration<<"\n";
+		boost::shared_ptr<HaplotypeEM> local(new HaplotypeEM(d,end-start+1,m));
+		//local->ShowResults(false);
+		local->setSeed(iteration);
+		local->setFreqThreshold(this->lft);
+		local->startHaplotypeAnalysis();
+		locals.push_back(local);
+		checksums.push_back(getCheckSum(local->PhasedData));
+		numOfHaps.push_back(local->Results.haplotypes.size());
+		iteration++;
+		if(iteration>minIteraction){
+			finalchoose=getSelection(checksums,numOfHaps);
+			if(-1 != finalchoose)
+				break;
+		}
+	}
+	if(-1 == finalchoose)
+		finalchoose=getSelection(checksums,numOfHaps,false);
+	this->hap=locals[finalchoose];
+	//std::cout<<"final choose checksum:"<<(getCheckSum(this->hap->PhasedData))<<"\n";
 }
 
 void HaplotypeLD::updateData(boost::shared_ptr<SHEsisData> ret, boost::multi_array<short,3> phased) {
