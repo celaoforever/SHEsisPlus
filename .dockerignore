@@ -1,0 +1,6 @@
+.git
+.gitignore
+*.o
+SHEsis
+SHEsisWebServer/node_modules
+SHEsisWebServer/public/tmp/*

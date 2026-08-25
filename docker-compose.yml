@@ -1,0 +1,33 @@
+services:
+  shesis-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: shesis-web
+    ports:
+      - "5903:5903"
+    environment:
+      - REDIS_HOST=shesis-redis
+      - MONGO_HOST=shesis-mongo
+    depends_on:
+      - shesis-redis
+      - shesis-mongo
+    volumes:
+      - shesis_results:/app/SHEsisWebServer/public/tmp
+    restart: unless-stopped
+
+  shesis-redis:
+    image: redis:6-alpine
+    container_name: shesis-redis
+    restart: unless-stopped
+
+  shesis-mongo:
+    image: mongo:4.4
+    container_name: shesis-mongo
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+  shesis_results:

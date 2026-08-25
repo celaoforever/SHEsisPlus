@@ -1,27 +1,44 @@
 SHEsisPlus
 ======
-##Introduction
+## Introduction
 SHEsisPlus is a open source software package for analysis of genetic association, Hardy-weinberg equilibrium, linkage disequilibrium and haplotype construction at multiallelic polymorphism loci, compatible for both diploid and polyploid species. The web-based version can be accessed via [SHEsisPlus web version](http://shesisplus.bio-x.cn/).
 
-##What's new
+## What's new
 Compared to previous version of [SHEsis](http://analysis.bio-x.cn/myAnalysis.php), SHEsisPlus is compatitable for haploid, diploid and polyploid species. It can not only analyze case/control data, but also quantitative trait data. It provides various ways of P value adjustments, including Holm step-down, Sidak single-step, Sidak step-down, FDR and permutation tests. All these can be can be performed via the webui.  
 
-##Compile
+## Compile
 To build SHEsisPlus from source code, please first install [Boost C++ Library](http://www.boost.org). 
-###Linux
+### Linux
 Modify makefile to specify the locations of Boost include files and libs. Then type "make" in the souce code directory.
-###Windows:
+### Windows:
 Create a project in Microsoft visual studio. Add all the source files and header files EXCEPT unit test source files (\*\_test.cpp) to the current project. Modify the project properties and specify the path of Boost includefiles and libs. Then build it. 
+
+## Docker deployment
+
+SHEsisPlus can be deployed automatically using the included `deploy.sh` script. The script installs Docker and the Docker Compose plugin if they are not already installed, creates the required project directory and Docker Compose configuration, pulls the required Docker images, and starts the application.
+
+The same command can be used to install SHEsisPlus on a remote Linux VPS or directly on a local Linux system.
+
+### Automatic installation
+
+Run the following command as root or with sufficient privileges:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/celaoforever/SHEsisPlus/master/deploy.sh)
+```
+
+> **Warning**: Review the deployment script before executing it, especially when installing on production systems.
+
 
 
 <strong>Note:</strong> SHEsisPlus is developed and tested under Linux. Its behaviour under Windows is not guaranteed. If you want to compile it under Windows, we recommand you to build it within [Cygwin](https://www.cygwin.com/). 
 
 
-##Input format
+## Input format
 
-###Case/control data
+### Case/control data
 
-####Sample data for diploid species
+#### Sample data for diploid species
 
     id1  G A  C C  1 1  A1 A2
     id2  A A  T C  1 1  A2 A2
@@ -30,7 +47,7 @@ Create a project in Microsoft visual studio. Add all the source files and header
     id5  G G  A A  2 3  A1 A2
     id6  A A  C A  0 0  A6 A7
 
-####Sample data for triploid species
+#### Sample data for triploid species
 
     id1  A G A  T C C  1 1 1  AA T  TT
     id2  A A A  C T C  2 1 1  A  T  AA
@@ -43,9 +60,9 @@ Create a project in Microsoft visual studio. Add all the source files and header
 
 The above shown is sample data for diploid and tripolid species. For diploid species, the columns correspond to: sample id, site1-allele1, site1-allele2, site2-allele1, site2-allele2, .... For triploid species, the columns should be: sample id, site1-allele1, site1-allele2, site1-allele3, site2-allele1, site2-allele2, site2-allele3, ... 
 
-###Quantitative trait data
+### Quantitative trait data
 
-####Sample data for diploid species
+#### Sample data for diploid species
 
     id1  20.6  G A  C C  1 1  A1 A2
     id2  25.4  A A  T C  1 1  A2 A2
@@ -54,7 +71,7 @@ The above shown is sample data for diploid and tripolid species. For diploid spe
     id5  11.0  G G  A A  2 3  A1 A2
     id6  5.5   A A  C A  0 0  A6 A7
 
-####Sample data for triploid species
+#### Sample data for triploid species
 
     id1  1.1  A G A  T C C  1 1 1  AA T  TT
     id2  3.2  A A A  C T C  2 1 1  A  T  AA
@@ -65,9 +82,9 @@ The above shown is sample data for diploid and tripolid species. For diploid spe
 
 The format for quantitative trait data is similar to that for case/control data except that the second column is the quantitative trait. The quantitative trait should be numeric. 
 
-##Arguments
+## Arguments
 
-###Allowed options:
+### Allowed options:
 <pre>
   --help                produce help message
   --input arg           path for the input file containing both cases and 
@@ -104,17 +121,17 @@ The format for quantitative trait data is similar to that for case/control data 
   --adjust              adjust p-value for multiple testing
   --webserver           Internal use for webserver
 </pre>
-###example
+### example
 
 ./SHEsisPlus --input-case case.txt --input-ctrl ctrl-txt --snp-line "rs1,rs2,rs3" --output out --ploidy 2 --hwe --assoc --permutation 1000 --haplo-EM --mask "1,1,0" --ld-in-case --adjust
 
 ./SHEsisPlus --input qtl.txt --qtl --ploidy 3 --hwe --assoc --ld --haplo-SAT --lft 0.01 --permutation 10000
 
-##Interpret output
+## Interpret output
 
-###Binary phenotype
+### Binary phenotype
 
-####Association test
+#### Association test
 <img src="http://shesisplus.bio-x.cn/images/help-assoc-binary.PNG" >
 
 This is an exmple of output for case/control association analysis. The fileds are:
@@ -167,26 +184,26 @@ This is an exmple of output for case/control association analysis. The fileds ar
 </tbody>
 </table>
 
-####Hardy-weinberg equilibrium test
+#### Hardy-weinberg equilibrium test
 <img src="http://shesisplus.bio-x.cn/images/help-hwe-binary.PNG">
 
 The output is straightforward. Hardy-weinberg equilibrium is calculated in cases, in controls, and in both cases and controls. Both Pearson's chi square test and Fisher's exact test are performed. 
 
-####Haplotype analysis
+#### Haplotype analysis
 <img src="http://shesisplus.bio-x.cn/images/help-hap-binary.PNG">
 
  In this example, haplotypes with frequency <0.03 are discarded. 0.03 is the default value. You can change this value by option --lft. The fields in the table are also easy to understand. Apart from association test for every single haplotype, a global result is also given. This result shows if the haplotype distribution is different between cases and controls.
 
-####Linkage disequilibrium analysis
+#### Linkage disequilibrium analysis
 
 <img src="http://shesisplus.bio-x.cn/images/help_binary_D.jpg">
 <img src="http://shesisplus.bio-x.cn/images/help_binary_R2.jpg">
 
 For linkage disequilibrium analysis, pair-wise D' and R<sup>2</sup> are calculated. The higher two loci are in linkage disequilibrium, the darker the color will be. 
 
-###Quantitative trait
+### Quantitative trait
 
-####Association test
+#### Association test
 
 <img src="http://shesisplus.bio-x.cn/images/help-assoc-qtl.PNG">
 
@@ -229,19 +246,19 @@ This is an exmple of output for case/control association analysis. The fileds ar
 
 The following fields have been described before. 
 
-####Hardy-weinberg equilibrium test
+#### Hardy-weinberg equilibrium test
 
 <img src="http://shesisplus.bio-x.cn/images/help-hwe-qtl.PNG">
 
 For quantative trait, Hardy-weinberg equilibrium test in all samples are carried out. 
 
-####Haplotype analysis
+#### Haplotype analysis
 
 <img src="http://shesisplus.bio-x.cn/images/help-hap-qtl.PNG">
 
 For quantitative trait, linkage disequilibirum is calculated in all samples. The results are similar to that of case/control data.
 
-##References:
+## References:
 
 [1] Neigenfind J1, Gyetvai G, Basekow R, Diehl S, Achenbach U, Gebhardt C, Selbig J, Kersten B.Haplotype inference from unphased SNP data in heterozygous polyploids based on SAT. <i>BMC Genomics</i> 2008 Jul 30;9:356. doi: 10.1186/1471-2164-9-356.
 
